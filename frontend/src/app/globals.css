@@ -1,0 +1,72 @@
+@import "tailwindcss";
+
+:root {
+  --background: #f8fafc;
+  --foreground: #0f172a;
+
+  /* Identitas Warna Logo SMPN 1 Ngawi */
+  --brand-navy: #1E2B7A;
+  --brand-blue: #1E50E2;
+  --brand-cyan: #0097DF;
+  --brand-gold: #FFE500;
+  --brand-gold-dark: #D97706;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-brand-navy: var(--brand-navy);
+  --color-brand-blue: var(--brand-blue);
+  --color-brand-cyan: var(--brand-cyan);
+  --color-brand-gold: var(--brand-gold);
+}
+
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans, system-ui, -apple-system, sans-serif);
+  overflow-x: hidden;
+}
+
+/* Custom Utilities untuk Aksentuasi Warna Logo */
+.bg-brand-navy {
+  background-color: #1E2B7A;
+}
+
+.text-brand-navy {
+  color: #1E2B7A;
+}
+
+.bg-brand-cyan {
+  background-color: #0097DF;
+}
+
+.text-brand-cyan {
+  color: #0097DF;
+}
+
+.bg-brand-gold {
+  background-color: #FFE500;
+}
+
+.text-brand-gold {
+  color: #FFE500;
+}
+
+.border-brand-gold {
+  border-color: #FFE500;
+}
+
+.bg-gradient-school {
+  background: linear-gradient(135deg, #16205b 0%, #1E2B7A 50%, #0077b6 100%);
+}
+
+.bg-gradient-accent {
+  background: linear-gradient(135deg, #0097DF 0%, #1E50E2 100%);
+}
+
+.text-gradient-gold {
+  background: linear-gradient(135deg, #FFE500 0%, #F59E0B 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
