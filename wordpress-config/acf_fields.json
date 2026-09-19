@@ -1,0 +1,307 @@
+[
+  {
+    "key": "group_guru_fields",
+    "title": "Data Guru & Staf",
+    "fields": [
+      {
+        "key": "field_guru_nip",
+        "label": "NIP",
+        "name": "nip",
+        "type": "text",
+        "instructions": "Masukkan NIP (kosongkan jika belum ada / non-PNS)",
+        "required": 0,
+        "show_in_graphql": 1
+      },
+      {
+        "key": "field_guru_jabatan",
+        "label": "Jabatan",
+        "name": "jabatan",
+        "type": "text",
+        "instructions": "Contoh: Kepala Sekolah, Guru Mata Pelajaran, Staf Tata Usaha",
+        "required": 1,
+        "show_in_graphql": 1
+      },
+      {
+        "key": "field_guru_mapel",
+        "label": "Mata Pelajaran",
+        "name": "mata_pelajaran",
+        "type": "text",
+        "instructions": "Contoh: Matematika, Bahasa Indonesia (kosongkan jika tenaga kependidikan/staf)",
+        "required": 0,
+        "show_in_graphql": 1
+      },
+      {
+        "key": "field_guru_email",
+        "label": "Email",
+        "name": "email",
+        "type": "email",
+        "instructions": "Email resmi guru/staf",
+        "required": 0,
+        "show_in_graphql": 1
+      }
+    ],
+    "location": [
+      [
+        {
+          "param": "post_type",
+          "operator": "==",
+          "value": "guru"
+        }
+      ]
+    ],
+    "show_in_graphql": 1,
+    "graphql_field_name": "dataGuru"
+  },
+  {
+    "key": "group_ekskul_fields",
+    "title": "Data Ekstrakurikuler",
+    "fields": [
+      {
+        "key": "field_ekskul_pembina",
+        "label": "Pembina / Pelatih",
+        "name": "pembina",
+        "type": "text",
+        "instructions": "Nama guru pembina atau pelatih ekstrakurikuler",
+        "required": 1,
+        "show_in_graphql": 1
+      },
+      {
+        "key": "field_ekskul_jadwal",
+        "label": "Jadwal Latihan",
+        "name": "jadwal",
+        "type": "text",
+        "instructions": "Contoh: Setiap Jumat, 15.00 - 17.00 WIB",
+        "required": 1,
+        "show_in_graphql": 1
+      },
+      {
+        "key": "field_ekskul_deskripsi_singkat",
+        "label": "Deskripsi Singkat",
+        "name": "deskripsi_singkat",
+        "type": "textarea",
+        "instructions": "Ringkasan kegiatan ekskul untuk ditampilkan pada kartu halaman akademik",
+        "rows": 3,
+        "show_in_graphql": 1
+      }
+    ],
+    "location": [
+      [
+        {
+          "param": "post_type",
+          "operator": "==",
+          "value": "ekstrakurikuler"
+        }
+      ]
+    ],
+    "show_in_graphql": 1,
+    "graphql_field_name": "dataEkstrakurikuler"
+  },
+  {
+    "key": "group_prestasi_fields",
+    "title": "Data Prestasi",
+    "fields": [
+      {
+        "key": "field_prestasi_kategori",
+        "label": "Kategori",
+        "name": "kategori",
+        "type": "select",
+        "choices": {
+          "Akademik": "Akademik",
+          "Non-Akademik": "Non-Akademik"
+        },
+        "default_value": "Akademik",
+        "required": 1,
+        "show_in_graphql": 1
+      },
+      {
+        "key": "field_prestasi_tingkat",
+        "label": "Tingkat Kejuaraan",
+        "name": "tingkat",
+        "type": "select",
+        "choices": {
+          "Kabupaten": "Kabupaten",
+          "Karesidenan": "Karesidenan",
+          "Provinsi": "Provinsi",
+          "Nasional": "Nasional",
+          "Internasional": "Internasional"
+        },
+        "default_value": "Kabupaten",
+        "required": 1,
+        "show_in_graphql": 1
+      },
+      {
+        "key": "field_prestasi_tahun",
+        "label": "Tahun",
+        "name": "tahun",
+        "type": "number",
+        "default_value": 2024,
+        "required": 1,
+        "show_in_graphql": 1
+      },
+      {
+        "key": "field_prestasi_peraih",
+        "label": "Nama Peraih / Tim",
+        "name": "peraih",
+        "type": "text",
+        "instructions": "Contoh: Tim Futsal SMPN 1 Ngawi / Muhammad Rizky (Kelas 8B)",
+        "required": 1,
+        "show_in_graphql": 1
+      },
+      {
+        "key": "field_prestasi_penyelenggara",
+        "label": "Penyelenggara",
+        "name": "penyelenggara",
+        "type": "text",
+        "instructions": "Contoh: Dinas Pendidikan dan Kebudayaan Kabupaten Ngawi",
+        "required": 0,
+        "show_in_graphql": 1
+      }
+    ],
+    "location": [
+      [
+        {
+          "param": "post_type",
+          "operator": "==",
+          "value": "prestasi"
+        }
+      ]
+    ],
+    "show_in_graphql": 1,
+    "graphql_field_name": "dataPrestasi"
+  },
+  {
+    "key": "group_agenda_fields",
+    "title": "Data Agenda Kegiatan",
+    "fields": [
+      {
+        "key": "field_agenda_tanggal",
+        "label": "Tanggal Pelaksanaan",
+        "name": "tanggal_kegiatan",
+        "type": "date_picker",
+        "display_format": "d/m/Y",
+        "return_format": "Y-m-d",
+        "required": 1,
+        "show_in_graphql": 1
+      },
+      {
+        "key": "field_agenda_waktu",
+        "label": "Waktu Pelaksanaan",
+        "name": "waktu",
+        "type": "text",
+        "instructions": "Contoh: 07.30 - 12.00 WIB",
+        "required": 1,
+        "show_in_graphql": 1
+      },
+      {
+        "key": "field_agenda_lokasi",
+        "label": "Lokasi",
+        "name": "lokasi",
+        "type": "text",
+        "instructions": "Contoh: Lapangan Utama SMPN 1 Ngawi",
+        "required": 1,
+        "show_in_graphql": 1
+      }
+    ],
+    "location": [
+      [
+        {
+          "param": "post_type",
+          "operator": "==",
+          "value": "agenda"
+        }
+      ]
+    ],
+    "show_in_graphql": 1,
+    "graphql_field_name": "dataAgenda"
+  },
+  {
+    "key": "group_pengumuman_fields",
+    "title": "Data Pengumuman",
+    "fields": [
+      {
+        "key": "field_pengumuman_tanggal",
+        "label": "Tanggal Pengumuman",
+        "name": "tanggal_pengumuman",
+        "type": "date_picker",
+        "display_format": "d/m/Y",
+        "return_format": "Y-m-d",
+        "required": 1,
+        "show_in_graphql": 1
+      },
+      {
+        "key": "field_pengumuman_urgensi",
+        "label": "Status Urgensi",
+        "name": "urgensi",
+        "type": "select",
+        "choices": {
+          "Biasa": "Biasa",
+          "Penting": "Penting",
+          "Mendesak": "Mendesak"
+        },
+        "default_value": "Biasa",
+        "required": 1,
+        "show_in_graphql": 1
+      },
+      {
+        "key": "field_pengumuman_file",
+        "label": "File Lampiran (PDF / Dokumen)",
+        "name": "file_lampiran",
+        "type": "file",
+        "instructions": "Upload dokumen surat/edaran resmi jika ada",
+        "return_format": "array",
+        "required": 0,
+        "show_in_graphql": 1
+      }
+    ],
+    "location": [
+      [
+        {
+          "param": "post_type",
+          "operator": "==",
+          "value": "pengumuman"
+        }
+      ]
+    ],
+    "show_in_graphql": 1,
+    "graphql_field_name": "dataPengumuman"
+  },
+  {
+    "key": "group_galeri_fields",
+    "title": "Data Galeri & Video",
+    "fields": [
+      {
+        "key": "field_galeri_tipe",
+        "label": "Tipe Media",
+        "name": "tipe_media",
+        "type": "select",
+        "choices": {
+          "Foto": "Foto",
+          "Video": "Video"
+        },
+        "default_value": "Foto",
+        "required": 1,
+        "show_in_graphql": 1
+      },
+      {
+        "key": "field_galeri_youtube",
+        "label": "URL Video YouTube",
+        "name": "youtube_url",
+        "type": "url",
+        "instructions": "Hanya diisi jika Tipe Media adalah Video (Contoh: https://www.youtube.com/watch?v=xxxx)",
+        "required": 0,
+        "show_in_graphql": 1
+      }
+    ],
+    "location": [
+      [
+        {
+          "param": "post_type",
+          "operator": "==",
+          "value": "galeri"
+        }
+      ]
+    ],
+    "show_in_graphql": 1,
+    "graphql_field_name": "dataGaleri"
+  }
+]
