@@ -16,7 +16,7 @@ Panduan ini berisi langkah-langkah final menghubungkan repository GitHub **`cybe
    - **Output Directory**: `.next` (default).
 5. Pada bagian **Environment Variables**, tambahkan:
    - **Key**: `NEXT_PUBLIC_WORDPRESS_API_URL`
-   - **Value**: `https://admin.smpn1ngawi.sch.id/graphql` (atau alamat GraphQL WordPress live Anda di Idwebhost).
+   - **Value**: `https://sp1ng.smpn1ngawi.sch.id/graphql`
 6. Klik **Deploy**. Vercel akan otomatis melakukan build dan memberikan URL pratinjau (misal: `smpn1ngawi.vercel.app`).
 
 Setiap kali ada commit atau perubahan yang di-push ke branch `main`, Vercel akan otomatis men-deploy versi terbaru dalam hitungan detik.
@@ -46,7 +46,7 @@ Setiap kali ada commit atau perubahan yang di-push ke branch `main`, Vercel akan
 |---|---|---|---|
 | **A** | `smpn1ngawi.sch.id.` | `76.76.21.21` | Mengarahkan domain utama ke server Vercel |
 | **CNAME** | `www.smpn1ngawi.sch.id.` | `cname.vercel-dns.com.` | Mengarahkan subdomain WWW ke Vercel |
-| **A** | `admin.smpn1ngawi.sch.id.` | *[IP Server cPanel Idwebhost Anda]* | Subdomain WordPress CMS Admin |
+| **A** | `sp1ng.smpn1ngawi.sch.id.` | *[IP Server cPanel Idwebhost Anda]* | Subdomain WordPress CMS Admin (sp1ng) |
 
 > **Catatan**: 
 > - Jangan ubah MX Record email sekolah jika Anda menggunakan email cPanel/Google Workspace.
@@ -54,9 +54,9 @@ Setiap kali ada commit atau perubahan yang di-push ke branch `main`, Vercel akan
 
 ---
 
-## 4. Konfigurasi WordPress Live (`admin.smpn1ngawi.sch.id`)
+## 4. Konfigurasi WordPress Live (`sp1ng.smpn1ngawi.sch.id`)
 
-1. Login ke WP Admin di `https://admin.smpn1ngawi.sch.id/wp-admin`.
+1. Login ke WP Admin di `https://sp1ng.smpn1ngawi.sch.id/wp-admin`.
 2. Pastikan plugin **WPGraphQL** dan **Advanced Custom Fields (ACF)** sudah aktif.
 3. Import pengaturan CPT UI dan ACF field group dari folder `wordpress-config/` di repository ini:
    - `wordpress-config/cptui_settings.json`

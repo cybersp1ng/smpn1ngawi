@@ -12,6 +12,10 @@ const nextConfig: NextConfig = {
         hostname: "admin.smpn1ngawi.sch.id",
       },
       {
+        protocol: "https",
+        hostname: "sp1ng.smpn1ngawi.sch.id",
+      },
+      {
         protocol: "http",
         hostname: "smpn1ngawi.local",
       },
