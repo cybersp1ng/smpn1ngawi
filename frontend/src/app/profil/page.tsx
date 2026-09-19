@@ -4,15 +4,13 @@ import {
   History,
   Target,
   Compass,
-  Users,
   Award,
   ChevronRight,
-  Sparkles,
   CheckCircle2,
-  BookOpen,
   ArrowRight,
 } from 'lucide-react';
 import SchoolLogo from '@/components/SchoolLogo';
+import { fetchGraphQL } from '@/lib/graphql';
 
 export const metadata = {
   title: 'Profil Sekolah',
@@ -20,20 +18,48 @@ export const metadata = {
     'Profil lengkap SMP Negeri 1 Ngawi: Sejarah berdirinya sekolah, Visi dan Misi, serta bagan Struktur Organisasi kepengurusan sekolah.',
 };
 
-export default function ProfilPage() {
-  const visi =
-    'Terwujudnya Peserta Didik yang Beriman dan Bertakwa, Berkarakter Pancasila, Unggul dalam Prestasi Akademik dan Non-Akademik, serta Berwawasan Lingkungan Global.';
+interface StrukturOrganisasiItem {
+  role: string;
+  name: string;
+  nip: string;
+  category: string;
+}
 
-  const misi = [
+interface ProfilSekolahData {
+  sejarahJudul: string;
+  sejarahSubjudul: string;
+  sejarahHighlightJudul: string;
+  sejarahHighlightTeks: string;
+  sejarahKonten: string[];
+  visi: string;
+  misi: string[];
+  strukturOrganisasi: StrukturOrganisasiItem[];
+}
+
+// Fallback Default Content
+const FALLBACK_PROFIL: ProfilSekolahData = {
+  sejarahJudul: 'Sejarah Singkat SMP Negeri 1 Ngawi',
+  sejarahSubjudul:
+    'Tumbuh dan berkembang selama berpuluh-puluh tahun sebagai pelopor pendidikan tingkat menengah di jantung Kabupaten Ngawi.',
+  sejarahHighlightJudul: 'Pusat Keunggulan Daerah',
+  sejarahHighlightTeks:
+    'Meluluskan puluhan ribu alumni yang kini berkontribusi aktif dalam berbagai bidang profesional, pemerintahan, akademisi, hingga wirausaha di seluruh Indonesia.',
+  sejarahKonten: [
+    'SMP Negeri 1 Ngawi didirikan dengan tekad mulia untuk mencerdaskan kehidupan bangsa dan menyediakan sarana pendidikan menengah pertama berkualitas bagi putra-putri daerah di wilayah Ngawi dan sekitarnya.',
+    'Seiring berjalannya waktu, sekolah ini terus bertransformasi dari masa ke masa. Mulai dari pemenuhan sarana fisik ruang kelas, pembangunan laboratorium sains terpadu, pengembangan laboratorium komputer dan teknologi informasi, hingga kini menerapkan konsep Sekolah Digital yang ramah lingkungan.',
+    'Prestasi demi prestasi berhasil diukir, baik dalam bidang akademik seperti Olimpiade Sains Nasional (OSN), maupun non-akademik meliputi bidang seni, olahraga, dan kepramukaan. Komitmen terhadap integritas dan mutu pendidikan menjadikan SMP Negeri 1 Ngawi senantiasa meraih predikat Akreditasi A (Unggul) secara konsisten.',
+    'Saat ini, di bawah naungan Kurikulum Merdeka, SMP Negeri 1 Ngawi semakin memantapkan diri sebagai sekolah rujukan yang berorientasi pada pembentukan karakter Profil Pelajar Pancasila.',
+  ],
+  visi: 'Terwujudnya Peserta Didik yang Beriman dan Bertakwa, Berkarakter Pancasila, Unggul dalam Prestasi Akademik dan Non-Akademik, serta Berwawasan Lingkungan Global.',
+  misi: [
     'Menumbuhkembangkan penghayatan dan pengamalan ajaran agama yang dianut sebagai landasan kearifan dalam bertindak.',
     'Menerapkan pembelajaran berdiferensiasi dan inovatif berbasis Kurikulum Merdeka yang menumbuhkan nalar kritis dan kreativitas.',
     'Mengembangkan minat, bakat, dan potensi peserta didik secara optimal melalui program intrakurikuler dan ekstrakurikuler unggulan.',
     'Menanamkan nilai-nilai luhur Profil Pelajar Pancasila dalam kehidupan sehari-hari di lingkungan sekolah dan masyarakat.',
     'Mewujudkan lingkungan sekolah yang aman, nyaman, ramah anak, dan berbudaya lingkungan hidup (Adiwiyata).',
     'Meningkatkan kompetensi pendidik dan tenaga kependidikan secara berkelanjutan serta adaptif terhadap kemajuan teknologi informasi.',
-  ];
-
-  const strukturOrganisasi = [
+  ],
+  strukturOrganisasi: [
     {
       role: 'Kepala Sekolah',
       name: 'Drs. H. Sudarsono, M.Pd.',
@@ -82,7 +108,113 @@ export default function ProfilPage() {
       nip: '19840210 200902 2 006',
       category: 'Layanan Siswa',
     },
-  ];
+  ],
+};
+
+interface WPProfilResponse {
+  pageBy?: {
+    dataProfil?: {
+      sejarahJudul?: string;
+      sejarahSubjudul?: string;
+      sejarahHighlightJudul?: string;
+      sejarahHighlightTeks?: string;
+      sejarahKonten?: string;
+      visi?: string;
+      misi?: string;
+      strukturOrganisasi?: string;
+    };
+  };
+}
+
+async function getProfilSekolah(): Promise<ProfilSekolahData> {
+  const query = `
+    query GetProfilSekolah {
+      pageBy(uri: "profil") {
+        dataProfil {
+          sejarahJudul
+          sejarahSubjudul
+          sejarahHighlightJudul
+          sejarahHighlightTeks
+          sejarahKonten
+          visi
+          misi
+          strukturOrganisasi
+        }
+      }
+    }
+  `;
+
+  try {
+    const { data } = await fetchGraphQL<WPProfilResponse>(query, { revalidate: 60 });
+    const acf = data?.pageBy?.dataProfil;
+
+    if (!acf) {
+      return FALLBACK_PROFIL;
+    }
+
+    // Parsing Misi (per baris)
+    let parsedMisi = FALLBACK_PROFIL.misi;
+    if (acf.misi && acf.misi.trim().length > 0) {
+      parsedMisi = acf.misi
+        .split('\n')
+        .map((m) => m.replace(/^[-*•\d.]+\s*/, '').trim())
+        .filter((m) => m.length > 0);
+    }
+
+    // Parsing Sejarah Konten (paragraf yang dipisah baris)
+    let parsedSejarahKonten = FALLBACK_PROFIL.sejarahKonten;
+    if (acf.sejarahKonten && acf.sejarahKonten.trim().length > 0) {
+      parsedSejarahKonten = acf.sejarahKonten
+        .split(/\n\s*\n/)
+        .map((p) => p.trim())
+        .filter((p) => p.length > 0);
+    }
+
+    // Parsing Struktur Organisasi (Format: Jabatan | Nama | NIP | Kategori)
+    let parsedStruktur = FALLBACK_PROFIL.strukturOrganisasi;
+    if (acf.strukturOrganisasi && acf.strukturOrganisasi.trim().length > 0) {
+      const rows = acf.strukturOrganisasi
+        .split('\n')
+        .map((r) => r.trim())
+        .filter((r) => r.length > 0);
+
+      const items: StrukturOrganisasiItem[] = [];
+      for (const row of rows) {
+        const parts = row.split('|').map((p) => p.trim());
+        if (parts.length >= 2) {
+          items.push({
+            role: parts[0] || 'Pengurus',
+            name: parts[1] || '',
+            nip: parts[2] || '-',
+            category: parts[3] || 'Manajemen',
+          });
+        }
+      }
+
+      if (items.length > 0) {
+        parsedStruktur = items;
+      }
+    }
+
+    return {
+      sejarahJudul: acf.sejarahJudul || FALLBACK_PROFIL.sejarahJudul,
+      sejarahSubjudul: acf.sejarahSubjudul || FALLBACK_PROFIL.sejarahSubjudul,
+      sejarahHighlightJudul:
+        acf.sejarahHighlightJudul || FALLBACK_PROFIL.sejarahHighlightJudul,
+      sejarahHighlightTeks:
+        acf.sejarahHighlightTeks || FALLBACK_PROFIL.sejarahHighlightTeks,
+      sejarahKonten: parsedSejarahKonten,
+      visi: acf.visi || FALLBACK_PROFIL.visi,
+      misi: parsedMisi,
+      strukturOrganisasi: parsedStruktur,
+    };
+  } catch {
+    return FALLBACK_PROFIL;
+  }
+}
+
+export default async function ProfilPage() {
+  const profil = await getProfilSekolah();
 
   return (
     <div className="space-y-16 sm:space-y-24 pb-20">
@@ -151,51 +283,32 @@ export default function ProfilPage() {
                 <History className="w-4 h-4 text-[#0097DF]" /> Kilas Balik & Rekam Jejak
               </div>
               <h2 className="text-2xl sm:text-4xl font-extrabold text-slate-900 tracking-tight leading-tight">
-                Sejarah Singkat SMP Negeri 1 Ngawi
+                {profil.sejarahJudul}
               </h2>
               <p className="text-slate-600 text-sm sm:text-base mt-4 leading-relaxed">
-                Tumbuh dan berkembang selama berpuluh-puluh tahun sebagai pelopor pendidikan tingkat
-                menengah di jantung Kabupaten Ngawi.
+                {profil.sejarahSubjudul}
               </p>
 
               <div className="mt-6 p-6 rounded-2xl bg-[#111A4D] text-white space-y-3 border border-[#0097DF]/30">
                 <div className="flex items-center gap-3">
                   <SchoolLogo size={42} />
                   <div>
-                    <h3 className="font-bold text-sm text-[#FFE500]">Pusat Keunggulan Daerah</h3>
+                    <h3 className="font-bold text-sm text-[#FFE500]">
+                      {profil.sejarahHighlightJudul}
+                    </h3>
                     <p className="text-xs text-slate-300">Berdiri sejak era awal kemerdekaan</p>
                   </div>
                 </div>
                 <p className="text-xs text-slate-300 leading-relaxed pt-2 border-t border-white/10">
-                  Meluluskan puluhan ribu alumni yang kini berkontribusi aktif dalam berbagai bidang
-                  profesional, pemerintahan, akademisi, hingga wirausaha di seluruh Indonesia.
+                  {profil.sejarahHighlightTeks}
                 </p>
               </div>
             </div>
 
             <div className="lg:col-span-7 space-y-4 text-slate-700 text-sm sm:text-base leading-relaxed">
-              <p>
-                SMP Negeri 1 Ngawi didirikan dengan tekad mulia untuk mencerdaskan kehidupan bangsa
-                dan menyediakan sarana pendidikan menengah pertama berkualitas bagi putra-putri
-                daerah di wilayah Ngawi dan sekitarnya.
-              </p>
-              <p>
-                Seiring berjalannya waktu, sekolah ini terus bertransformasi dari masa ke masa. Mulai
-                dari pemenuhan sarana fisik ruang kelas, pembangunan laboratorium sains terpadu,
-                pengembangan laboratorium komputer dan teknologi informasi, hingga kini menerapkan
-                konsep <strong>Sekolah Digital</strong> yang ramah lingkungan.
-              </p>
-              <p>
-                Prestasi demi prestasi berhasil diukir, baik dalam bidang akademik seperti Olimpiade
-                Sains Nasional (OSN), maupun non-akademik meliputi bidang seni, olahraga, dan
-                kepramukaan. Komitmen terhadap integritas dan mutu pendidikan menjadikan SMP Negeri 1
-                Ngawi senantiasa meraih predikat <strong>Akreditasi A (Unggul)</strong> secara konsisten.
-              </p>
-              <p>
-                Saat ini, di bawah naungan Kurikulum Merdeka, SMP Negeri 1 Ngawi semakin memantapkan
-                diri sebagai sekolah rujukan yang berorientasi pada pembentukan karakter Profil
-                Pelajar Pancasila.
-              </p>
+              {profil.sejarahKonten.map((paragraf, pIdx) => (
+                <p key={pIdx}>{paragraf}</p>
+              ))}
             </div>
           </div>
         </div>
@@ -225,10 +338,10 @@ export default function ProfilPage() {
                 <Target className="w-4 h-4" /> Visi Utama
               </div>
               <blockquote className="text-xl sm:text-2xl lg:text-3xl font-extrabold tracking-tight leading-snug text-[#FFE500]">
-                &ldquo;{visi}&rdquo;
+                &ldquo;{profil.visi}&rdquo;
               </blockquote>
               <p className="text-slate-300 text-xs sm:text-sm font-medium">
-                Visi Pendidikan SMP Negeri 1 Ngawi Tahun Berjalan
+                Visi Pendidikan SMP Negeri 1 Ngawi
               </p>
             </div>
           </div>
@@ -239,14 +352,14 @@ export default function ProfilPage() {
               <Compass className="w-5 h-5 text-[#0097DF]" /> Misi Sekolah
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {misi.map((item, idx) => (
+              {profil.misi.map((item, idx) => (
                 <div
                   key={idx}
                   className="bg-white rounded-2xl p-6 border border-slate-200/80 shadow-sm hover:shadow-md hover:border-[#0097DF]/40 transition flex flex-col justify-between group"
                 >
                   <div className="space-y-3">
                     <div className="w-9 h-9 rounded-xl bg-[#1E2B7A]/10 text-[#1E2B7A] font-black text-sm flex items-center justify-center group-hover:bg-[#1E2B7A] group-hover:text-[#FFE500] transition">
-                      0{idx + 1}
+                      {idx < 9 ? `0${idx + 1}` : idx + 1}
                     </div>
                     <p className="text-slate-700 text-sm leading-relaxed">{item}</p>
                   </div>
@@ -276,9 +389,9 @@ export default function ProfilPage() {
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {strukturOrganisasi.map((item) => (
+            {profil.strukturOrganisasi.map((item, idx) => (
               <div
-                key={item.role}
+                key={`${item.role}-${idx}`}
                 className="bg-white rounded-2xl p-6 border border-slate-200/80 shadow-sm hover:shadow-md hover:-translate-y-1 hover:border-[#0097DF]/40 transition flex flex-col justify-between"
               >
                 <div className="space-y-3">
@@ -289,7 +402,7 @@ export default function ProfilPage() {
                     <h4 className="font-extrabold text-slate-900 text-base">{item.role}</h4>
                     <p className="text-xs text-[#0097DF] font-bold mt-1">{item.name}</p>
                   </div>
-                  {item.nip !== '-' && (
+                  {item.nip && item.nip !== '-' && (
                     <p className="text-[11px] text-slate-500 font-medium">NIP: {item.nip}</p>
                   )}
                 </div>

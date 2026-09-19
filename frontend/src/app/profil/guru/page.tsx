@@ -1,19 +1,19 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import {
   Search,
   Users,
   GraduationCap,
   Mail,
   ChevronRight,
-  Sparkles,
   BookOpen,
 } from 'lucide-react';
-import SchoolLogo from '@/components/SchoolLogo';
+import { fetchGraphQL } from '@/lib/graphql';
 
-interface GuruItem {
+export interface GuruItem {
   id: string;
   nama: string;
   nip: string;
@@ -21,6 +21,7 @@ interface GuruItem {
   mataPelajaran: string;
   kategori: string;
   email: string;
+  fotoUrl?: string;
 }
 
 const DAFTAR_GURU_INITIAL: GuruItem[] = [
@@ -142,14 +143,86 @@ const KATEGORI_OPTIONS = [
   'Sosial & Agama',
   'Olahraga & Seni',
   'Teknologi & Vokasi',
+  'Layanan Siswa',
   'Tenaga Kependidikan',
 ];
 
+interface WPGuruResponse {
+  daftarGuru?: {
+    nodes: Array<{
+      id: string;
+      title: string;
+      featuredImage?: {
+        node?: {
+          sourceUrl?: string;
+        };
+      };
+      dataGuru?: {
+        nip?: string;
+        jabatan?: string;
+        mataPelajaran?: string;
+        kategori?: string;
+        email?: string;
+      };
+    }>;
+  };
+}
+
 export default function GuruPage() {
+  const [daftarGuru, setDaftarGuru] = useState<GuruItem[]>(DAFTAR_GURU_INITIAL);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedKategori, setSelectedKategori] = useState('Semua');
 
-  const filteredGurus = DAFTAR_GURU_INITIAL.filter((guru) => {
+  useEffect(() => {
+    async function loadGuruFromWordPress() {
+      const query = `
+        query GetDaftarGuru {
+          daftarGuru(first: 100) {
+            nodes {
+              id
+              title
+              featuredImage {
+                node {
+                  sourceUrl
+                }
+              }
+              dataGuru {
+                nip
+                jabatan
+                mataPelajaran
+                kategori
+                email
+              }
+            }
+          }
+        }
+      `;
+
+      try {
+        const { data } = await fetchGraphQL<WPGuruResponse>(query);
+        const nodes = data?.daftarGuru?.nodes;
+        if (nodes && nodes.length > 0) {
+          const mapped: GuruItem[] = nodes.map((node, idx) => ({
+            id: node.id || String(idx + 1),
+            nama: node.title,
+            nip: node.dataGuru?.nip || '-',
+            jabatan: node.dataGuru?.jabatan || 'Tenaga Pendidik',
+            mataPelajaran: node.dataGuru?.mataPelajaran || '-',
+            kategori: node.dataGuru?.kategori || 'Matematika & IPA',
+            email: node.dataGuru?.email || '',
+            fotoUrl: node.featuredImage?.node?.sourceUrl,
+          }));
+          setDaftarGuru(mapped);
+        }
+      } catch {
+        // Gunakan DAFTAR_GURU_INITIAL jika GraphQL belum siap / offline
+      }
+    }
+
+    loadGuruFromWordPress();
+  }, []);
+
+  const filteredGurus = daftarGuru.filter((guru) => {
     const matchesSearch =
       guru.nama.toLowerCase().includes(searchQuery.toLowerCase()) ||
       guru.mataPelajaran.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -217,7 +290,7 @@ export default function GuruPage() {
               {/* Counter Hasil */}
               <div className="md:col-span-4 flex items-center justify-end text-xs font-semibold text-slate-500 gap-1.5">
                 <Users className="w-4 h-4 text-[#1E2B7A]" />
-                Menampilkan <span className="text-[#1E2B7A] font-bold">{filteredGurus.length}</span> dari {DAFTAR_GURU_INITIAL.length} tenaga pendidik
+                Menampilkan <span className="text-[#1E2B7A] font-bold">{filteredGurus.length}</span> dari {daftarGuru.length} tenaga pendidik
               </div>
             </div>
 
@@ -249,12 +322,21 @@ export default function GuruPage() {
                 >
                   <div>
                     {/* Header Avatar / Visual */}
-                    <div className="h-40 bg-gradient-to-tr from-[#111A4D] to-[#1E2B7A] flex items-center justify-center relative overflow-hidden">
-                      <div className="w-20 h-20 rounded-full bg-white/10 border-2 border-[#FFE500]/50 flex items-center justify-center text-[#FFE500] shadow-inner group-hover:scale-105 transition">
-                        <GraduationCap className="w-10 h-10" />
-                      </div>
-                      <span className="absolute top-3 right-3 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-[#FFE500]/20 text-[#FFE500] border border-[#FFE500]/40">
-                        Pendidik
+                    <div className="h-44 bg-gradient-to-tr from-[#111A4D] to-[#1E2B7A] flex items-center justify-center relative overflow-hidden">
+                      {guru.fotoUrl ? (
+                        <Image
+                          src={guru.fotoUrl}
+                          alt={guru.nama}
+                          fill
+                          className="object-cover object-top group-hover:scale-105 transition duration-300"
+                        />
+                      ) : (
+                        <div className="w-20 h-20 rounded-full bg-white/10 border-2 border-[#FFE500]/50 flex items-center justify-center text-[#FFE500] shadow-inner group-hover:scale-105 transition">
+                          <GraduationCap className="w-10 h-10" />
+                        </div>
+                      )}
+                      <span className="absolute top-3 right-3 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-[#111A4D]/80 backdrop-blur-xs text-[#FFE500] border border-[#FFE500]/40">
+                        {guru.kategori}
                       </span>
                     </div>
 
@@ -272,7 +354,7 @@ export default function GuruPage() {
                           <BookOpen className="w-3.5 h-3.5 text-[#1E2B7A] shrink-0" />
                           <span className="font-semibold">{guru.mataPelajaran}</span>
                         </div>
-                        {guru.nip !== '-' && (
+                        {guru.nip && guru.nip !== '-' && (
                           <div className="text-[11px] text-slate-400 font-mono">
                             NIP: {guru.nip}
                           </div>
@@ -283,13 +365,19 @@ export default function GuruPage() {
 
                   {/* Kontak Card Footer */}
                   <div className="p-4 bg-slate-50 border-t border-slate-100 text-xs">
-                    <a
-                      href={`mailto:${guru.email}`}
-                      className="flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl bg-white border border-slate-200 text-slate-700 hover:text-[#1E2B7A] hover:border-[#1E2B7A] transition font-semibold"
-                    >
-                      <Mail className="w-3.5 h-3.5 text-[#0097DF]" />
-                      <span>Kirim Email</span>
-                    </a>
+                    {guru.email ? (
+                      <a
+                        href={`mailto:${guru.email}`}
+                        className="flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl bg-white border border-slate-200 text-slate-700 hover:text-[#1E2B7A] hover:border-[#1E2B7A] transition font-semibold"
+                      >
+                        <Mail className="w-3.5 h-3.5 text-[#0097DF]" />
+                        <span>Kirim Email</span>
+                      </a>
+                    ) : (
+                      <div className="flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl bg-slate-100 text-slate-400 font-medium cursor-default">
+                        <span>SMPN 1 Ngawi</span>
+                      </div>
+                    )}
                   </div>
                 </div>
               ))}
@@ -317,3 +405,4 @@ export default function GuruPage() {
     </div>
   );
 }
+

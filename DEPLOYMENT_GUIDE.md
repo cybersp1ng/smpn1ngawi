@@ -59,6 +59,48 @@ Setiap kali ada commit atau perubahan yang di-push ke branch `main`, Vercel akan
 1. Login ke WP Admin di `https://sp1ng.smpn1ngawi.sch.id/wp-admin`.
 2. Pastikan plugin **WPGraphQL** dan **Advanced Custom Fields (ACF)** sudah aktif.
 3. Import pengaturan CPT UI dan ACF field group dari folder `wordpress-config/` di repository ini:
-   - `wordpress-config/cptui_settings.json`
-   - `wordpress-config/acf_fields.json`
-4. Masukkan artikel berita, pengumuman, daftar guru, dan agenda sekolah secara dinamis melalui dashboard admin.
+   - `wordpress-config/cptui_settings.json` (via menu *CPT UI* &rarr; *Tools* &rarr; *Import/Export Post Types*)
+   - `wordpress-config/acf_fields.json` (via menu *Custom Fields* &rarr; *Tools* &rarr; *Import Field Groups*)
+
+---
+
+## 5. Panduan Admin: Mengelola & Mengupdate Menu Profil
+
+### A. Mengupdate Profil Sekolah (Sejarah Singkat, Visi Misi, & Struktur Organisasi)
+1. Buka menu **Pages (Halaman)** &rarr; **Add New Page (Tambah Halaman Baru)**.
+2. Beri judul halaman: `Profil Sekolah` dan pastikan URL Slug-nya adalah `profil`.
+3. Pada bagian bawah editor, akan muncul panel **Pengaturan Halaman Profil Sekolah** (ACF):
+   - **Sejarah Singkat**:
+     - *Judul Sejarah*: Judul utama sejarah sekolah.
+     - *Subjudul Sejarah*: Ringkasan pengantar sejarah.
+     - *Kotak Sorotan*: Judul & teks sorotan (misal: Pusat Keunggulan Daerah).
+     - *Uraian Narasi Sejarah*: Isi lengkap paragraf sejarah (pisahkan paragraf dengan Enter 2x).
+   - **Visi & Misi**:
+     - *Visi Sekolah*: Teks visi utama sekolah.
+     - *Misi Sekolah*: Tuliskan butir misi sekolah, **satu butir per baris baru**.
+   - **Struktur Organisasi**:
+     - Tuliskan susunan bagan kepengurusan sekolah dengan format baris:
+       ```
+       Jabatan | Nama Lengkap | NIP | Kategori
+       ```
+       *Contoh:*
+       ```
+       Kepala Sekolah | Drs. H. Sudarsono, M.Pd. | 19680512 199412 1 002 | Pimpinan Utama
+       Komite Sekolah | Ir. H. Bambang Wahyudi | - | Mitra & Pengawas
+       Wakasek Bidang Kurikulum | Sri Wahyuni, S.Pd., M.Si. | 19750314 199903 2 003 | Manajemen
+       ```
+4. Klik **Publish (Terbitkan)** / **Update (Perbarui)**. Website Next.js akan memperbarui tampilan halaman `/profil` secara otomatis.
+
+### B. Mengupdate Direktori Guru & Tenaga Kependidikan
+1. Buka menu **Guru & Staf** pada bilah menu samping dashboard WordPress.
+2. Klik **Tambah Guru/Staf Baru**:
+   - **Judul**: Masukkan nama lengkap guru beserta gelar (misal: `Drs. H. Sudarsono, M.Pd.`).
+   - **Featured Image (Gambar Utama)**: Unggah foto formal guru/staf untuk dijadikan foto kartu avatar.
+   - **Panel Data Guru & Staf**:
+     - *NIP*: Nomor Induk Pegawai (atau beri tanda `-` jika non-PNS).
+     - *Jabatan*: Misal `Kepala Sekolah`, `Wakasek Kurikulum`, atau `Guru Mata Pelajaran`.
+     - *Mata Pelajaran*: Misal `Matematika`, `Bahasa Indonesia`, `Bimbingan Konseling`.
+     - *Email*: Alamat email resmi guru (misal: `guru@smpn1ngawi.sch.id`).
+     - *Kategori / Rumpun*: Pilih kategori (Pimpinan, Matematika & IPA, Bahasa, Sosial & Agama, Olahraga & Seni, Teknologi & Vokasi, Layanan Siswa, Tenaga Kependidikan).
+3. Klik **Publish (Terbitkan)**. Halaman `/profil/guru` akan langsung menyajikan data guru terbaru secara dinamis.
+

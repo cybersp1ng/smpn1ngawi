@@ -38,6 +38,25 @@
         "instructions": "Email resmi guru/staf",
         "required": 0,
         "show_in_graphql": 1
+      },
+      {
+        "key": "field_guru_kategori",
+        "label": "Kategori / Rumpun",
+        "name": "kategori",
+        "type": "select",
+        "choices": {
+          "Pimpinan": "Pimpinan",
+          "Matematika & IPA": "Matematika & IPA",
+          "Bahasa": "Bahasa",
+          "Sosial & Agama": "Sosial & Agama",
+          "Olahraga & Seni": "Olahraga & Seni",
+          "Teknologi & Vokasi": "Teknologi & Vokasi",
+          "Layanan Siswa": "Layanan Siswa",
+          "Tenaga Kependidikan": "Tenaga Kependidikan"
+        },
+        "default_value": "Matematika & IPA",
+        "required": 1,
+        "show_in_graphql": 1
       }
     ],
     "location": [
@@ -303,5 +322,106 @@
     ],
     "show_in_graphql": 1,
     "graphql_field_name": "dataGaleri"
+  },
+  {
+    "key": "group_profil_sekolah_fields",
+    "title": "Pengaturan Halaman Profil Sekolah",
+    "fields": [
+      {
+        "key": "field_profil_sejarah_judul",
+        "label": "Judul Sejarah",
+        "name": "sejarah_judul",
+        "type": "text",
+        "default_value": "Sejarah Singkat SMP Negeri 1 Ngawi",
+        "required": 0,
+        "show_in_graphql": 1
+      },
+      {
+        "key": "field_profil_sejarah_subjudul",
+        "label": "Subjudul Sejarah",
+        "name": "sejarah_subjudul",
+        "type": "text",
+        "default_value": "Tumbuh dan berkembang selama berpuluh-puluh tahun sebagai pelopor pendidikan tingkat menengah di jantung Kabupaten Ngawi.",
+        "required": 0,
+        "show_in_graphql": 1
+      },
+      {
+        "key": "field_profil_sejarah_highlight_judul",
+        "label": "Judul Kotak Sorotan Sejarah",
+        "name": "sejarah_highlight_judul",
+        "type": "text",
+        "default_value": "Pusat Keunggulan Daerah",
+        "required": 0,
+        "show_in_graphql": 1
+      },
+      {
+        "key": "field_profil_sejarah_highlight_teks",
+        "label": "Teks Kotak Sorotan Sejarah",
+        "name": "sejarah_highlight_teks",
+        "type": "textarea",
+        "rows": 3,
+        "default_value": "Meluluskan puluhan ribu alumni yang kini berkontribusi aktif dalam berbagai bidang profesional, pemerintahan, akademisi, hingga wirausaha di seluruh Indonesia.",
+        "required": 0,
+        "show_in_graphql": 1
+      },
+      {
+        "key": "field_profil_sejarah_konten",
+        "label": "Uraian Narasi Sejarah (Paragraf)",
+        "name": "sejarah_konten",
+        "type": "textarea",
+        "instructions": "Pisahkan tiap paragraf dengan satu baris kosong (Enter 2x)",
+        "rows": 8,
+        "required": 0,
+        "show_in_graphql": 1
+      },
+      {
+        "key": "field_profil_visi",
+        "label": "Visi Sekolah",
+        "name": "visi",
+        "type": "textarea",
+        "rows": 3,
+        "required": 0,
+        "show_in_graphql": 1
+      },
+      {
+        "key": "field_profil_misi",
+        "label": "Misi Sekolah",
+        "name": "misi",
+        "type": "textarea",
+        "instructions": "Tuliskan butir-butir misi sekolah, satu butir per baris baru (tekan Enter untuk butir berikutnya)",
+        "rows": 6,
+        "required": 0,
+        "show_in_graphql": 1
+      },
+      {
+        "key": "field_profil_struktur_organisasi",
+        "label": "Daftar Struktur Organisasi",
+        "name": "struktur_organisasi",
+        "type": "textarea",
+        "instructions": "Format per baris: Jabatan | Nama Lengkap | NIP | Kategori (Contoh: Kepala Sekolah | Drs. H. Sudarsono, M.Pd. | 19680512 199412 1 002 | Pimpinan Utama)",
+        "rows": 10,
+        "required": 0,
+        "show_in_graphql": 1
+      }
+    ],
+    "location": [
+      [
+        {
+          "param": "page",
+          "operator": "==",
+          "value": "profil"
+        }
+      ],
+      [
+        {
+          "param": "post_type",
+          "operator": "==",
+          "value": "page"
+        }
+      ]
+    ],
+    "show_in_graphql": 1,
+    "graphql_field_name": "dataProfil"
   }
 ]
+
