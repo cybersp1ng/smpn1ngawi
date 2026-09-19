@@ -312,5 +312,58 @@
     "show_in_graphql": "true",
     "graphql_single_name": "galeri",
     "graphql_plural_name": "daftarGaleri"
+  },
+  "struktur_organisasi": {
+    "name": "struktur_organisasi",
+    "label": "Struktur Organisasi",
+    "singular_label": "Struktur Organisasi",
+    "description": "Bagan susunan kepemimpinan dan tata kelola SMPN 1 Ngawi",
+    "public": "true",
+    "publicly_queryable": "true",
+    "show_ui": "true",
+    "show_in_nav_menus": "true",
+    "delete_with_user": "false",
+    "show_in_rest": "true",
+    "rest_base": "struktur_organisasi",
+    "rest_controller_class": "",
+    "rest_namespace": "",
+    "has_archive": "false",
+    "has_archive_string": "",
+    "exclude_from_search": "false",
+    "capability_type": "post",
+    "hierarchical": "false",
+    "can_export": "true",
+    "rewrite": "true",
+    "rewrite_slug": "",
+    "rewrite_withfront": "true",
+    "query_var": "true",
+    "query_var_slug": "",
+    "menu_position": "11",
+    "show_in_menu": "true",
+    "show_in_menu_string": "",
+    "menu_icon": "dashicons-networking",
+    "supports": [
+      "title",
+      "custom-fields"
+    ],
+    "taxonomies": [],
+    "labels": {
+      "menu_name": "Struktur Organisasi",
+      "all_items": "Semua Pengurus",
+      "add_new": "Tambah Pengurus",
+      "add_new_item": "Tambah Pengurus Baru",
+      "edit_item": "Edit Pengurus",
+      "new_item": "Pengurus Baru",
+      "view_item": "Lihat Pengurus",
+      "view_items": "Lihat Semua Pengurus",
+      "search_items": "Cari Pengurus",
+      "not_found": "Tidak ada data pengurus",
+      "not_found_in_trash": "Tidak ada di tempat sampah"
+    },
+    "custom_supports": "",
+    "show_in_graphql": "true",
+    "graphql_single_name": "strukturOrganisasi",
+    "graphql_plural_name": "daftarStrukturOrganisasi"
   }
 }
+

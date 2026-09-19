@@ -422,6 +422,68 @@
     ],
     "show_in_graphql": 1,
     "graphql_field_name": "dataProfil"
+  },
+  {
+    "key": "group_struktur_organisasi_item_fields",
+    "title": "Data Pengurus Struktur Organisasi",
+    "fields": [
+      {
+        "key": "field_so_role",
+        "label": "Jabatan",
+        "name": "role",
+        "type": "text",
+        "instructions": "Contoh: Kepala Sekolah, Wakasek Bidang Kurikulum, Komite Sekolah",
+        "required": 1,
+        "show_in_graphql": 1
+      },
+      {
+        "key": "field_so_nip",
+        "label": "NIP",
+        "name": "nip",
+        "type": "text",
+        "instructions": "Masukkan NIP (kosongkan atau isi tanda - jika tidak ada)",
+        "required": 0,
+        "show_in_graphql": 1
+      },
+      {
+        "key": "field_so_category",
+        "label": "Kategori / Tingkatan",
+        "name": "category",
+        "type": "select",
+        "choices": {
+          "Pimpinan Utama": "Pimpinan Utama",
+          "Mitra & Pengawas": "Mitra & Pengawas",
+          "Manajemen": "Manajemen",
+          "Administrasi": "Administrasi",
+          "Layanan Siswa": "Layanan Siswa"
+        },
+        "default_value": "Manajemen",
+        "required": 1,
+        "show_in_graphql": 1
+      },
+      {
+        "key": "field_so_urutan",
+        "label": "Urutan Tampil",
+        "name": "urutan",
+        "type": "number",
+        "default_value": 1,
+        "instructions": "Nomor urut posisi bagan (1 untuk Kepala Sekolah, 2 untuk Komite, dst)",
+        "required": 0,
+        "show_in_graphql": 1
+      }
+    ],
+    "location": [
+      [
+        {
+          "param": "post_type",
+          "operator": "==",
+          "value": "struktur_organisasi"
+        }
+      ]
+    ],
+    "show_in_graphql": 1,
+    "graphql_field_name": "dataStruktur"
   }
 ]
+
 

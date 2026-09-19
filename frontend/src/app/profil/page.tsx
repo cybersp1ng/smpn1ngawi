@@ -124,9 +124,73 @@ interface WPProfilResponse {
       strukturOrganisasi?: string;
     };
   };
+  daftarStrukturOrganisasi?: {
+    nodes: Array<{
+      title: string;
+      dataStruktur?: {
+        role?: string;
+        nip?: string;
+        category?: string;
+        urutan?: number;
+      };
+    }>;
+  };
+}
+
+async function fetchStrukturFromRest(): Promise<StrukturOrganisasiItem[]> {
+  try {
+    const wpUrl =
+      process.env.NEXT_PUBLIC_WORDPRESS_API_URL?.replace(/\/graphql\/?$/, '') ||
+      'https://sp1ng.smpn1ngawi.sch.id/wp';
+    const restEndpoint = `${wpUrl}/wp-json/wp/v2/struktur_organisasi?_embed&per_page=100`;
+
+    const res = await fetch(restEndpoint, { next: { revalidate: 60 } });
+    if (!res.ok) return [];
+
+    const posts = await res.json();
+    if (Array.isArray(posts) && posts.length > 0) {
+      interface WpRestStruktur {
+        id: number;
+        title: { rendered: string };
+        acf?: {
+          role?: string;
+          nip?: string;
+          category?: string;
+          urutan?: number;
+        };
+      }
+
+      const items: Array<StrukturOrganisasiItem & { order: number }> = posts.map(
+        (p: WpRestStruktur) => {
+          const rawName = p.title?.rendered || '';
+          const cleanName = rawName
+            .replace(/&#(\d+);/g, (_, dec) => String.fromCharCode(dec))
+            .replace(/&amp;/g, '&');
+
+          return {
+            role: p.acf?.role || cleanName,
+            name: cleanName,
+            nip: p.acf?.nip || '-',
+            category: p.acf?.category || 'Manajemen',
+            order: Number(p.acf?.urutan || 99),
+          };
+        }
+      );
+
+      // Urutkan berdasarkan kolom urutan
+      items.sort((a, b) => a.order - b.order);
+      return items.map(({ role, name, nip, category }) => ({ role, name, nip, category }));
+    }
+  } catch {
+    // Abaikan jika REST API tidak tersedia
+  }
+  return [];
 }
 
 async function getProfilSekolah(): Promise<ProfilSekolahData> {
+  // Cek apakah ada data struktur dari CPT struktur_organisasi via REST API
+  const restStruktur = await fetchStrukturFromRest();
+
   const query = `
     query GetProfilSekolah {
       pageBy(uri: "profil") {
@@ -141,38 +205,41 @@ async function getProfilSekolah(): Promise<ProfilSekolahData> {
           strukturOrganisasi
         }
       }
+      daftarStrukturOrganisasi(first: 100) {
+        nodes {
+          title
+          dataStruktur {
+            role
+            nip
+            category
+            urutan
+          }
+        }
+      }
     }
   `;
 
   try {
     const { data } = await fetchGraphQL<WPProfilResponse>(query, { revalidate: 60 });
     const acf = data?.pageBy?.dataProfil;
+    const cpostNodes = data?.daftarStrukturOrganisasi?.nodes;
 
-    if (!acf) {
-      return FALLBACK_PROFIL;
+    let parsedStruktur = restStruktur.length > 0 ? restStruktur : FALLBACK_PROFIL.strukturOrganisasi;
+
+    // 1. Jika ada data dari CPT strukturOrganisasi via WPGraphQL
+    if (cpostNodes && cpostNodes.length > 0) {
+      const sorted = [...cpostNodes].sort(
+        (a, b) => Number(a.dataStruktur?.urutan || 99) - Number(b.dataStruktur?.urutan || 99)
+      );
+      parsedStruktur = sorted.map((node) => ({
+        role: node.dataStruktur?.role || node.title,
+        name: node.title,
+        nip: node.dataStruktur?.nip || '-',
+        category: node.dataStruktur?.category || 'Manajemen',
+      }));
     }
-
-    // Parsing Misi (per baris)
-    let parsedMisi = FALLBACK_PROFIL.misi;
-    if (acf.misi && acf.misi.trim().length > 0) {
-      parsedMisi = acf.misi
-        .split('\n')
-        .map((m) => m.replace(/^[-*•\d.]+\s*/, '').trim())
-        .filter((m) => m.length > 0);
-    }
-
-    // Parsing Sejarah Konten (paragraf yang dipisah baris)
-    let parsedSejarahKonten = FALLBACK_PROFIL.sejarahKonten;
-    if (acf.sejarahKonten && acf.sejarahKonten.trim().length > 0) {
-      parsedSejarahKonten = acf.sejarahKonten
-        .split(/\n\s*\n/)
-        .map((p) => p.trim())
-        .filter((p) => p.length > 0);
-    }
-
-    // Parsing Struktur Organisasi (Format: Jabatan | Nama | NIP | Kategori)
-    let parsedStruktur = FALLBACK_PROFIL.strukturOrganisasi;
-    if (acf.strukturOrganisasi && acf.strukturOrganisasi.trim().length > 0) {
+    // 2. Atau jika diisi via teks textarea di Halaman Page "Profil"
+    else if (acf?.strukturOrganisasi && acf.strukturOrganisasi.trim().length > 0) {
       const rows = acf.strukturOrganisasi
         .split('\n')
         .map((r) => r.trim())
@@ -196,6 +263,31 @@ async function getProfilSekolah(): Promise<ProfilSekolahData> {
       }
     }
 
+    if (!acf) {
+      return {
+        ...FALLBACK_PROFIL,
+        strukturOrganisasi: parsedStruktur,
+      };
+    }
+
+    // Parsing Misi (per baris)
+    let parsedMisi = FALLBACK_PROFIL.misi;
+    if (acf.misi && acf.misi.trim().length > 0) {
+      parsedMisi = acf.misi
+        .split('\n')
+        .map((m) => m.replace(/^[-*•\d.]+\s*/, '').trim())
+        .filter((m) => m.length > 0);
+    }
+
+    // Parsing Sejarah Konten (paragraf yang dipisah baris)
+    let parsedSejarahKonten = FALLBACK_PROFIL.sejarahKonten;
+    if (acf.sejarahKonten && acf.sejarahKonten.trim().length > 0) {
+      parsedSejarahKonten = acf.sejarahKonten
+        .split(/\n\s*\n/)
+        .map((p) => p.trim())
+        .filter((p) => p.length > 0);
+    }
+
     return {
       sejarahJudul: acf.sejarahJudul || FALLBACK_PROFIL.sejarahJudul,
       sejarahSubjudul: acf.sejarahSubjudul || FALLBACK_PROFIL.sejarahSubjudul,
@@ -209,7 +301,10 @@ async function getProfilSekolah(): Promise<ProfilSekolahData> {
       strukturOrganisasi: parsedStruktur,
     };
   } catch {
-    return FALLBACK_PROFIL;
+    return {
+      ...FALLBACK_PROFIL,
+      strukturOrganisasi: restStruktur.length > 0 ? restStruktur : FALLBACK_PROFIL.strukturOrganisasi,
+    };
   }
 }
 
