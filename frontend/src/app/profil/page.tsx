@@ -62,8 +62,8 @@ const FALLBACK_PROFIL: ProfilSekolahData = {
   strukturOrganisasi: [
     {
       role: 'Kepala Sekolah',
-      name: 'Drs. H. Sudarsono, M.Pd.',
-      nip: '19680512 199412 1 002',
+      name: 'Tarkum, S.Pd.',
+      nip: '',
       category: 'Pimpinan Utama',
     },
     {
