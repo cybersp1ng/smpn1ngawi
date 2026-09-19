@@ -175,6 +175,7 @@ export default function GuruPage() {
 
   useEffect(() => {
     async function loadGuruFromWordPress() {
+      // 1. Coba fetch via WPGraphQL terlebih dahulu
       const query = `
         query GetDaftarGuru {
           daftarGuru(first: 100) {
@@ -199,7 +200,7 @@ export default function GuruPage() {
       `;
 
       try {
-        const { data } = await fetchGraphQL<WPGuruResponse>(query);
+        const { data, error } = await fetchGraphQL<WPGuruResponse>(query);
         const nodes = data?.daftarGuru?.nodes;
         if (nodes && nodes.length > 0) {
           const mapped: GuruItem[] = nodes.map((node, idx) => ({
@@ -213,9 +214,72 @@ export default function GuruPage() {
             fotoUrl: node.featuredImage?.node?.sourceUrl,
           }));
           setDaftarGuru(mapped);
+          return;
+        }
+
+        // Jika GraphQL mengembalikan error / null, coba lewat REST API resmi
+        if (error || !nodes) {
+          await loadFromRestApi();
         }
       } catch {
-        // Gunakan DAFTAR_GURU_INITIAL jika GraphQL belum siap / offline
+        await loadFromRestApi();
+      }
+    }
+
+    async function loadFromRestApi() {
+      try {
+        // Deteksi basis URL WordPress dari env atau fallback ke server live
+        const wpUrl =
+          process.env.NEXT_PUBLIC_WORDPRESS_API_URL?.replace(/\/graphql\/?$/, '') ||
+          'https://sp1ng.smpn1ngawi.sch.id/wp';
+        const restEndpoint = `${wpUrl}/wp-json/wp/v2/guru?_embed&per_page=100`;
+
+        const res = await fetch(restEndpoint);
+        if (!res.ok) return;
+
+        const posts = await res.json();
+        if (Array.isArray(posts) && posts.length > 0) {
+          interface WpRestGuru {
+            id: number;
+            title: { rendered: string };
+            acf?: {
+              nip?: string;
+              jabatan?: string;
+              mata_pelajaran?: string;
+              kategori?: string;
+              email?: string;
+            };
+            _embedded?: {
+              'wp:featuredmedia'?: Array<{ source_url?: string }>;
+            };
+          }
+
+          const mappedFromRest: GuruItem[] = posts.map((p: WpRestGuru) => {
+            const rawTitle = p.title?.rendered || 'Pendidik';
+            // Decode HTML entities jika ada (misal &#038;)
+            const cleanTitle = rawTitle
+              .replace(/&#(\d+);/g, (_, dec) => String.fromCharCode(dec))
+              .replace(/&amp;/g, '&');
+
+            const fotoUrl =
+              p._embedded?.['wp:featuredmedia']?.[0]?.source_url || undefined;
+
+            return {
+              id: String(p.id),
+              nama: cleanTitle,
+              nip: p.acf?.nip || '-',
+              jabatan: p.acf?.jabatan || 'Tenaga Pendidik',
+              mataPelajaran: p.acf?.mata_pelajaran || 'Mata Pelajaran',
+              kategori: p.acf?.kategori || 'Matematika & IPA',
+              email: p.acf?.email || '',
+              fotoUrl,
+            };
+          });
+
+          setDaftarGuru(mappedFromRest);
+        }
+      } catch {
+        // Fallback tetap ke DAFTAR_GURU_INITIAL jika REST API juga offline
       }
     }
 
