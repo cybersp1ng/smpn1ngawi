@@ -24,117 +24,6 @@ export interface GuruItem {
   fotoUrl?: string;
 }
 
-const DAFTAR_GURU_INITIAL: GuruItem[] = [
-  {
-    id: '1',
-    nama: 'Drs. H. Sudarsono, M.Pd.',
-    nip: '19680512 199412 1 002',
-    jabatan: 'Kepala Sekolah',
-    mataPelajaran: 'Manajemen Pendidikan',
-    kategori: 'Pimpinan',
-    email: 'kepsek@smpn1ngawi.sch.id',
-  },
-  {
-    id: '2',
-    nama: 'Sri Wahyuni, S.Pd., M.Si.',
-    nip: '19750314 199903 2 003',
-    jabatan: 'Wakasek Kurikulum / Guru',
-    mataPelajaran: 'Matematika',
-    kategori: 'Matematika & IPA',
-    email: 'sri.wahyuni@smpn1ngawi.sch.id',
-  },
-  {
-    id: '3',
-    nama: 'Ahmad Fauzan, S.Pd.',
-    nip: '19790822 200501 1 008',
-    jabatan: 'Wakasek Kesiswaan / Guru',
-    mataPelajaran: 'Pendidikan Jasmani & Olahraga',
-    kategori: 'Olahraga & Seni',
-    email: 'ahmad.fauzan@smpn1ngawi.sch.id',
-  },
-  {
-    id: '4',
-    nama: 'Budi Santoso, M.Pd.',
-    nip: '19721105 199802 1 004',
-    jabatan: 'Wakasek Sarpras / Guru',
-    mataPelajaran: 'Ilmu Pengetahuan Alam (IPA)',
-    kategori: 'Matematika & IPA',
-    email: 'budi.santoso@smpn1ngawi.sch.id',
-  },
-  {
-    id: '5',
-    nama: 'Endang Rahayu, S.Pd.',
-    nip: '19810419 200801 2 015',
-    jabatan: 'Wakasek Humas / Guru',
-    mataPelajaran: 'Bahasa Indonesia',
-    kategori: 'Bahasa',
-    email: 'endang.rahayu@smpn1ngawi.sch.id',
-  },
-  {
-    id: '6',
-    nama: 'Drs. Supriyanto, M.Hum.',
-    nip: '19700412 199702 1 003',
-    jabatan: 'Guru Mata Pelajaran',
-    mataPelajaran: 'Bahasa Inggris',
-    kategori: 'Bahasa',
-    email: 'supriyanto@smpn1ngawi.sch.id',
-  },
-  {
-    id: '7',
-    nama: 'Nurul Hidayati, S.Si., S.Pd.',
-    nip: '19860714 201001 2 021',
-    jabatan: 'Guru Mata Pelajaran',
-    mataPelajaran: 'Ilmu Pengetahuan Alam (Biologi)',
-    kategori: 'Matematika & IPA',
-    email: 'nurul.hidayati@smpn1ngawi.sch.id',
-  },
-  {
-    id: '8',
-    nama: 'Haryanto, S.Pd., M.Kom.',
-    nip: '19830219 200903 1 005',
-    jabatan: 'Guru Mata Pelajaran',
-    mataPelajaran: 'Informatika & TIK',
-    kategori: 'Teknologi & Vokasi',
-    email: 'haryanto@smpn1ngawi.sch.id',
-  },
-  {
-    id: '9',
-    nama: 'Siti Aminah, S.Pd.I.',
-    nip: '19871109 201101 2 018',
-    jabatan: 'Guru Mata Pelajaran',
-    mataPelajaran: 'Pendidikan Agama Islam',
-    kategori: 'Sosial & Agama',
-    email: 'siti.aminah@smpn1ngawi.sch.id',
-  },
-  {
-    id: '10',
-    nama: 'Agus Triyono, S.Sos.',
-    nip: '19820516 200801 1 012',
-    jabatan: 'Guru Mata Pelajaran',
-    mataPelajaran: 'Pendidikan Pancasila & PPKn',
-    kategori: 'Sosial & Agama',
-    email: 'agus.triyono@smpn1ngawi.sch.id',
-  },
-  {
-    id: '11',
-    nama: 'Rina Kusuma, S.Psi., M.Pd.',
-    nip: '19840210 200902 2 006',
-    jabatan: 'Koordinator Guru BK',
-    mataPelajaran: 'Bimbingan dan Konseling',
-    kategori: 'Layanan Siswa',
-    email: 'rina.kusuma@smpn1ngawi.sch.id',
-  },
-  {
-    id: '12',
-    nama: 'Dra. Siti Masitoh',
-    nip: '19700918 199503 2 001',
-    jabatan: 'Kepala Tata Usaha',
-    mataPelajaran: 'Administrasi Umum',
-    kategori: 'Tenaga Kependidikan',
-    email: 'tu@smpn1ngawi.sch.id',
-  },
-];
-
 const KATEGORI_OPTIONS = [
   'Semua',
   'Pimpinan',
@@ -169,12 +58,14 @@ interface WPGuruResponse {
 }
 
 export default function GuruPage() {
-  const [daftarGuru, setDaftarGuru] = useState<GuruItem[]>(DAFTAR_GURU_INITIAL);
+  const [daftarGuru, setDaftarGuru] = useState<GuruItem[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedKategori, setSelectedKategori] = useState('Semua');
 
   useEffect(() => {
     async function loadGuruFromWordPress() {
+      setIsLoading(true);
       // 1. Coba fetch via WPGraphQL terlebih dahulu
       const query = `
         query GetDaftarGuru {
@@ -214,6 +105,7 @@ export default function GuruPage() {
             fotoUrl: node.featuredImage?.node?.sourceUrl,
           }));
           setDaftarGuru(mapped);
+          setIsLoading(false);
           return;
         }
 
@@ -223,6 +115,8 @@ export default function GuruPage() {
         }
       } catch {
         await loadFromRestApi();
+      } finally {
+        setIsLoading(false);
       }
     }
 
@@ -279,7 +173,7 @@ export default function GuruPage() {
           setDaftarGuru(mappedFromRest);
         }
       } catch {
-        // Fallback tetap ke DAFTAR_GURU_INITIAL jika REST API juga offline
+        // Abaikan jika REST API gagal
       }
     }
 
@@ -377,7 +271,29 @@ export default function GuruPage() {
           </div>
 
           {/* Grid Kartu Guru */}
-          {filteredGurus.length > 0 ? (
+          {isLoading ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
+                <div
+                  key={i}
+                  className="bg-white rounded-2xl border border-slate-200 overflow-hidden animate-pulse flex flex-col justify-between"
+                >
+                  <div className="h-44 bg-slate-200" />
+                  <div className="p-5 space-y-3">
+                    <div className="h-4 bg-slate-200 rounded-md w-3/4" />
+                    <div className="h-3 bg-slate-200 rounded-md w-1/2" />
+                    <div className="pt-2 border-t border-slate-100 space-y-2">
+                      <div className="h-3 bg-slate-200 rounded-md w-2/3" />
+                      <div className="h-2.5 bg-slate-200 rounded-md w-1/3" />
+                    </div>
+                  </div>
+                  <div className="p-4 bg-slate-50 border-t border-slate-100">
+                    <div className="h-8 bg-slate-200 rounded-xl" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : filteredGurus.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {filteredGurus.map((guru) => (
                 <div
