@@ -100,7 +100,7 @@ export default function KontakPage() {
             </div>
             <h3 className="text-base font-bold text-slate-900">Alamat Kampus</h3>
             <p className="mt-2 text-sm text-slate-600 leading-relaxed">
-              Jl. Kartini No. 1, Kel. Margomulyo, Kec. Ngawi, Kabupaten Ngawi, Jawa Timur 63217
+              Jl. Ronggowarsito No.1, Kluncing, Ketanggi, Kec. Ngawi, Kabupaten Ngawi, Jawa Timur 63211
             </p>
           </div>
 
@@ -109,12 +109,12 @@ export default function KontakPage() {
             <div className="h-12 w-12 rounded-xl bg-[#0097DF]/10 text-[#0097DF] flex items-center justify-center mb-4">
               <Phone className="h-6 w-6" />
             </div>
-            <h3 className="text-base font-bold text-slate-900">Telepon & Fax</h3>
+            <h3 className="text-base font-bold text-slate-900">Telepon Kantor</h3>
             <p className="mt-2 text-sm text-slate-600">
-              Telp: (0351) 749071
+              Telp: (0351) 749142
             </p>
             <p className="text-sm text-slate-600 mt-1">
-              WhatsApp CS: +62 812-3456-7890
+              Layanan Informasi Sekolah
             </p>
           </div>
 
@@ -139,10 +139,10 @@ export default function KontakPage() {
             </div>
             <h3 className="text-base font-bold text-slate-900">Jam Layanan TU</h3>
             <p className="mt-2 text-sm text-slate-600">
-              Senin - Kamis: 07.00 - 15.00 WIB
+              Senin - Jumat: 07.00 - 15.00 WIB
             </p>
             <p className="text-sm text-slate-600 mt-1">
-              Jumat: 07.00 - 11.30 WIB
+              Sabtu & Minggu: Libur
             </p>
           </div>
         </div>
@@ -291,7 +291,7 @@ export default function KontakPage() {
                   <MapPin className="h-4 w-4 text-[#0097DF]" /> Lokasi Satuan Pendidikan
                 </span>
                 <a
-                  href="https://maps.google.com/?q=SMP+Negeri+1+Ngawi"
+                  href="https://maps.app.goo.gl/PbGRDBuNEkk4DYp28"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-xs text-[#0097DF] hover:underline font-medium"
@@ -331,31 +331,40 @@ export default function KontakPage() {
 
               <div className="space-y-2.5">
                 <a
-                  href="https://instagram.com"
+                  href="https://instagram.com/smpn1_ngawi"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center justify-between rounded-xl bg-white/10 hover:bg-white/20 p-3 text-xs transition-colors backdrop-blur-sm border border-white/10"
                 >
-                  <span className="font-semibold">Instagram: @smpn1ngawi</span>
+                  <span className="font-semibold">Instagram: @smpn1_ngawi</span>
                   <span className="text-[#FFE500]">Follow &rarr;</span>
                 </a>
                 <a
-                  href="https://youtube.com"
+                  href="https://www.youtube.com/@smpn1ngawi"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center justify-between rounded-xl bg-white/10 hover:bg-white/20 p-3 text-xs transition-colors backdrop-blur-sm border border-white/10"
                 >
-                  <span className="font-semibold">YouTube: Spensa Ngawi TV</span>
+                  <span className="font-semibold">YouTube: @smpn1ngawi</span>
                   <span className="text-[#FFE500]">Subscribe &rarr;</span>
                 </a>
                 <a
-                  href="https://facebook.com"
+                  href="https://m.facebook.com/smpnegeri1ngawi"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center justify-between rounded-xl bg-white/10 hover:bg-white/20 p-3 text-xs transition-colors backdrop-blur-sm border border-white/10"
                 >
-                  <span className="font-semibold">Facebook: SMP Negeri 1 Ngawi</span>
+                  <span className="font-semibold">Facebook: smpnegeri1ngawi</span>
                   <span className="text-[#FFE500]">Kunjungi &rarr;</span>
+                </a>
+                <a
+                  href="https://tiktok.com/@smpn1ngawi"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center justify-between rounded-xl bg-white/10 hover:bg-white/20 p-3 text-xs transition-colors backdrop-blur-sm border border-white/10"
+                >
+                  <span className="font-semibold">TikTok: @smpn1ngawi</span>
+                  <span className="text-[#FFE500]">Follow &rarr;</span>
                 </a>
               </div>
             </div>

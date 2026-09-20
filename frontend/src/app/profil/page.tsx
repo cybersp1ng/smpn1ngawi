@@ -500,9 +500,6 @@ export default async function ProfilPage() {
             <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 mt-3 tracking-tight">
               Struktur Organisasi Sekolah
             </h2>
-            <p className="text-slate-600 text-sm sm:text-base mt-2">
-              Bagan susunan tim kepemimpinan dan manajemen operasional di lingkungan SMP Negeri 1 Ngawi.
-            </p>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
