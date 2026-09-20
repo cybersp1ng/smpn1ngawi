@@ -130,9 +130,10 @@ const DAFTAR_PRESTASI_DEFAULT: PrestasiItem[] = [
 ];
 
 /** Decode HTML entities dari WordPress */
-function decodeWpText(raw: string): string {
-  if (!raw) return '';
-  return raw
+function decodeWpText(raw: unknown): string {
+  if (raw === undefined || raw === null) return '';
+  const str = String(raw);
+  return str
     .replace(/&#(\d+);/g, (_, dec: string) => String.fromCharCode(Number(dec)))
     .replace(/&amp;/g, '&')
     .replace(/&quot;/g, '"')
@@ -176,7 +177,7 @@ export default function PrestasiPage() {
       // 1. Coba dari WP REST API /wp-json/wp/v2/prestasi
       try {
         const restEndpoint = `${wpUrl}/wp-json/wp/v2/prestasi?_embed&per_page=100`;
-        const res = await fetch(restEndpoint);
+        const res = await fetch(restEndpoint, { cache: 'no-store' });
         if (res.ok) {
           const posts = await res.json();
           if (Array.isArray(posts) && posts.length > 0) {
@@ -186,7 +187,7 @@ export default function PrestasiPage() {
               acf?: {
                 kategori?: string;
                 tingkat?: string;
-                tahun?: string;
+                tahun?: string | number;
                 peraih?: string;
                 penyelenggara?: string;
                 peringkat?: string;
@@ -196,12 +197,12 @@ export default function PrestasiPage() {
             const mapped: PrestasiItem[] = posts.map((p: WpRestPrestasi) => ({
               id: String(p.id),
               judul: decodeWpText(p.title?.rendered || 'Prestasi'),
-              kategori: decodeWpText(p.acf?.kategori || 'Akademik'),
-              tingkat: decodeWpText(p.acf?.tingkat || 'Kabupaten'),
-              tahun: decodeWpText(p.acf?.tahun || new Date().getFullYear().toString()),
-              peraih: decodeWpText(p.acf?.peraih || '-'),
-              penyelenggara: decodeWpText(p.acf?.penyelenggara || 'SMPN 1 Ngawi'),
-              peringkat: decodeWpText(p.acf?.peringkat || 'Juara'),
+              kategori: decodeWpText(p.acf?.kategori) || 'Akademik',
+              tingkat: decodeWpText(p.acf?.tingkat) || 'Kabupaten',
+              tahun: decodeWpText(p.acf?.tahun) || new Date().getFullYear().toString(),
+              peraih: decodeWpText(p.acf?.peraih) || '-',
+              penyelenggara: decodeWpText(p.acf?.penyelenggara) || 'SMPN 1 Ngawi',
+              peringkat: decodeWpText(p.acf?.peringkat) || 'Juara',
             }));
 
             setDaftarPrestasi(mapped);
@@ -233,18 +234,18 @@ export default function PrestasiPage() {
             }
           }
         `;
-        const { data } = await fetchGraphQL<WPPrestasiResponse>(query);
+        const { data } = await fetchGraphQL<WPPrestasiResponse>(query, { revalidate: 0 });
         const nodes = data?.daftarPrestasi?.nodes;
         if (nodes && nodes.length > 0) {
           const mapped: PrestasiItem[] = nodes.map((node, idx) => ({
             id: node.id || String(idx + 1),
             judul: decodeWpText(node.title),
-            kategori: decodeWpText(node.dataPrestasi?.kategori || 'Akademik'),
-            tingkat: decodeWpText(node.dataPrestasi?.tingkat || 'Kabupaten'),
-            tahun: decodeWpText(node.dataPrestasi?.tahun || new Date().getFullYear().toString()),
-            peraih: decodeWpText(node.dataPrestasi?.peraih || '-'),
-            penyelenggara: decodeWpText(node.dataPrestasi?.penyelenggara || 'SMPN 1 Ngawi'),
-            peringkat: decodeWpText(node.dataPrestasi?.peringkat || 'Juara'),
+            kategori: decodeWpText(node.dataPrestasi?.kategori) || 'Akademik',
+            tingkat: decodeWpText(node.dataPrestasi?.tingkat) || 'Kabupaten',
+            tahun: decodeWpText(node.dataPrestasi?.tahun) || new Date().getFullYear().toString(),
+            peraih: decodeWpText(node.dataPrestasi?.peraih) || '-',
+            penyelenggara: decodeWpText(node.dataPrestasi?.penyelenggara) || 'SMPN 1 Ngawi',
+            peringkat: decodeWpText(node.dataPrestasi?.peringkat) || 'Juara',
           }));
           setDaftarPrestasi(mapped);
           setIsLoading(false);
