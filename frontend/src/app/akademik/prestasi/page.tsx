@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import {
   Award,
@@ -13,19 +13,20 @@ import {
   Filter,
   Users,
 } from 'lucide-react';
+import { fetchGraphQL } from '@/lib/graphql';
 
-interface PrestasiItem {
+export interface PrestasiItem {
   id: string;
   judul: string;
-  kategori: 'Akademik' | 'Non-Akademik';
-  tingkat: 'Kabupaten' | 'Provinsi' | 'Nasional' | 'Internasional';
+  kategori: string;
+  tingkat: string;
   tahun: string;
   peraih: string;
   penyelenggara: string;
-  peringkat: 'Juara 1' | 'Juara 2' | 'Juara 3' | 'Medali Emas' | 'Medali Perak' | 'Medali Perunggu' | 'Harapan 1';
+  peringkat: string;
 }
 
-const DAFTAR_PRESTASI: PrestasiItem[] = [
+const DAFTAR_PRESTASI_DEFAULT: PrestasiItem[] = [
   {
     id: '1',
     judul: 'Olimpiade Sains Nasional (OSN) Bidang Matematika',
@@ -128,12 +129,138 @@ const DAFTAR_PRESTASI: PrestasiItem[] = [
   },
 ];
 
+/** Decode HTML entities dari WordPress */
+function decodeWpText(raw: string): string {
+  if (!raw) return '';
+  return raw
+    .replace(/&#(\d+);/g, (_, dec: string) => String.fromCharCode(Number(dec)))
+    .replace(/&amp;/g, '&')
+    .replace(/&quot;/g, '"')
+    .replace(/&#039;/g, "'")
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .trim();
+}
+
+interface WPPrestasiResponse {
+  daftarPrestasi?: {
+    nodes: Array<{
+      id: string;
+      title: string;
+      dataPrestasi?: {
+        kategori?: string;
+        tingkat?: string;
+        tahun?: string;
+        peraih?: string;
+        penyelenggara?: string;
+        peringkat?: string;
+      };
+    }>;
+  };
+}
+
 export default function PrestasiPage() {
+  const [daftarPrestasi, setDaftarPrestasi] = useState<PrestasiItem[]>(DAFTAR_PRESTASI_DEFAULT);
+  const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedKategori, setSelectedKategori] = useState<string>('Semua');
   const [selectedTingkat, setSelectedTingkat] = useState<string>('Semua');
 
-  const filteredPrestasi = DAFTAR_PRESTASI.filter((item) => {
+  useEffect(() => {
+    async function loadPrestasi() {
+      setIsLoading(true);
+      const wpUrl =
+        process.env.NEXT_PUBLIC_WORDPRESS_API_URL?.replace(/\/graphql\/?$/, '') ||
+        'https://sp1ng.smpn1ngawi.sch.id/wp';
+
+      // 1. Coba dari WP REST API /wp-json/wp/v2/prestasi
+      try {
+        const restEndpoint = `${wpUrl}/wp-json/wp/v2/prestasi?_embed&per_page=100`;
+        const res = await fetch(restEndpoint);
+        if (res.ok) {
+          const posts = await res.json();
+          if (Array.isArray(posts) && posts.length > 0) {
+            interface WpRestPrestasi {
+              id: number;
+              title: { rendered: string };
+              acf?: {
+                kategori?: string;
+                tingkat?: string;
+                tahun?: string;
+                peraih?: string;
+                penyelenggara?: string;
+                peringkat?: string;
+              };
+            }
+
+            const mapped: PrestasiItem[] = posts.map((p: WpRestPrestasi) => ({
+              id: String(p.id),
+              judul: decodeWpText(p.title?.rendered || 'Prestasi'),
+              kategori: decodeWpText(p.acf?.kategori || 'Akademik'),
+              tingkat: decodeWpText(p.acf?.tingkat || 'Kabupaten'),
+              tahun: decodeWpText(p.acf?.tahun || new Date().getFullYear().toString()),
+              peraih: decodeWpText(p.acf?.peraih || '-'),
+              penyelenggara: decodeWpText(p.acf?.penyelenggara || 'SMPN 1 Ngawi'),
+              peringkat: decodeWpText(p.acf?.peringkat || 'Juara'),
+            }));
+
+            setDaftarPrestasi(mapped);
+            setIsLoading(false);
+            return;
+          }
+        }
+      } catch {
+        // Lanjut ke fallback GraphQL jika REST API gagal
+      }
+
+      // 2. Coba fetch via WPGraphQL
+      try {
+        const query = `
+          query GetDaftarPrestasi {
+            daftarPrestasi(first: 100) {
+              nodes {
+                id
+                title
+                dataPrestasi {
+                  kategori
+                  tingkat
+                  tahun
+                  peraih
+                  penyelenggara
+                  peringkat
+                }
+              }
+            }
+          }
+        `;
+        const { data } = await fetchGraphQL<WPPrestasiResponse>(query);
+        const nodes = data?.daftarPrestasi?.nodes;
+        if (nodes && nodes.length > 0) {
+          const mapped: PrestasiItem[] = nodes.map((node, idx) => ({
+            id: node.id || String(idx + 1),
+            judul: decodeWpText(node.title),
+            kategori: decodeWpText(node.dataPrestasi?.kategori || 'Akademik'),
+            tingkat: decodeWpText(node.dataPrestasi?.tingkat || 'Kabupaten'),
+            tahun: decodeWpText(node.dataPrestasi?.tahun || new Date().getFullYear().toString()),
+            peraih: decodeWpText(node.dataPrestasi?.peraih || '-'),
+            penyelenggara: decodeWpText(node.dataPrestasi?.penyelenggara || 'SMPN 1 Ngawi'),
+            peringkat: decodeWpText(node.dataPrestasi?.peringkat || 'Juara'),
+          }));
+          setDaftarPrestasi(mapped);
+          setIsLoading(false);
+          return;
+        }
+      } catch {
+        // Tetap menggunakan DAFTAR_PRESTASI_DEFAULT jika belum ada di WP
+      }
+
+      setIsLoading(false);
+    }
+
+    loadPrestasi();
+  }, []);
+
+  const filteredPrestasi = daftarPrestasi.filter((item) => {
     const matchesSearch =
       item.judul.toLowerCase().includes(searchQuery.toLowerCase()) ||
       item.peraih.toLowerCase().includes(searchQuery.toLowerCase()) ||
