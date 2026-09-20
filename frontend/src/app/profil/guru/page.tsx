@@ -10,7 +10,6 @@ import {
   Mail,
   ChevronRight,
   BookOpen,
-  Layers,
 } from 'lucide-react';
 import { fetchGraphQL } from '@/lib/graphql';
 
@@ -322,9 +321,11 @@ export default function GuruPage() {
                           <GraduationCap className="w-10 h-10" />
                         </div>
                       )}
-                      <span className="absolute top-3 right-3 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-[#111A4D]/80 backdrop-blur-xs text-[#FFE500] border border-[#FFE500]/40">
-                        {guru.kategori}
-                      </span>
+                      {guru.kategori && (
+                        <span className="absolute top-3 right-3 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-[#111A4D]/80 backdrop-blur-xs text-[#FFE500] border border-[#FFE500]/40">
+                          {guru.kategori}
+                        </span>
+                      )}
                     </div>
 
                     {/* Informasi Guru */}
@@ -344,16 +345,6 @@ export default function GuruPage() {
                             <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wide block">Mata Pelajaran</span>
                             <span className="font-semibold text-slate-700">
                               {guru.mataPelajaran && guru.mataPelajaran !== '-' ? guru.mataPelajaran : <span className="text-slate-400 italic">—</span>}
-                            </span>
-                          </div>
-                        </div>
-                        {/* Rumpun / Kategori */}
-                        <div className="flex items-start gap-1.5">
-                          <Layers className="w-3.5 h-3.5 text-[#0097DF] shrink-0 mt-0.5" />
-                          <div>
-                            <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wide block">Rumpun</span>
-                            <span className="font-semibold text-slate-700">
-                              {guru.kategori ? guru.kategori : <span className="text-slate-400 italic">—</span>}
                             </span>
                           </div>
                         </div>
