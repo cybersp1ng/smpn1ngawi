@@ -104,7 +104,7 @@ async function fetchStrukturFromRest(): Promise<StrukturOrganisasiItem[]> {
       'https://sp1ng.smpn1ngawi.sch.id/wp';
     const restEndpoint = `${wpUrl}/wp-json/wp/v2/struktur_organisasi?_embed&per_page=100`;
 
-    const res = await fetch(restEndpoint, { next: { revalidate: 60 } });
+    const res = await fetch(restEndpoint, { next: { revalidate: 0 } });
     if (!res.ok) return [];
 
     const posts = await res.json();
@@ -112,16 +112,47 @@ async function fetchStrukturFromRest(): Promise<StrukturOrganisasiItem[]> {
       interface WpRestStruktur {
         id: number;
         title: { rendered: string };
+        featured_media?: number;
         acf?: {
           role?: string;
           nip?: string;
           category?: string;
           urutan?: number;
-          foto?: string | { url?: string };
+          foto?: string | number | { url?: string; source_url?: string };
         };
         _embedded?: {
           'wp:featuredmedia'?: Array<{ source_url?: string }>;
         };
+      }
+
+      // Kumpulkan ID media yang perlu di-fetch jika ACF hanya mengembalikan ID angka
+      const mediaIdsToFetch = new Set<number>();
+      posts.forEach((p: WpRestStruktur) => {
+        if (typeof p.acf?.foto === 'number' && p.acf.foto > 0) {
+          mediaIdsToFetch.add(p.acf.foto);
+        } else if (p.featured_media && p.featured_media > 0 && !p._embedded?.['wp:featuredmedia']?.[0]?.source_url) {
+          mediaIdsToFetch.add(p.featured_media);
+        }
+      });
+
+      // Fetch semua media URLs yang diperlukan
+      const mediaMap = new Map<number, string>();
+      if (mediaIdsToFetch.size > 0) {
+        await Promise.all(
+          Array.from(mediaIdsToFetch).map(async (mediaId) => {
+            try {
+              const mRes = await fetch(`${wpUrl}/wp-json/wp/v2/media/${mediaId}`);
+              if (mRes.ok) {
+                const mData = await mRes.json();
+                if (mData.source_url) {
+                  mediaMap.set(mediaId, mData.source_url);
+                }
+              }
+            } catch {
+              // Abaikan jika gagal mengambil media tertentu
+            }
+          })
+        );
       }
 
       const items: Array<StrukturOrganisasiItem & { order: number }> = posts.map(
@@ -131,10 +162,23 @@ async function fetchStrukturFromRest(): Promise<StrukturOrganisasiItem[]> {
             .replace(/&#(\d+);/g, (_, dec) => String.fromCharCode(dec))
             .replace(/&amp;/g, '&');
 
-          // Cek foto dari Featured Image WordPress atau field ACF
+          // 1. Cek dari featured media embedded
           let fotoUrl = p._embedded?.['wp:featuredmedia']?.[0]?.source_url;
+
+          // 2. Cek dari ACF foto
           if (!fotoUrl && p.acf?.foto) {
-            fotoUrl = typeof p.acf.foto === 'string' ? p.acf.foto : p.acf.foto.url;
+            if (typeof p.acf.foto === 'string') {
+              fotoUrl = p.acf.foto;
+            } else if (typeof p.acf.foto === 'number') {
+              fotoUrl = mediaMap.get(p.acf.foto);
+            } else if (typeof p.acf.foto === 'object') {
+              fotoUrl = p.acf.foto.url || p.acf.foto.source_url;
+            }
+          }
+
+          // 3. Fallback ke featured_media ID lookup
+          if (!fotoUrl && p.featured_media && mediaMap.has(p.featured_media)) {
+            fotoUrl = mediaMap.get(p.featured_media);
           }
 
           return {
