@@ -23,155 +23,188 @@ interface EkskulItem {
   deskripsi: string;
 }
 
-const DAFTAR_EKSKUL: EkskulItem[] = [
-  {
-    id: '1',
-    nama: 'Pramuka (Gugus Depan SMPN 1 Ngawi)',
-    kategori: 'Kepemimpinan',
-    pembina: 'Bambang Sudarsono, S.Pd. & Tim Pembina',
-    jadwal: 'Jumat, 15.00 - 17.00 WIB',
-    lokasi: 'Lapangan Utama & Sanggar Pramuka',
-    deskripsi:
-      'Kegiatan kepanduan wajib untuk menumbuhkan jiwa mandiri, kedisiplinan, cinta tanah air, keterampilan tali-temali, dan survival.',
-  },
-  {
-    id: '2',
-    nama: 'Palang Merah Remaja (PMR Madya)',
-    kategori: 'Kepemimpinan',
-    pembina: 'Nurul Hidayati, S.Si.',
-    jadwal: 'Sabtu, 08.00 - 10.00 WIB',
-    lokasi: 'Ruang UKS & Halaman Sekolah',
-    deskripsi:
-      'Pelatihan pertolongan pertama pada kecelakaan, edukasi donor darah, kesiapsiagaan bencana, dan bakti sosial masyarakat.',
-  },
-  {
-    id: '3',
-    nama: 'Pasukan Pengibar Bendera (Paskibra)',
-    kategori: 'Kepemimpinan',
-    pembina: 'Agus Triyono, S.Sos.',
-    jadwal: 'Selasa & Kamis, 15.30 - 17.00 WIB',
-    lokasi: 'Lapangan Upacara',
-    deskripsi:
-      'Pelatihan formasi baris-berbaris (PBB) presisi, pembentukan postur tegap, loyalitas, dan penyiapan petugas upacara bendera.',
-  },
-  {
-    id: '4',
-    nama: 'Futsal & Sepak Bola',
-    kategori: 'Olahraga',
-    pembina: 'Ahmad Fauzan, S.Pd. & Coach Hendra',
-    jadwal: 'Rabu & Sabtu, 15.30 - 17.30 WIB',
-    lokasi: 'Lapangan Olahraga Serbaguna',
-    deskripsi:
-      'Pembinaan teknik dasar, stamina, strategi tim, dan persiapan mengikuti turnamen futsal pelajar tingkat kabupaten dan provinsi.',
-  },
-  {
-    id: '5',
-    nama: 'Bola Basket (Spenza Basketball)',
-    kategori: 'Olahraga',
-    pembina: 'Rian Pratama, S.Pd.',
-    jadwal: 'Senin & Kamis, 15.30 - 17.00 WIB',
-    lokasi: 'Lapangan Basket Outdoor',
-    deskripsi:
-      'Pengasahan kemampuan dribble, passing, shooting, serta mental bertanding dalam ajang kompetisi basket pelajar.',
-  },
-  {
-    id: '6',
-    nama: 'Bola Voli',
-    kategori: 'Olahraga',
-    pembina: 'Drs. Supriyanto',
-    jadwal: 'Selasa & Jumat, 15.30 - 17.00 WIB',
-    lokasi: 'Lapangan Voli',
-    deskripsi:
-      'Latihan smash, passing bawah/atas, servis tajam, dan kekompakan tim dalam kejuaraan antar-sekolah.',
-  },
-  {
-    id: '7',
-    nama: 'Bulutangkis (Badminton)',
-    kategori: 'Olahraga',
-    pembina: 'Budi Santoso, M.Pd.',
-    jadwal: 'Rabu, 15.00 - 17.00 WIB',
-    lokasi: 'GOR Bulutangkis Ngawi',
-    deskripsi:
-      'Pengembangan bakat bulutangkis nomor tunggal dan ganda putra/putri untuk ajang O2SN tingkat kabupaten.',
-  },
-  {
-    id: '8',
-    nama: 'Seni Tari Tradisional & Kreasi',
-    kategori: 'Seni & Budaya',
-    pembina: 'Dewi Lestari, S.Sn.',
-    jadwal: 'Kamis, 15.00 - 17.00 WIB',
-    lokasi: 'Ruang Sanggar Seni',
-    deskripsi:
-      'Pelestarian warisan budaya tari Jawa Timur serta eksplorasi tari kreasi nusantara untuk pementasan seni dan festival FLS2N.',
-  },
-  {
-    id: '9',
-    nama: 'Seni Karawitan & Gamelan',
-    kategori: 'Seni & Budaya',
-    pembina: 'Ki Slamet Wiyono',
-    jadwal: 'Sabtu, 09.00 - 11.30 WIB',
-    lokasi: 'Ruang Karawitan Lt. 2',
-    deskripsi:
-      'Pembelajaran menabuh gamelan lengkap (kendang, saron, bonang, gong) dan olah vokal tembang macapat.',
-  },
-  {
-    id: '10',
-    nama: 'Paduan Suara (Spenza Choir)',
-    kategori: 'Seni & Budaya',
-    pembina: 'Endang Rahayu, S.Pd.',
-    jadwal: 'Selasa, 15.00 - 16.30 WIB',
-    lokasi: 'Ruang Audio Visual',
-    deskripsi:
-      'Latihan teknik pernapasan, intonasi, harmoni suara 4 suara (SATB), dan penampilan upacara hari besar kenegaraan.',
-  },
-  {
-    id: '11',
-    nama: 'Klub Robotik & Coding TIK',
-    kategori: 'Sains & Teknologi',
-    pembina: 'Haryanto, S.Pd., M.Kom.',
-    jadwal: 'Rabu, 15.00 - 17.00 WIB',
-    lokasi: 'Laboratorium Komputer 1',
-    deskripsi:
-      'Merakit robot mikrokontroler (Arduino), pemrograman logika dasar (Scratch/Python), dan persiapan lomba otomasi teknologi.',
-  },
-  {
-    id: '12',
-    nama: 'English Speaking & Debate Club',
-    kategori: 'Bahasa & Literasi',
-    pembina: 'Dra. Endah Sulistyowati',
-    jadwal: 'Kamis, 15.00 - 16.30 WIB',
-    lokasi: 'Laboratorium Bahasa',
-    deskripsi:
-      'Praktik percakapan bahasa Inggris aktif, pidato (speech contest), storytelling, dan teknik debat bahasa Inggris.',
-  },
-  {
-    id: '13',
-    nama: 'Jurnalistik & Majalah Dinding (Mading)',
-    kategori: 'Bahasa & Literasi',
-    pembina: 'Sri Wahyuni, S.Pd.',
-    jadwal: 'Jumat, 13.30 - 15.00 WIB',
-    lokasi: 'Ruang Redaksi Perpustakaan',
-    deskripsi:
-      'Pelatihan teknik wawancara, penulisan berita artikel sekolah, fotografi jurnalistik, dan pengelolaan majalah dinding berkala.',
-  },
-  {
-    id: '14',
-    nama: 'Kerohanian Islam (Rohis & MTQ)',
-    kategori: 'Keagamaan',
-    pembina: 'Siti Aminah, S.Pd.I.',
-    jadwal: 'Jumat, 11.30 - 13.00 WIB',
-    lokasi: 'Masjid Sekolah Al-Ikhlas',
-    deskripsi:
-      'Kajian keislaman, bimbingan tartil & tahfidz Al-Qur’an, seni hadrah rebana, serta kepanitiaan peringatan hari besar Islam (PHBI).',
-  },
-];
+const DAFTAR_EKSKUL: EkskulItem[] =
+  [
+    {
+      id: '1',
+      nama: 'Pramuka (Gugus Depan SMPN 1 Ngawi)',
+      kategori: 'Kepemimpinan',
+      pembina: 'Samsul Huda, S.Pd.',
+      jadwal: 'Jumat',
+      lokasi: 'Lapangan Utama & Sanggar Pramuka',
+      deskripsi:
+        'Kegiatan kepanduan wajib untuk menumbuhkan jiwa mandiri, kedisiplinan, cinta tanah air, keterampilan tali-temali, dan survival bagi siswa kelas VII, VIII, dan IX.',
+    },
+    {
+      id: '2',
+      nama: 'PMR/UKS',
+      kategori: 'Kesehatan & Kemanusiaan',
+      pembina: 'Siti Nur Choliful, S.Pd.',
+      jadwal: 'Jum’at',
+      lokasi: 'Ruang UKS & Lingkungan Sekolah',
+      deskripsi:
+        'Kegiatan pembinaan kesehatan remaja dan pertolongan pertama untuk siswa kelas VII dan VIII.',
+    },
+    {
+      id: '3',
+      nama: 'Olimpiade Sains Nasional (OSN) IPA',
+      kategori: 'Akademik',
+      pembina: 'Artati Rahmiati, S.Pd., Fita Maftuhah, S.Pd',
+      jadwal: 'Senin',
+      lokasi: 'Laboratorium IPA / Ruang Kelas',
+      deskripsi:
+        'Pengembangan kompetensi dan pemahaman mendalam bidang sains (IPA) untuk persiapan kompetisi siswa kelas VII dan VIII.',
+    },
+    {
+      id: '4',
+      nama: 'Olimpiade Sains Nasional (OSN) Matematika',
+      kategori: 'Akademik',
+      pembina: 'Endah Ariastutik, S.Pd., Hipo Putri Arisa, S.Pd.',
+      jadwal: 'Senin',
+      lokasi: 'Ruang Kelas',
+      deskripsi:
+        'Pelatihan pemecahan masalah matematika tingkat lanjut untuk persiapan kompetisi siswa kelas VII dan VIII.',
+    },
+    {
+      id: '5',
+      nama: 'Olimpiade Sains Nasional (OSN) IPS',
+      kategori: 'Akademik',
+      pembina: 'Sunarsih., M.Pd., Mia Abdilliah, S.P',
+      jadwal: 'Senin',
+      lokasi: 'Ruang Kelas',
+      deskripsi:
+        'Pendalaman materi ilmu pengetahuan sosial dan analisis isu strategis untuk persiapan kompetisi siswa kelas VII dan VIII.',
+    },
+    {
+      id: '6',
+      nama: 'Spensa English Club (SEC)',
+      kategori: 'Bahasa & Literasi',
+      pembina: 'Nur Hetti Setyani, M.Pd, Didik Nurwanto, S.Pd.',
+      jadwal: 'Senin',
+      lokasi: 'Ruang Kelas',
+      deskripsi:
+        'Wadah pengembangan kemampuan berbahasa Inggris aktif dan kreatif bagi siswa kelas VII dan VIII.',
+    },
+    {
+      id: '7',
+      nama: 'Paduan Suara',
+      kategori: 'Seni & Budaya',
+      pembina: 'Yudha Ariyanto, S.Pd',
+      jadwal: 'Senin',
+      lokasi: 'Ruang Seni / Aula',
+      deskripsi:
+        'Pelatihan olah vokal, teknik bernyanyi harmoni, dan paduan suara bagi siswa kelas VII dan VIII.',
+    },
+    {
+      id: '8',
+      nama: 'Karawitan',
+      kategori: 'Seni & Budaya',
+      pembina: 'Harintayoga Adhi P. S.Pd.',
+      jadwal: 'Selasa dan Kamis',
+      lokasi: 'Ruang Karawitan / Pendopo',
+      deskripsi:
+        'Pelatihan seni musik tradisional gamelan jawa untuk melestarikan budaya bagi siswa kelas VII dan VIII.',
+    },
+    {
+      id: '9',
+      nama: 'Kaligrafi',
+      kategori: 'Keagamaan',
+      pembina: 'Ambar Maisyaroh, S.Pd.I',
+      jadwal: 'Senin',
+      lokasi: 'Mushola / Ruang Kelas',
+      deskripsi:
+        'Seni menulis indah huruf Arab untuk mengembangkan kreativitas keagamaan siswa kelas VII dan VIII.',
+    },
+    {
+      id: '10',
+      nama: 'Hadrah',
+      kategori: 'Keagamaan',
+      pembina: 'Warsito, S.Pd.I, Sulistiono, S.Pd.I',
+      jadwal: 'Senin',
+      lokasi: 'Mushola / Ruang Agama',
+      deskripsi:
+        'Kesenian musik rebana Islami untuk menumbuhkan kecintaan pada seni religi bagi siswa kelas VII dan VIII.',
+    },
+    {
+      id: '11',
+      nama: 'Paskibraka',
+      kategori: 'Kepemimpinan & Kedisiplinan',
+      pembina: 'Lathifah Nur’aini Sariwati, S.Pd, Jingga, S.Pd',
+      jadwal: 'Selasa dan Kamis',
+      lokasi: 'Lapangan Sekolah',
+      deskripsi:
+        'Pelatihan peraturan baris-berbaris (PBB) dan kedisiplinan kepemudaan untuk siswa kelas VII dan VIII.',
+    },
+    {
+      id: '12',
+      nama: 'Basket',
+      kategori: 'Olahraga',
+      pembina: 'Briliantikta Teha S., S.Pd, Mahendra, S.Pd.',
+      jadwal: 'Senin',
+      lokasi: 'Lapangan Basket',
+      deskripsi:
+        'Pelatihan teknik dasar dan strategi permainan bola basket untuk siswa kelas VII dan VIII.',
+    },
+    {
+      id: '13',
+      nama: 'Bola Volly',
+      kategori: 'Olahraga',
+      pembina: 'Fery Handika, S.Pd., Krisna Kurniawan',
+      jadwal: 'Senin dan Kamis',
+      lokasi: 'Lapangan Voli',
+      deskripsi:
+        'Pelatihan teknik bermain bola voli, kerja sama tim, dan fisik bagi siswa kelas VII dan VIII.',
+    },
+    {
+      id: '14',
+      nama: 'Futsal',
+      kategori: 'Olahraga',
+      pembina: 'Fajar Dwi Prasetya, S.Pd, Ghana Pramudya W., S.Pd.',
+      jadwal: 'Senin',
+      lokasi: 'Lapangan Futsal / Indoor',
+      deskripsi:
+        'Pengembangan teknik permainan dan strategi olahraga futsal bagi siswa kelas VII dan VIII.',
+    },
+    {
+      id: '15',
+      nama: 'Siklap',
+      kategori: 'Keahlian / Kreativitas',
+      pembina: 'Didik Nurwanto, S.Pd, Bagus Cristiyantono, S.Pd',
+      jadwal: 'Rabu',
+      lokasi: 'Ruang Keterampilan / Komputer',
+      deskripsi:
+        'Kegiatan ekstrakurikuler penunjang keterampilan khusus bagi siswa kelas VII dan VIII.',
+    },
+    {
+      id: '16',
+      nama: 'Seni Tari',
+      kategori: 'Seni & Budaya',
+      pembina: 'Endang K.,S.Pd.,M.M.Pd.',
+      jadwal: 'Senin',
+      lokasi: 'Ruang Seni / Aula',
+      deskripsi:
+        'Pelatihan gerak tari tradisional maupun kreasi baru untuk melestarikan seni budaya bagi siswa kelas VII dan VIII.',
+    },
+    {
+      id: '17',
+      nama: 'Desain Grafis',
+      kategori: 'Teknologi & Multimedia',
+      pembina: 'Hafid Miftahurrosyad, S.Kom',
+      jadwal: 'Senin',
+      lokasi: 'Laboratorium Komputer',
+      deskripsi:
+        'Pelatihan pembuatan karya visual digital, pengeditan gambar, dan media kreatif bagi siswa kelas VII dan VIII.',
+    }
+  ]
 
 const KATEGORI_EKSKUL = [
   'Semua',
+  'Akademik',
   'Kepemimpinan',
   'Olahraga',
   'Seni & Budaya',
-  'Sains & Teknologi',
+  'Teknologi & Multimedia',
+  'Keahlian / Kreativitas',
   'Bahasa & Literasi',
   'Keagamaan',
 ];
@@ -253,11 +286,10 @@ export default function EkstrakurikulerPage() {
                 <button
                   key={kat}
                   onClick={() => setSelectedKat(kat)}
-                  className={`px-4 py-2 rounded-xl text-xs font-bold transition ${
-                    selectedKat === kat
-                      ? 'bg-[#1E2B7A] text-[#FFE500] shadow-xs'
-                      : 'bg-slate-50 text-slate-600 hover:bg-slate-100 hover:text-[#1E2B7A]'
-                  }`}
+                  className={`px-4 py-2 rounded-xl text-xs font-bold transition ${selectedKat === kat
+                    ? 'bg-[#1E2B7A] text-[#FFE500] shadow-xs'
+                    : 'bg-slate-50 text-slate-600 hover:bg-slate-100 hover:text-[#1E2B7A]'
+                    }`}
                 >
                   {kat}
                 </button>
@@ -302,18 +334,6 @@ export default function EkstrakurikulerPage() {
                       <span><strong>Lokasi:</strong> {ekskul.lokasi}</span>
                     </div>
                   </div>
-                </div>
-
-                <div className="pt-5 mt-4 border-t border-slate-100 flex items-center justify-between text-xs">
-                  <span className="text-emerald-600 font-semibold flex items-center gap-1">
-                    <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" /> Pendaftaran Terbuka
-                  </span>
-                  <Link
-                    href="/kontak"
-                    className="font-bold text-[#1E2B7A] hover:text-[#0097DF] transition"
-                  >
-                    Tanya Ekskul →
-                  </Link>
                 </div>
               </div>
             ))}
