@@ -26,109 +26,6 @@ export interface PrestasiItem {
   peringkat: string;
 }
 
-const DAFTAR_PRESTASI_DEFAULT: PrestasiItem[] = [
-  {
-    id: '1',
-    judul: 'Olimpiade Sains Nasional (OSN) Bidang Matematika',
-    kategori: 'Akademik',
-    tingkat: 'Nasional',
-    tahun: '2026',
-    peraih: 'Rizky Pratama (Kelas 8B)',
-    penyelenggara: 'Balai Pengembangan Talenta Indonesia (BPTI) Kemendikbudristek',
-    peringkat: 'Medali Emas',
-  },
-  {
-    id: '2',
-    judul: 'Festival dan Lomba Seni Siswa Nasional (FLS2N) Tari Tradisional',
-    kategori: 'Non-Akademik',
-    tingkat: 'Provinsi',
-    tahun: '2026',
-    peraih: 'Tim Tari Spenza (5 Siswi)',
-    penyelenggara: 'Dinas Pendidikan Provinsi Jawa Timur',
-    peringkat: 'Juara 1',
-  },
-  {
-    id: '3',
-    judul: 'Olimpiade Olahraga Siswa Nasional (O2SN) Cabang Bulutangkis Tunggal Putra',
-    kategori: 'Non-Akademik',
-    tingkat: 'Kabupaten',
-    tahun: '2026',
-    peraih: 'Ahmad Daniel (Kelas 7D)',
-    penyelenggara: 'Dinas Pendidikan & Kebudayaan Kab. Ngawi',
-    peringkat: 'Juara 1',
-  },
-  {
-    id: '4',
-    judul: 'National Youth Robotic & STEM Competition',
-    kategori: 'Akademik',
-    tingkat: 'Nasional',
-    tahun: '2025',
-    peraih: 'Tim Robotik Spenza (Dimas & Aditya)',
-    penyelenggara: 'Institut Teknologi Sepuluh Nopember (ITS)',
-    peringkat: 'Juara 2',
-  },
-  {
-    id: '5',
-    judul: 'Lomba Cerdas Cermat Wawasan Kebangsaan & Pancasila',
-    kategori: 'Akademik',
-    tingkat: 'Kabupaten',
-    tahun: '2025',
-    peraih: 'Tim Cerdas Cermat SMPN 1 Ngawi',
-    penyelenggara: 'Bakesbangpol Kabupaten Ngawi',
-    peringkat: 'Juara 1',
-  },
-  {
-    id: '6',
-    judul: 'Kejuaraan Futsal Pelajar Piala Bupati Ngawi',
-    kategori: 'Non-Akademik',
-    tingkat: 'Kabupaten',
-    tahun: '2025',
-    peraih: 'Tim Futsal Utama SMPN 1 Ngawi',
-    penyelenggara: 'Disparpora Kabupaten Ngawi',
-    peringkat: 'Juara 1',
-  },
-  {
-    id: '7',
-    judul: 'Lomba Pidato Bahasa Inggris (English Speech Contest) SMP/MTs',
-    kategori: 'Akademik',
-    tingkat: 'Provinsi',
-    tahun: '2025',
-    peraih: 'Nabila Azzahra (Kelas 9A)',
-    penyelenggara: 'Universitas Negeri Surabaya (UNESA)',
-    peringkat: 'Juara 2',
-  },
-  {
-    id: '8',
-    judul: 'Musabaqah Tilawatil Qur’an (MTQ) Tingkat Remaja',
-    kategori: 'Non-Akademik',
-    tingkat: 'Kabupaten',
-    tahun: '2025',
-    peraih: 'Muhammad Zidan (Kelas 8C)',
-    penyelenggara: 'LPTQ & Kemenag Kabupaten Ngawi',
-    peringkat: 'Juara 1',
-  },
-  {
-    id: '9',
-    judul: 'Olimpiade Sains Terpadu IPA Tingkat Provinsi Jawa Timur',
-    kategori: 'Akademik',
-    tingkat: 'Provinsi',
-    tahun: '2024',
-    peraih: 'Siti Hanifah (Kelas 9B)',
-    penyelenggara: 'Fakultas MIPA Universitas Brawijaya',
-    peringkat: 'Medali Perak',
-  },
-  {
-    id: '10',
-    judul: 'Lomba Paduan Suara Pelajar SMP Hari Bela Negara',
-    kategori: 'Non-Akademik',
-    tingkat: 'Kabupaten',
-    tahun: '2024',
-    peraih: 'Spenza Choir (30 Siswa)',
-    penyelenggara: 'Kodim 0805 / Pemkab Ngawi',
-    peringkat: 'Juara 1',
-  },
-];
-
 /** Decode HTML entities dari WordPress */
 function decodeWpText(raw: unknown): string {
   if (raw === undefined || raw === null) return '';
@@ -161,7 +58,7 @@ interface WPPrestasiResponse {
 }
 
 export default function PrestasiPage() {
-  const [daftarPrestasi, setDaftarPrestasi] = useState<PrestasiItem[]>(DAFTAR_PRESTASI_DEFAULT);
+  const [daftarPrestasi, setDaftarPrestasi] = useState<PrestasiItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedKategori, setSelectedKategori] = useState<string>('Semua');
@@ -180,7 +77,7 @@ export default function PrestasiPage() {
         const res = await fetch(restEndpoint, { cache: 'no-store' });
         if (res.ok) {
           const posts = await res.json();
-          if (Array.isArray(posts) && posts.length > 0) {
+          if (Array.isArray(posts)) {
             interface WpRestPrestasi {
               id: number;
               title: { rendered: string };
@@ -236,7 +133,7 @@ export default function PrestasiPage() {
         `;
         const { data } = await fetchGraphQL<WPPrestasiResponse>(query, { revalidate: 0 });
         const nodes = data?.daftarPrestasi?.nodes;
-        if (nodes && nodes.length > 0) {
+        if (nodes) {
           const mapped: PrestasiItem[] = nodes.map((node, idx) => ({
             id: node.id || String(idx + 1),
             judul: decodeWpText(node.title),
@@ -252,7 +149,7 @@ export default function PrestasiPage() {
           return;
         }
       } catch {
-        // Tetap menggunakan DAFTAR_PRESTASI_DEFAULT jika belum ada di WP
+        // Abaikan jika GraphQL gagal
       }
 
       setIsLoading(false);
@@ -260,6 +157,12 @@ export default function PrestasiPage() {
 
     loadPrestasi();
   }, []);
+
+  // Hitung ringkasan dinamis dari data WordPress
+  const totalPrestasi = daftarPrestasi.length;
+  const countNasional = daftarPrestasi.filter((p) => p.tingkat.toLowerCase().includes('nasional')).length;
+  const countProvinsi = daftarPrestasi.filter((p) => p.tingkat.toLowerCase().includes('provinsi')).length;
+  const countKabupaten = daftarPrestasi.filter((p) => p.tingkat.toLowerCase().includes('kabupaten')).length;
 
   const filteredPrestasi = daftarPrestasi.filter((item) => {
     const matchesSearch =
@@ -307,22 +210,30 @@ export default function PrestasiPage() {
             dalam mengharumkan nama sekolah di kancah regional maupun nasional.
           </p>
 
-          {/* Stat Ringkasan Prestasi */}
+          {/* Stat Ringkasan Prestasi Dinamis */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 max-w-4xl mx-auto pt-8">
             <div className="p-4 rounded-2xl bg-white/10 border border-white/10 backdrop-blur-sm">
-              <span className="block text-2xl sm:text-3xl font-black text-[#FFE500]">100+</span>
-              <span className="text-xs text-slate-300">Total Juara & Medali</span>
+              <span className="block text-2xl sm:text-3xl font-black text-[#FFE500]">
+                {isLoading ? '...' : totalPrestasi}
+              </span>
+              <span className="text-xs text-slate-300">Total Juara Terdata</span>
             </div>
             <div className="p-4 rounded-2xl bg-white/10 border border-white/10 backdrop-blur-sm">
-              <span className="block text-2xl sm:text-3xl font-black text-white">25+</span>
+              <span className="block text-2xl sm:text-3xl font-black text-white">
+                {isLoading ? '...' : countNasional}
+              </span>
               <span className="text-xs text-slate-300">Tingkat Nasional</span>
             </div>
             <div className="p-4 rounded-2xl bg-white/10 border border-white/10 backdrop-blur-sm">
-              <span className="block text-2xl sm:text-3xl font-black text-[#0097DF]">40+</span>
+              <span className="block text-2xl sm:text-3xl font-black text-[#0097DF]">
+                {isLoading ? '...' : countProvinsi}
+              </span>
               <span className="text-xs text-slate-300">Tingkat Provinsi</span>
             </div>
             <div className="p-4 rounded-2xl bg-white/10 border border-white/10 backdrop-blur-sm">
-              <span className="block text-2xl sm:text-3xl font-black text-emerald-400">60+</span>
+              <span className="block text-2xl sm:text-3xl font-black text-emerald-400">
+                {isLoading ? '...' : countKabupaten}
+              </span>
               <span className="text-xs text-slate-300">Tingkat Kabupaten</span>
             </div>
           </div>
@@ -392,54 +303,90 @@ export default function PrestasiPage() {
             </div>
           </div>
 
-          {/* Grid Kartu Prestasi */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredPrestasi.map((item) => (
-              <div
-                key={item.id}
-                className="bg-white rounded-3xl border border-slate-200/80 shadow-sm hover:shadow-md hover:-translate-y-1 hover:border-[#0097DF]/40 transition-all duration-200 p-6 sm:p-7 flex flex-col justify-between group"
+          {/* Grid Kartu Prestasi / Loading / Empty State */}
+          {isLoading ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {[1, 2, 3, 4, 5, 6].map((i) => (
+                <div key={i} className="bg-white rounded-3xl border border-slate-200 p-6 animate-pulse space-y-4">
+                  <div className="flex justify-between items-center">
+                    <div className="h-6 w-24 bg-slate-200 rounded-full" />
+                    <div className="h-4 w-16 bg-slate-200 rounded-md" />
+                  </div>
+                  <div className="h-6 w-3/4 bg-slate-200 rounded-lg" />
+                  <div className="space-y-2 pt-2 border-t border-slate-100">
+                    <div className="h-4 w-1/2 bg-slate-200 rounded-md" />
+                    <div className="h-4 w-2/3 bg-slate-200 rounded-md" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : filteredPrestasi.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {filteredPrestasi.map((item) => (
+                <div
+                  key={item.id}
+                  className="bg-white rounded-3xl border border-slate-200/80 shadow-sm hover:shadow-md hover:-translate-y-1 hover:border-[#0097DF]/40 transition-all duration-200 p-6 sm:p-7 flex flex-col justify-between group"
+                >
+                  <div className="space-y-4">
+                    {/* Top Badges */}
+                    <div className="flex items-center justify-between">
+                      <span className="px-3 py-1 rounded-full text-[11px] font-bold bg-[#FFE500]/20 text-[#B45309] border border-[#FFE500]/50 flex items-center gap-1.5">
+                        <Medal className="w-3.5 h-3.5 text-[#D97706]" /> {item.peringkat}
+                      </span>
+                      <span className="text-xs font-bold text-slate-400 font-mono">
+                        Tahun {item.tahun}
+                      </span>
+                    </div>
+
+                    <h3 className="font-extrabold text-slate-900 text-lg group-hover:text-[#1E2B7A] transition leading-snug">
+                      {item.judul}
+                    </h3>
+
+                    <div className="space-y-2 pt-2 border-t border-slate-100 text-xs text-slate-600">
+                      <div>
+                        <span className="text-slate-400 block text-[11px]">Nama Peraih:</span>
+                        <strong className="text-slate-900 text-sm font-bold flex items-center gap-1.5 mt-0.5">
+                          <Users className="w-4 h-4 text-[#0097DF] shrink-0" /> {item.peraih}
+                        </strong>
+                      </div>
+                      <div className="pt-1">
+                        <span className="text-slate-400 block text-[11px]">Penyelenggara:</span>
+                        <p className="text-slate-700 font-medium leading-relaxed">{item.penyelenggara}</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Footer Tag */}
+                  <div className="pt-4 mt-4 border-t border-slate-100 flex items-center justify-between text-xs">
+                    <span className="px-2.5 py-0.5 rounded-md bg-blue-50 text-[#1E2B7A] font-bold">
+                      Tingkat {item.tingkat}
+                    </span>
+                    <span className="text-slate-400 font-medium">
+                      Bidang {item.kategori}
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="bg-white rounded-3xl p-12 text-center border border-slate-200 shadow-sm space-y-3">
+              <Trophy className="w-12 h-12 text-slate-300 mx-auto" />
+              <h3 className="font-bold text-slate-900 text-lg">Belum ada data prestasi ditemukan</h3>
+              <p className="text-sm text-slate-500 max-w-md mx-auto">
+                Silakan coba filter atau kata kunci pencarian yang berbeda, atau tambahkan data prestasi baru melalui WordPress.
+              </p>
+              <button
+                onClick={() => {
+                  setSearchQuery('');
+                  setSelectedKategori('Semua');
+                  setSelectedTingkat('Semua');
+                }}
+                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#1E2B7A] text-[#FFE500] text-xs font-bold mt-2"
               >
-                <div className="space-y-4">
-                  {/* Top Badges */}
-                  <div className="flex items-center justify-between">
-                    <span className="px-3 py-1 rounded-full text-[11px] font-bold bg-[#FFE500]/20 text-[#B45309] border border-[#FFE500]/50 flex items-center gap-1.5">
-                      <Medal className="w-3.5 h-3.5 text-[#D97706]" /> {item.peringkat}
-                    </span>
-                    <span className="text-xs font-bold text-slate-400 font-mono">
-                      Tahun {item.tahun}
-                    </span>
-                  </div>
-
-                  <h3 className="font-extrabold text-slate-900 text-lg group-hover:text-[#1E2B7A] transition leading-snug">
-                    {item.judul}
-                  </h3>
-
-                  <div className="space-y-2 pt-2 border-t border-slate-100 text-xs text-slate-600">
-                    <div>
-                      <span className="text-slate-400 block text-[11px]">Nama Peraih:</span>
-                      <strong className="text-slate-900 text-sm font-bold flex items-center gap-1.5 mt-0.5">
-                        <Users className="w-4 h-4 text-[#0097DF] shrink-0" /> {item.peraih}
-                      </strong>
-                    </div>
-                    <div className="pt-1">
-                      <span className="text-slate-400 block text-[11px]">Penyelenggara:</span>
-                      <p className="text-slate-700 font-medium leading-relaxed">{item.penyelenggara}</p>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Footer Tag */}
-                <div className="pt-4 mt-4 border-t border-slate-100 flex items-center justify-between text-xs">
-                  <span className="px-2.5 py-0.5 rounded-md bg-blue-50 text-[#1E2B7A] font-bold">
-                    Tingkat {item.tingkat}
-                  </span>
-                  <span className="text-slate-400 font-medium">
-                    Bidang {item.kategori}
-                  </span>
-                </div>
-              </div>
-            ))}
-          </div>
+                Reset Pencarian
+              </button>
+            </div>
+          )}
         </div>
       </section>
     </div>
