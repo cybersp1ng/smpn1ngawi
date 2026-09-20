@@ -59,57 +59,9 @@ const FALLBACK_PROFIL: ProfilSekolahData = {
     'Mewujudkan lingkungan sekolah yang aman, nyaman, ramah anak, dan berbudaya lingkungan hidup (Adiwiyata).',
     'Meningkatkan kompetensi pendidik dan tenaga kependidikan secara berkelanjutan serta adaptif terhadap kemajuan teknologi informasi.',
   ],
-  strukturOrganisasi: [
-    {
-      role: 'Kepala Sekolah',
-      name: 'Tarkum, S.Pd.',
-      nip: '',
-      category: 'Pimpinan Utama',
-    },
-    {
-      role: 'Komite Sekolah',
-      name: 'Ir. H. Bambang Wahyudi',
-      nip: '-',
-      category: 'Mitra & Pengawas',
-    },
-    {
-      role: 'Wakasek Bidang Kurikulum',
-      name: 'Sri Wahyuni, S.Pd., M.Si.',
-      nip: '19750314 199903 2 003',
-      category: 'Manajemen',
-    },
-    {
-      role: 'Wakasek Bidang Kesiswaan',
-      name: 'Ahmad Fauzan, S.Pd.',
-      nip: '19790822 200501 1 008',
-      category: 'Manajemen',
-    },
-    {
-      role: 'Wakasek Sarana & Prasarana',
-      name: 'Budi Santoso, M.Pd.',
-      nip: '19721105 199802 1 004',
-      category: 'Manajemen',
-    },
-    {
-      role: 'Wakasek Bidang Humas',
-      name: 'Endang Rahayu, S.Pd.',
-      nip: '19810419 200801 2 015',
-      category: 'Manajemen',
-    },
-    {
-      role: 'Kepala Tata Usaha (TU)',
-      name: 'Dra. Siti Masitoh',
-      nip: '19700918 199503 2 001',
-      category: 'Administrasi',
-    },
-    {
-      role: 'Koordinator Bimbingan Konseling (BK)',
-      name: 'Rina Kusuma, S.Psi., M.Pd.',
-      nip: '19840210 200902 2 006',
-      category: 'Layanan Siswa',
-    },
-  ],
+  strukturOrganisasi: [],
 };
+
 
 interface WPProfilResponse {
   pageBy?: {

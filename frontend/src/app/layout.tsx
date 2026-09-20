@@ -24,6 +24,10 @@ export const metadata: Metadata = {
     'Pendidikan Ngawi',
     'Sekolah Unggulan Ngawi',
   ],
+  icons: {
+    icon: '/favicon.ico',
+    shortcut: '/favicon.ico',
+  },
   authors: [{ name: 'SMP Negeri 1 Ngawi' }],
   creator: 'SMP Negeri 1 Ngawi',
   openGraph: {
