@@ -57,6 +57,18 @@ interface WPGuruResponse {
   };
 }
 
+/** Decode common HTML entities yang dikirim WordPress (misal &amp; → &, &#038; → &) */
+function decodeWpText(raw: string): string {
+  return raw
+    .replace(/&#(\d+);/g, (_, dec: string) => String.fromCharCode(Number(dec)))
+    .replace(/&amp;/g, '&')
+    .replace(/&quot;/g, '"')
+    .replace(/&#039;/g, "'")
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .trim();
+}
+
 export default function GuruPage() {
   const [daftarGuru, setDaftarGuru] = useState<GuruItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -96,11 +108,11 @@ export default function GuruPage() {
         if (nodes && nodes.length > 0) {
           const mapped: GuruItem[] = nodes.map((node, idx) => ({
             id: node.id || String(idx + 1),
-            nama: node.title,
+            nama: decodeWpText(node.title),
             nip: node.dataGuru?.nip || '-',
-            jabatan: node.dataGuru?.jabatan || 'Tenaga Pendidik',
-            mataPelajaran: node.dataGuru?.mataPelajaran || '-',
-            kategori: node.dataGuru?.kategori || 'Matematika & IPA',
+            jabatan: decodeWpText(node.dataGuru?.jabatan || 'Tenaga Pendidik'),
+            mataPelajaran: decodeWpText(node.dataGuru?.mataPelajaran || '-'),
+            kategori: decodeWpText(node.dataGuru?.kategori || ''),
             email: node.dataGuru?.email || '',
             fotoUrl: node.featuredImage?.node?.sourceUrl,
           }));
@@ -149,22 +161,16 @@ export default function GuruPage() {
           }
 
           const mappedFromRest: GuruItem[] = posts.map((p: WpRestGuru) => {
-            const rawTitle = p.title?.rendered || 'Pendidik';
-            // Decode HTML entities jika ada (misal &#038;)
-            const cleanTitle = rawTitle
-              .replace(/&#(\d+);/g, (_, dec) => String.fromCharCode(dec))
-              .replace(/&amp;/g, '&');
-
             const fotoUrl =
               p._embedded?.['wp:featuredmedia']?.[0]?.source_url || undefined;
 
             return {
               id: String(p.id),
-              nama: cleanTitle,
+              nama: decodeWpText(p.title?.rendered || 'Pendidik'),
               nip: p.acf?.nip || '-',
-              jabatan: p.acf?.jabatan || 'Tenaga Pendidik',
-              mataPelajaran: p.acf?.mata_pelajaran || 'Mata Pelajaran',
-              kategori: p.acf?.kategori || 'Matematika & IPA',
+              jabatan: decodeWpText(p.acf?.jabatan || 'Tenaga Pendidik'),
+              mataPelajaran: decodeWpText(p.acf?.mata_pelajaran || '-'),
+              kategori: decodeWpText(p.acf?.kategori || ''),
               email: p.acf?.email || '',
               fotoUrl,
             };
