@@ -12,7 +12,7 @@ const plusJakartaSans = Plus_Jakarta_Sans({
 
 export const metadata: Metadata = {
   title: {
-    default: 'SMP Negeri 1 Ngawi | Berkarakter, Unggul, dan Berprestasi',
+    default: 'SMP Negeri 1 Ngawi | Juara dan Berbudaya',
     template: '%s | SMP Negeri 1 Ngawi',
   },
   description:
@@ -31,7 +31,7 @@ export const metadata: Metadata = {
   authors: [{ name: 'SMP Negeri 1 Ngawi' }],
   creator: 'SMP Negeri 1 Ngawi',
   openGraph: {
-    title: 'SMP Negeri 1 Ngawi | Berkarakter, Unggul, dan Berprestasi',
+    title: 'SMP Negeri 1 Ngawi | Juara dan Berbudaya',
     description:
       'Website resmi SMP Negeri 1 Ngawi. Menyajikan informasi profil, akademik, berita, agenda, dan prestasi siswa.',
     url: 'https://smpn1ngawi.sch.id',

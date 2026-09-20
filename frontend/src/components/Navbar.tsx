@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
+import { Dancing_Script } from 'next/font/google';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
@@ -9,6 +10,11 @@ import {
   ChevronDown,
 } from 'lucide-react';
 import SchoolLogo from '@/components/SchoolLogo';
+
+const dancingScript = Dancing_Script({
+  subsets: ['latin'],
+  display: 'swap',
+});
 
 interface NavItem {
   label: string;
@@ -101,11 +107,10 @@ export default function Navbar() {
     <header className="sticky top-0 z-50 w-full transition-all duration-300">
       {/* Main Navbar */}
       <nav
-        className={`w-full transition-all duration-300 ${
-          scrolled
-            ? 'bg-white/95 backdrop-blur-md shadow-md border-b border-slate-200/80 py-3'
-            : 'bg-white shadow-sm py-4'
-        }`}
+        className={`w-full transition-all duration-300 ${scrolled
+          ? 'bg-white/95 backdrop-blur-md shadow-md border-b border-slate-200/80 py-3'
+          : 'bg-white shadow-sm py-4'
+          }`}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between items-center">
           {/* Logo & Identitas Sekolah */}
@@ -115,9 +120,11 @@ export default function Navbar() {
               <span className="block font-extrabold text-slate-900 text-lg tracking-tight leading-tight group-hover:text-[#1E2B7A] transition">
                 SMP NEGERI 1 NGAWI
               </span>
-              <span className="block text-xs font-semibold text-[#0097DF]">
-                Berkarakter, Unggul & Berprestasi
+
+              <span className={`block text-sm text-[#1E2B7A] ${dancingScript.className}`}>
+                Juara dan Berbudaya
               </span>
+
             </div>
           </Link>
 
@@ -138,17 +145,15 @@ export default function Navbar() {
                     <button
                       type="button"
                       onClick={() => handleToggleClick(item.label)}
-                      className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-sm font-semibold transition cursor-pointer ${
-                        isActive
-                          ? 'text-[#1E2B7A] bg-blue-50/80 shadow-xs'
-                          : 'text-slate-700 hover:text-[#0097DF] hover:bg-slate-50'
-                      }`}
+                      className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-sm font-semibold transition cursor-pointer ${isActive
+                        ? 'text-[#1E2B7A] bg-blue-50/80 shadow-xs'
+                        : 'text-slate-700 hover:text-[#0097DF] hover:bg-slate-50'
+                        }`}
                     >
                       {item.label}
                       <ChevronDown
-                        className={`w-4 h-4 transition-transform duration-200 ${
-                          activeDropdown === item.label ? 'rotate-180 text-[#0097DF]' : 'text-slate-400'
-                        }`}
+                        className={`w-4 h-4 transition-transform duration-200 ${activeDropdown === item.label ? 'rotate-180 text-[#0097DF]' : 'text-slate-400'
+                          }`}
                       />
                     </button>
 
@@ -188,29 +193,15 @@ export default function Navbar() {
                 <Link
                   key={item.label}
                   href={item.href}
-                  className={`px-3.5 py-2 rounded-xl text-sm font-semibold transition ${
-                    isActive
-                      ? 'text-[#1E2B7A] bg-blue-50/80 shadow-xs'
-                      : 'text-slate-700 hover:text-[#0097DF] hover:bg-slate-50'
-                  }`}
+                  className={`px-3.5 py-2 rounded-xl text-sm font-semibold transition ${isActive
+                    ? 'text-[#1E2B7A] bg-blue-50/80 shadow-xs'
+                    : 'text-slate-700 hover:text-[#0097DF] hover:bg-slate-50'
+                    }`}
                 >
                   {item.label}
                 </Link>
               );
             })}
-          </div>
-
-          {/* Call To Action Button */}
-          <div className="hidden lg:flex items-center gap-3">
-            <Link
-              href="/kontak"
-              className="inline-flex items-center justify-center px-5 py-2.5 text-sm font-bold rounded-xl text-white bg-[#1E2B7A] hover:bg-[#151E54] border border-[#FFE500]/40 shadow-sm hover:shadow-md transition-all group"
-            >
-              <span className="flex items-center gap-1.5">
-                Hubungi Kami
-                <span className="w-1.5 h-1.5 rounded-full bg-[#FFE500] group-hover:scale-125 transition" />
-              </span>
-            </Link>
           </div>
 
           {/* Mobile Menu Button */}
@@ -240,9 +231,8 @@ export default function Navbar() {
                     >
                       {item.label}
                       <ChevronDown
-                        className={`w-4 h-4 transition-transform ${
-                          activeDropdown === item.label ? 'rotate-180 text-blue-600' : ''
-                        }`}
+                        className={`w-4 h-4 transition-transform ${activeDropdown === item.label ? 'rotate-180 text-blue-600' : ''
+                          }`}
                       />
                     </button>
                     {activeDropdown === item.label && (
