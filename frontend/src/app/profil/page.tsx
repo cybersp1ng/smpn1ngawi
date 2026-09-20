@@ -1,5 +1,6 @@
 import React from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import {
   History,
   Target,
@@ -8,6 +9,7 @@ import {
   ChevronRight,
   CheckCircle2,
   ArrowRight,
+  User,
 } from 'lucide-react';
 import SchoolLogo from '@/components/SchoolLogo';
 import { fetchGraphQL } from '@/lib/graphql';
@@ -23,6 +25,7 @@ interface StrukturOrganisasiItem {
   name: string;
   nip: string;
   category: string;
+  fotoUrl?: string;
 }
 
 interface ProfilSekolahData {
@@ -79,6 +82,11 @@ interface WPProfilResponse {
   daftarStrukturOrganisasi?: {
     nodes: Array<{
       title: string;
+      featuredImage?: {
+        node?: {
+          sourceUrl?: string;
+        };
+      };
       dataStruktur?: {
         role?: string;
         nip?: string;
@@ -109,6 +117,10 @@ async function fetchStrukturFromRest(): Promise<StrukturOrganisasiItem[]> {
           nip?: string;
           category?: string;
           urutan?: number;
+          foto?: string | { url?: string };
+        };
+        _embedded?: {
+          'wp:featuredmedia'?: Array<{ source_url?: string }>;
         };
       }
 
@@ -119,11 +131,18 @@ async function fetchStrukturFromRest(): Promise<StrukturOrganisasiItem[]> {
             .replace(/&#(\d+);/g, (_, dec) => String.fromCharCode(dec))
             .replace(/&amp;/g, '&');
 
+          // Cek foto dari Featured Image WordPress atau field ACF
+          let fotoUrl = p._embedded?.['wp:featuredmedia']?.[0]?.source_url;
+          if (!fotoUrl && p.acf?.foto) {
+            fotoUrl = typeof p.acf.foto === 'string' ? p.acf.foto : p.acf.foto.url;
+          }
+
           return {
             role: p.acf?.role || cleanName,
             name: cleanName,
             nip: p.acf?.nip || '-',
             category: p.acf?.category || 'Manajemen',
+            fotoUrl,
             order: Number(p.acf?.urutan || 99),
           };
         }
@@ -131,7 +150,7 @@ async function fetchStrukturFromRest(): Promise<StrukturOrganisasiItem[]> {
 
       // Urutkan berdasarkan kolom urutan
       items.sort((a, b) => a.order - b.order);
-      return items.map(({ role, name, nip, category }) => ({ role, name, nip, category }));
+      return items.map(({ role, name, nip, category, fotoUrl }) => ({ role, name, nip, category, fotoUrl }));
     }
   } catch {
     // Abaikan jika REST API tidak tersedia
@@ -160,6 +179,11 @@ async function getProfilSekolah(): Promise<ProfilSekolahData> {
       daftarStrukturOrganisasi(first: 100) {
         nodes {
           title
+          featuredImage {
+            node {
+              sourceUrl
+            }
+          }
           dataStruktur {
             role
             nip
@@ -188,6 +212,7 @@ async function getProfilSekolah(): Promise<ProfilSekolahData> {
         name: node.title,
         nip: node.dataStruktur?.nip || '-',
         category: node.dataStruktur?.category || 'Manajemen',
+        fotoUrl: node.featuredImage?.node?.sourceUrl,
       }));
     }
     // 2. Atau jika diisi via teks textarea di Halaman Page "Profil"
@@ -206,6 +231,7 @@ async function getProfilSekolah(): Promise<ProfilSekolahData> {
             name: parts[1] || '',
             nip: parts[2] || '-',
             category: parts[3] || 'Manajemen',
+            fotoUrl: parts[4] || undefined,
           });
         }
       }
@@ -439,21 +465,45 @@ export default async function ProfilPage() {
             {profil.strukturOrganisasi.map((item, idx) => (
               <div
                 key={`${item.role}-${idx}`}
-                className="bg-white rounded-2xl p-6 border border-slate-200/80 shadow-sm hover:shadow-md hover:-translate-y-1 hover:border-[#0097DF]/40 transition flex flex-col justify-between"
+                className="bg-white rounded-2xl border border-slate-200/80 shadow-sm hover:shadow-md hover:-translate-y-1 hover:border-[#0097DF]/40 transition flex flex-col justify-between overflow-hidden group"
               >
-                <div className="space-y-3">
-                  <span className="inline-block px-2.5 py-1 rounded-md text-[11px] font-bold text-[#1E2B7A] bg-blue-50">
-                    {item.category}
-                  </span>
-                  <div>
-                    <h4 className="font-extrabold text-slate-900 text-base">{item.role}</h4>
-                    <p className="text-xs text-[#0097DF] font-bold mt-1">{item.name}</p>
+                <div>
+                  {/* Foto Anggota Struktur */}
+                  <div className="h-48 bg-gradient-to-tr from-[#111A4D] to-[#1E2B7A] flex items-center justify-center relative overflow-hidden">
+                    {item.fotoUrl ? (
+                      <Image
+                        src={item.fotoUrl}
+                        alt={item.name}
+                        fill
+                        className="object-cover object-top group-hover:scale-105 transition duration-300"
+                      />
+                    ) : (
+                      <div className="w-20 h-20 rounded-full bg-white/10 border-2 border-[#FFE500]/50 flex items-center justify-center text-[#FFE500] shadow-inner group-hover:scale-105 transition">
+                        <User className="w-10 h-10" />
+                      </div>
+                    )}
+                    <span className="absolute top-3 right-3 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-[#111A4D]/85 backdrop-blur-xs text-[#FFE500] border border-[#FFE500]/40">
+                      {item.category}
+                    </span>
                   </div>
-                  {item.nip && item.nip !== '-' && (
-                    <p className="text-[11px] text-slate-500 font-medium">NIP: {item.nip}</p>
-                  )}
+
+                  {/* Informasi Anggota */}
+                  <div className="p-5 space-y-2">
+                    <div>
+                      <h4 className="font-extrabold text-slate-900 text-base leading-snug group-hover:text-[#1E2B7A] transition">
+                        {item.role}
+                      </h4>
+                      <p className="text-xs text-[#0097DF] font-bold mt-1">{item.name}</p>
+                    </div>
+                    {item.nip && item.nip !== '-' && (
+                      <p className="text-[11px] text-slate-400 font-mono pt-1 border-t border-slate-100">
+                        NIP: {item.nip}
+                      </p>
+                    )}
+                  </div>
                 </div>
-                <div className="pt-4 border-t border-slate-100 flex items-center justify-between text-xs text-slate-400">
+
+                <div className="px-5 py-3.5 bg-slate-50 border-t border-slate-100 flex items-center justify-between text-xs text-slate-400">
                   <span>SMPN 1 Ngawi</span>
                   <Award className="w-4 h-4 text-[#FFE500]" />
                 </div>
