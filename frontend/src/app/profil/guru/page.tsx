@@ -10,6 +10,7 @@ import {
   Mail,
   ChevronRight,
   BookOpen,
+  Layers,
 } from 'lucide-react';
 import { fetchGraphQL } from '@/lib/graphql';
 
@@ -335,13 +336,30 @@ export default function GuruPage() {
                         <p className="text-xs font-bold text-[#0097DF] mt-1">{guru.jabatan}</p>
                       </div>
 
-                      <div className="space-y-1.5 text-xs text-slate-600 pt-2 border-t border-slate-100">
-                        <div className="flex items-center gap-1.5">
-                          <BookOpen className="w-3.5 h-3.5 text-[#1E2B7A] shrink-0" />
-                          <span className="font-semibold">{guru.mataPelajaran}</span>
+                      <div className="space-y-2 text-xs text-slate-600 pt-2 border-t border-slate-100">
+                        {/* Mata Pelajaran */}
+                        <div className="flex items-start gap-1.5">
+                          <BookOpen className="w-3.5 h-3.5 text-[#1E2B7A] shrink-0 mt-0.5" />
+                          <div>
+                            <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wide block">Mata Pelajaran</span>
+                            <span className="font-semibold text-slate-700">
+                              {guru.mataPelajaran && guru.mataPelajaran !== '-' ? guru.mataPelajaran : <span className="text-slate-400 italic">—</span>}
+                            </span>
+                          </div>
                         </div>
+                        {/* Rumpun / Kategori */}
+                        <div className="flex items-start gap-1.5">
+                          <Layers className="w-3.5 h-3.5 text-[#0097DF] shrink-0 mt-0.5" />
+                          <div>
+                            <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wide block">Rumpun</span>
+                            <span className="font-semibold text-slate-700">
+                              {guru.kategori ? guru.kategori : <span className="text-slate-400 italic">—</span>}
+                            </span>
+                          </div>
+                        </div>
+                        {/* NIP */}
                         {guru.nip && guru.nip !== '-' && (
-                          <div className="text-[11px] text-slate-400 font-mono">
+                          <div className="text-[11px] text-slate-400 font-mono pt-0.5">
                             NIP: {guru.nip}
                           </div>
                         )}
