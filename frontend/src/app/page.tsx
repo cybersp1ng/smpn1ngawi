@@ -1,4 +1,6 @@
-import React from "react";
+"use client";
+
+import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import {
@@ -40,6 +42,13 @@ interface HomepageWelcomeData {
   name: string;
   role: string;
   fotoUrl?: string;
+}
+
+interface HomeAnnouncementItem {
+  id: string;
+  title: string;
+  date: string;
+  badge: string;
 }
 
 interface WPHomepageWelcomeResponse {
@@ -84,6 +93,152 @@ async function getHomepageContent() {
 
   const { data } = await fetchGraphQL<HomepageData>(query);
   return data?.posts?.nodes || [];
+}
+
+function decodeWpText(raw?: string): string {
+  if (!raw) return "";
+
+  return raw
+    .replace(/&#(\d+);/g, (_, dec: string) => String.fromCharCode(Number(dec)))
+    .replace(/&amp;/g, "&")
+    .replace(/&quot;/g, '"')
+    .replace(/&#039;/g, "'")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/<[^>]*>/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function formatTanggal(raw?: string): string {
+  if (!raw) return "Tanggal belum diatur";
+
+  const dateString = raw.includes("T") ? raw.split("T")[0] : raw;
+  const date = new Date(`${dateString}T00:00:00`);
+
+  if (Number.isNaN(date.getTime())) {
+    return raw;
+  }
+
+  return date.toLocaleDateString("id-ID", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  });
+}
+
+async function getHomepageAnnouncements(): Promise<HomeAnnouncementItem[]> {
+  const query = `
+    query GetHomepageAnnouncements {
+      daftarPengumuman(first: 3) {
+        nodes {
+          id
+          title
+          date
+          dataPengumuman {
+            urgensi
+            tanggalPengumuman
+          }
+        }
+      }
+    }
+  `;
+
+  const normalizeUrgensi = (raw?: string): string => {
+    const value = (raw || "").trim();
+    if (!value) return "Umum";
+    const upper = value.toUpperCase();
+
+    if (upper.includes("PPDB")) return "PPDB";
+    if (upper.includes("PENTING")) return "Penting";
+    if (upper.includes("MENDESAK")) return "Mendesak";
+
+    return "Umum";
+  };
+
+  const wpBaseUrl =
+    process.env.NEXT_PUBLIC_WORDPRESS_API_URL?.replace(/\/graphql\/?$/, "") ||
+    "https://sp1ng.smpn1ngawi.sch.id";
+
+  try {
+    const { data, error } = await fetchGraphQL<{
+      daftarPengumuman?: {
+        nodes: Array<{
+          id: string;
+          title: string;
+          date?: string;
+          dataPengumuman?: {
+            urgensi?: string;
+            tanggalPengumuman?: string;
+          };
+        }>;
+      };
+    }>(query, { revalidate: 60 });
+
+    const nodes = data?.daftarPengumuman?.nodes ?? [];
+
+    if (nodes.length > 0) {
+      return nodes.map((node) => {
+        const rawDate =
+          node.dataPengumuman?.tanggalPengumuman || node.date || "";
+        const badge = normalizeUrgensi(node.dataPengumuman?.urgensi);
+
+        return {
+          id: node.id,
+          title: decodeWpText(node.title) || "Judul pengumuman belum diatur",
+          date: formatTanggal(rawDate),
+          badge: badge || "Umum",
+        };
+      });
+    }
+
+    if (error) {
+      const restRes = await fetch(
+        `${wpBaseUrl}/wp-json/wp/v2/pengumuman?per_page=3`,
+      );
+      if (!restRes.ok) return [];
+
+      const posts = await restRes.json();
+      if (!Array.isArray(posts)) return [];
+
+      return posts.map((post: any) => {
+        const rawDate = post.acf?.tanggal_pengumuman || post.date || "";
+        return {
+          id: String(post.id),
+          title:
+            decodeWpText(post.title?.rendered) ||
+            "Judul pengumuman belum diatur",
+          date: formatTanggal(rawDate),
+          badge: normalizeUrgensi(post.acf?.urgensi),
+        };
+      });
+    }
+  } catch {
+    // fallback di bawah
+  }
+
+  try {
+    const restRes = await fetch(
+      `${wpBaseUrl}/wp-json/wp/v2/pengumuman?per_page=3`,
+    );
+    if (!restRes.ok) return [];
+
+    const posts = await restRes.json();
+    if (!Array.isArray(posts)) return [];
+
+    return posts.map((post: any) => {
+      const rawDate = post.acf?.tanggal_pengumuman || post.date || "";
+      return {
+        id: String(post.id),
+        title:
+          decodeWpText(post.title?.rendered) || "Judul pengumuman belum diatur",
+        date: formatTanggal(rawDate),
+        badge: normalizeUrgensi(post.acf?.urgensi),
+      };
+    });
+  } catch {
+    return [];
+  }
 }
 
 async function getHomepageWelcome(): Promise<HomepageWelcomeData> {
@@ -150,6 +305,69 @@ async function getHomepageWelcome(): Promise<HomepageWelcomeData> {
   }
 }
 
+function HomepageAnnouncementsPanel() {
+  const [announcements, setAnnouncements] = useState<HomeAnnouncementItem[]>(
+    [],
+  );
+
+  useEffect(() => {
+    let mounted = true;
+
+    async function load() {
+      const data = await getHomepageAnnouncements();
+      if (mounted) {
+        setAnnouncements(data);
+      }
+    }
+
+    load();
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  if (announcements.length === 0) return null;
+
+  return (
+    <div className="bg-white rounded-2xl border border-slate-200/80 p-6 shadow-sm space-y-5">
+      <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+        <h3 className="font-bold text-slate-900 text-base flex items-center gap-2">
+          <Bell className="w-5 h-5 text-amber-500" /> Pengumuman Resmi
+        </h3>
+        <Link
+          href="/informasi/pengumuman"
+          className="text-xs font-semibold text-blue-600 hover:underline"
+        >
+          Lihat Semua
+        </Link>
+      </div>
+
+      <div className="space-y-3.5">
+        {announcements.map((item) => (
+          <div
+            key={item.id}
+            className="p-3 rounded-xl bg-slate-50 hover:bg-blue-50/60 border border-slate-100 transition space-y-1.5"
+          >
+            <div className="flex items-center justify-between text-xs">
+              <span className="font-semibold text-amber-600 bg-amber-50 px-2 py-0.5 rounded">
+                {item.badge}
+              </span>
+              <span className="text-slate-400">{item.date}</span>
+            </div>
+            <Link
+              href="/informasi/pengumuman"
+              className="block text-xs sm:text-sm font-semibold text-slate-800 hover:text-blue-700 line-clamp-2 leading-snug"
+            >
+              {item.title}
+            </Link>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 export default async function HomePage() {
   const latestPosts = await getHomepageContent();
   const welcome = await getHomepageWelcome();
@@ -197,29 +415,6 @@ export default async function HomePage() {
           category: "Warta Sekolah",
         }))
       : fallbackNews;
-
-  const announcements = [
-    {
-      id: "1",
-      title: "Jadwal Asesmen Sumatif Akhir Semester Genap TP 2025/2026",
-      date: "20 Maret 2026",
-      badge: "Penting",
-    },
-    {
-      id: "2",
-      title:
-        "Sosialisasi Persiapan Penerimaan Peserta Didik Baru (PPDB) 2026/2027",
-      date: "18 Maret 2026",
-      badge: "Info PPDB",
-    },
-    {
-      id: "3",
-      title:
-        "Edaran Kegiatan Pondok Ramadhan dan Jam Belajar Selama Bulan Puasa",
-      date: "12 Maret 2026",
-      badge: "Umum",
-    },
-  ];
 
   const upcomingAgendas = [
     {
@@ -597,41 +792,7 @@ export default async function HomePage() {
           {/* Kolom Pengumuman & Agenda (4 Kolom) */}
           <div className="lg:col-span-4 space-y-8">
             {/* Pengumuman */}
-            <div className="bg-white rounded-2xl border border-slate-200/80 p-6 shadow-sm space-y-5">
-              <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-                <h3 className="font-bold text-slate-900 text-base flex items-center gap-2">
-                  <Bell className="w-5 h-5 text-amber-500" /> Pengumuman Resmi
-                </h3>
-                <Link
-                  href="/informasi/pengumuman"
-                  className="text-xs font-semibold text-blue-600 hover:underline"
-                >
-                  Lihat Semua
-                </Link>
-              </div>
-
-              <div className="space-y-3.5">
-                {announcements.map((item) => (
-                  <div
-                    key={item.id}
-                    className="p-3 rounded-xl bg-slate-50 hover:bg-blue-50/60 border border-slate-100 transition space-y-1.5"
-                  >
-                    <div className="flex items-center justify-between text-xs">
-                      <span className="font-semibold text-amber-600 bg-amber-50 px-2 py-0.5 rounded">
-                        {item.badge}
-                      </span>
-                      <span className="text-slate-400">{item.date}</span>
-                    </div>
-                    <Link
-                      href="/informasi/pengumuman"
-                      className="block text-xs sm:text-sm font-semibold text-slate-800 hover:text-blue-700 line-clamp-2 leading-snug"
-                    >
-                      {item.title}
-                    </Link>
-                  </div>
-                ))}
-              </div>
-            </div>
+            <HomepageAnnouncementsPanel />
 
             {/* Agenda Mendatang */}
             <div className="bg-white rounded-2xl border border-slate-200/80 p-6 shadow-sm space-y-5">
