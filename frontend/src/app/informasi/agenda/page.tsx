@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import {
   Calendar as CalendarIcon,
@@ -13,128 +13,253 @@ import {
   ArrowRight,
   Sparkles,
 } from "lucide-react";
+import { fetchGraphQL } from "@/lib/graphql";
 
 interface AgendaItem {
   id: string;
   title: string;
-  category: "Akademik" | "Kesiswaan" | "Ujian" | "Keagamaan" | "Upacara";
+  category: string;
   date: string;
-  endDate?: string;
   time: string;
   location: string;
   organizer: string;
   description: string;
-  status: "upcoming" | "ongoing" | "past";
+  status: "upcoming" | "past";
+  sortDate: string;
 }
 
-const mockAgenda: AgendaItem[] = [
-  {
-    id: "1",
-    title: "Penilaian Tengah Semester (PTS) Genap TA 2025/2026",
-    category: "Ujian",
-    date: "23 Maret 2026",
-    endDate: "28 Maret 2026",
-    time: "07.00 - 12.30 WIB",
-    location: "Ruang Kelas Masing-masing",
-    organizer: "Kurikulum & Tim Evaluasi",
-    description:
-      "Pelaksanaan evaluasi pembelajaran tengah semester genap untuk seluruh peserta didik kelas VII, VIII, dan IX secara luring berbasis CBT.",
-    status: "upcoming",
-  },
-  {
-    id: "2",
-    title: "Peringatan Hari Pendidikan Nasional & Upacara Bendera",
-    category: "Upacara",
-    date: "02 Mei 2026",
-    time: "06.45 - 08.30 WIB",
-    location: "Lapangan Utama SMPN 1 Ngawi",
-    organizer: "Kesiswaan & OSIS",
-    description:
-      "Upacara peringatan Hardiknas mengenakan pakaian adat Nusantara, dilanjutkan persembahan seni karawitan dan paduan suara Spensa.",
-    status: "upcoming",
-  },
-  {
-    id: "3",
-    title: "Pesantren Kilat & Bakti Sosial Ramadhan 1447 H",
-    category: "Keagamaan",
-    date: "14 April 2026",
-    endDate: "16 April 2026",
-    time: "07.30 - 15.00 WIB",
-    location: "Masjid Al-Ikhlas SMPN 1 Ngawi & Aula",
-    organizer: "Rohis & Kesiswaan",
-    description:
-      "Penguatan nilai-nilai religius, tadarus Al-Qur'an bersama, kajian fiqih remaja, dan pembagian paket sembako kepada dhuafa di lingkungan sekitar sekolah.",
-    status: "upcoming",
-  },
-  {
-    id: "4",
-    title: "Gelar Karya Proyek Penguatan Profil Pelajar Pancasila (P5)",
-    category: "Kesiswaan",
-    date: "18 Mei 2026",
-    endDate: "19 Mei 2026",
-    time: "08.00 - 14.00 WIB",
-    location: "Gedung Serbaguna & Halaman Kampus",
-    organizer: "Koordinator P5 & OSIS",
-    description:
-      "Pameran hasil karya inovasi daur ulang limbah, kewirausahaan kuliner tradisional Ngawi, serta pentas tari kolosal tema kearifan lokal.",
-    status: "upcoming",
-  },
-  {
-    id: "5",
-    title: "Try Out Asesmen Standarisasi Pendidikan Daerah (ASPD)",
-    category: "Ujian",
-    date: "08 Maret 2026",
-    endDate: "10 Maret 2026",
-    time: "07.30 - 11.30 WIB",
-    location: "Lab Komputer 1, 2, dan 3",
-    organizer: "Tim Sukses ASPD",
-    description:
-      "Simulasi pemantapan materi literasi, numerasi, dan sains bagi siswa kelas IX dalam persiapan menghadapi seleksi masuk SMA/SMK unggulan.",
-    status: "past",
-  },
-  {
-    id: "6",
-    title: "Rapat Pleno Komite & Parenting Kelas VII",
-    category: "Akademik",
-    date: "25 Februari 2026",
-    time: "08.30 - 11.30 WIB",
-    location: "Aula Pertemuan SMPN 1 Ngawi",
-    organizer: "Komite Sekolah & Manajemen",
-    description:
-      "Koordinasi program kemajuan sekolah, laporan capaian semester ganjil, dan seminar parenting pendampingan psikologis remaja di era digital.",
-    status: "past",
-  },
+interface WPAgendaResponse {
+  daftarAgenda?: {
+    nodes: Array<{
+      id: string;
+      title: string;
+      content?: string;
+      date?: string;
+      dataAgenda?: {
+        tanggalKegiatan?: string;
+        waktu?: string;
+        lokasi?: string;
+      };
+    }>;
+  };
+}
+
+const categories = [
+  "Semua",
+  "Ujian",
+  "Upacara",
+  "Kesiswaan",
+  "Keagamaan",
+  "Akademik",
+  "Umum",
 ];
 
-const categories = ["Semua", "Ujian", "Upacara", "Kesiswaan", "Keagamaan", "Akademik"];
+function decodeWpText(raw?: string): string {
+  if (!raw) return "";
+
+  return raw
+    .replace(/&#(\d+);/g, (_, dec: string) => String.fromCharCode(Number(dec)))
+    .replace(/&amp;/g, "&")
+    .replace(/&quot;/g, '"')
+    .replace(/&#039;/g, "'")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/<[^>]*>/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function formatTanggal(raw?: string): string {
+  if (!raw) return "Tanggal belum diatur";
+
+  const cleaned = raw.includes("T") ? raw.split("T")[0] : raw;
+  const date = new Date(`${cleaned}T00:00:00`);
+
+  if (Number.isNaN(date.getTime())) {
+    return raw;
+  }
+
+  return date.toLocaleDateString("id-ID", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  });
+}
+
+function getSortDateValue(raw?: string): string {
+  if (!raw) return "0000-00-00";
+
+  const cleaned = raw.includes("T") ? raw.split("T")[0] : raw;
+  const parsed = new Date(`${cleaned}T00:00:00`);
+
+  if (Number.isNaN(parsed.getTime())) {
+    return "0000-00-00";
+  }
+
+  return cleaned;
+}
+
+function normalizeCategory(title: string): string {
+  const text = title.toLowerCase();
+
+  if (
+    text.includes("ujian") ||
+    text.includes("pts") ||
+    text.includes("aspd") ||
+    text.includes("try out")
+  )
+    return "Ujian";
+  if (
+    text.includes("upacara") ||
+    text.includes("bendera") ||
+    text.includes("hari pendidikan")
+  )
+    return "Upacara";
+  if (
+    text.includes("ramadhan") ||
+    text.includes("ibadah") ||
+    text.includes("keagamaan") ||
+    text.includes("isra") ||
+    text.includes("miraj")
+  )
+    return "Keagamaan";
+  if (
+    text.includes("p5") ||
+    text.includes("pancasila") ||
+    text.includes("kurikulum") ||
+    text.includes("akademik")
+  )
+    return "Akademik";
+  if (
+    text.includes("osis") ||
+    text.includes("kesiswaan") ||
+    text.includes("siswa")
+  )
+    return "Kesiswaan";
+
+  return "Umum";
+}
 
 export default function AgendaPage() {
+  const [agenda, setAgenda] = useState<AgendaItem[]>([]);
   const [selectedCategory, setSelectedCategory] = useState("Semua");
-  const [statusFilter, setStatusFilter] = useState<"all" | "upcoming" | "past">("all");
+  const [statusFilter, setStatusFilter] = useState<"all" | "upcoming" | "past">(
+    "all",
+  );
   const [searchQuery, setSearchQuery] = useState("");
+  const [isLoading, setIsLoading] = useState(true);
 
-  const filteredAgenda = mockAgenda.filter((item) => {
-    const matchesCategory =
-      selectedCategory === "Semua" || item.category === selectedCategory;
-    const matchesStatus =
-      statusFilter === "all" || item.status === statusFilter;
-    const matchesSearch =
-      item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      item.location.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      item.description.toLowerCase().includes(searchQuery.toLowerCase());
-    return matchesCategory && matchesStatus && matchesSearch;
-  });
+  useEffect(() => {
+    let mounted = true;
+
+    async function loadAgendaFromWordPress() {
+      const query = `
+        query GetAgenda {
+          daftarAgenda(first: 100) {
+            nodes {
+              id
+              title
+              content
+              date
+              dataAgenda {
+                tanggalKegiatan
+                waktu
+                lokasi
+              }
+            }
+          }
+        }
+      `;
+
+      try {
+        const { data } = await fetchGraphQL<WPAgendaResponse>(query, {
+          revalidate: 60,
+        });
+
+        if (!mounted) return;
+
+        const nodes = data?.daftarAgenda?.nodes ?? [];
+
+        if (nodes.length > 0) {
+          const mapped = nodes.map((node) => {
+            const title = decodeWpText(node.title) || "Agenda belum diatur";
+            const description =
+              decodeWpText(node.content) ||
+              "Agenda resmi sekolah yang dapat diikuti warga sekolah.";
+            const rawDate =
+              node.dataAgenda?.tanggalKegiatan ||
+              node.date ||
+              "Tanggal belum diatur";
+            const time = node.dataAgenda?.waktu || "Waktu belum diatur";
+            const location = node.dataAgenda?.lokasi || "Lokasi belum diatur";
+            const computedStatus: "upcoming" | "past" =
+              new Date(`${getSortDateValue(rawDate)}T00:00:00`) >= new Date()
+                ? "upcoming"
+                : "past";
+
+            return {
+              id: node.id,
+              title,
+              category: normalizeCategory(title),
+              date: formatTanggal(rawDate),
+              time,
+              location,
+              organizer: "SMP Negeri 1 Ngawi",
+              description,
+              status: computedStatus,
+              sortDate: getSortDateValue(rawDate),
+            };
+          });
+
+          setAgenda(
+            mapped.sort(
+              (a, b) =>
+                new Date(b.sortDate).getTime() - new Date(a.sortDate).getTime(),
+            ),
+          );
+        }
+      } catch {
+        // Abaikan jika WordPress belum siap
+      } finally {
+        if (mounted) setIsLoading(false);
+      }
+    }
+
+    loadAgendaFromWordPress();
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  const filteredAgenda = useMemo(() => {
+    return agenda.filter((item) => {
+      const matchesCategory =
+        selectedCategory === "Semua" || item.category === selectedCategory;
+      const matchesStatus =
+        statusFilter === "all" || item.status === statusFilter;
+      const matchesSearch =
+        item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        item.location.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        item.description.toLowerCase().includes(searchQuery.toLowerCase());
+
+      return matchesCategory && matchesStatus && matchesSearch;
+    });
+  }, [agenda, selectedCategory, statusFilter, searchQuery]);
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-800">
-      {/* Hero Section */}
       <section className="relative overflow-hidden bg-gradient-to-br from-[#1E2B7A] via-[#151e54] to-[#0d1338] py-16 sm:py-24 text-white">
         <div className="absolute inset-0 bg-[radial-gradient(#0097DF_1px,transparent_1px)] [background-size:24px_24px] opacity-20" />
         <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="flex items-center gap-2 text-sm text-[#0097DF] mb-4 font-medium">
-            <Link href="/" className="hover:underline">Beranda</Link>
+            <Link href="/" className="hover:underline">
+              Beranda
+            </Link>
             <ChevronRight className="h-4 w-4" />
-            <Link href="/informasi" className="hover:underline">Informasi</Link>
+            <Link href="/informasi" className="hover:underline">
+              Informasi
+            </Link>
             <ChevronRight className="h-4 w-4" />
             <span className="text-white">Agenda Kegiatan</span>
           </div>
@@ -144,16 +269,19 @@ export default function AgendaPage() {
               <CalendarIcon className="h-3.5 w-3.5" /> Kalender & Kegiatan
             </div>
             <h1 className="text-3xl font-extrabold tracking-tight sm:text-5xl text-white">
-              Agenda Resmi <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#FFE500] to-amber-300">SMPN 1 Ngawi</span>
+              Agenda Resmi{" "}
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#FFE500] to-amber-300">
+                SMPN 1 Ngawi
+              </span>
             </h1>
             <p className="mt-4 text-base sm:text-lg text-slate-200">
-              Jadwal lengkap kegiatan akademik, kesiswaan, peringatan hari besar, serta agenda resmi sekolah sepanjang tahun ajaran.
+              Jadwal lengkap kegiatan akademik, kesiswaan, peringatan hari
+              besar, serta agenda resmi sekolah sepanjang tahun ajaran.
             </p>
           </div>
         </div>
       </section>
 
-      {/* Filter & Search Bar */}
       <section className="relative -mt-8 z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="rounded-2xl bg-white p-4 sm:p-6 shadow-xl border border-slate-100 flex flex-col md:flex-row gap-4 items-center justify-between">
           <div className="relative w-full md:w-96">
@@ -167,7 +295,6 @@ export default function AgendaPage() {
             />
           </div>
 
-          {/* Status Tabs */}
           <div className="flex items-center gap-2 w-full md:w-auto overflow-x-auto pb-2 md:pb-0">
             <button
               onClick={() => setStatusFilter("all")}
@@ -202,10 +329,11 @@ export default function AgendaPage() {
           </div>
         </div>
 
-        {/* Category Chips */}
         <div className="flex items-center gap-2 overflow-x-auto py-4">
           <Filter className="h-4 w-4 text-slate-400 shrink-0" />
-          <span className="text-xs font-medium text-slate-500 mr-2 shrink-0">Kategori:</span>
+          <span className="text-xs font-medium text-slate-500 mr-2 shrink-0">
+            Kategori:
+          </span>
           {categories.map((cat) => (
             <button
               key={cat}
@@ -222,18 +350,27 @@ export default function AgendaPage() {
         </div>
       </section>
 
-      {/* Agenda List Grid */}
       <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10">
-        {filteredAgenda.length === 0 ? (
+        {isLoading ? (
+          <div className="text-center py-16 bg-white rounded-2xl border border-slate-100 p-8 shadow-sm">
+            Memuat agenda dari WordPress...
+          </div>
+        ) : filteredAgenda.length === 0 ? (
           <div className="text-center py-16 bg-white rounded-2xl border border-slate-100 p-8 shadow-sm">
             <CalendarIcon className="mx-auto h-12 w-12 text-slate-300" />
-            <h3 className="mt-3 text-base font-semibold text-slate-800">Tidak ada agenda ditemukan</h3>
-            <p className="mt-1 text-sm text-slate-500">Coba sesuaikan kata kunci pencarian atau ganti filter status.</p>
+            <h3 className="mt-3 text-base font-semibold text-slate-800">
+              Tidak ada agenda ditemukan
+            </h3>
+            <p className="mt-1 text-sm text-slate-500">
+              Coba sesuaikan kata kunci pencarian atau ganti filter status.
+            </p>
           </div>
         ) : (
           <div className="space-y-4">
             {filteredAgenda.map((agenda) => {
               const isUpcoming = agenda.status === "upcoming";
+              const dateParts = agenda.date.split(" ");
+
               return (
                 <div
                   key={agenda.id}
@@ -244,22 +381,19 @@ export default function AgendaPage() {
                   }`}
                 >
                   <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-5">
-                    {/* Left: Date badge & Titles */}
                     <div className="flex items-start gap-4">
-                      {/* Date Badge */}
                       <div className="shrink-0 text-center rounded-xl bg-gradient-to-b from-[#1E2B7A] to-[#111A4D] text-white p-3 min-w-[76px] shadow-md shadow-[#1E2B7A]/15">
                         <span className="block text-xs font-medium text-slate-200 uppercase tracking-wider">
-                          {agenda.date.split(" ")[1]}
+                          {dateParts[1] || ""}
                         </span>
                         <span className="block text-2xl font-black text-[#FFE500] leading-none my-1">
-                          {agenda.date.split(" ")[0]}
+                          {dateParts[0] || ""}
                         </span>
                         <span className="block text-[10px] text-slate-300">
-                          {agenda.date.split(" ")[2]}
+                          {dateParts[2] || ""}
                         </span>
                       </div>
 
-                      {/* Content */}
                       <div>
                         <div className="flex flex-wrap items-center gap-2 mb-1.5">
                           <span className="px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-[#0097DF]/10 text-[#0097DF]">
@@ -286,7 +420,6 @@ export default function AgendaPage() {
                       </div>
                     </div>
 
-                    {/* Right: Meta Details (Time, Place, Organizer) */}
                     <div className="flex flex-wrap lg:flex-col items-start lg:items-end gap-2 sm:gap-3 text-xs text-slate-600 shrink-0 pt-3 lg:pt-0 border-t lg:border-t-0 border-slate-100">
                       <div className="flex items-center gap-1.5 font-medium">
                         <Clock className="h-3.5 w-3.5 text-[#0097DF]" />
@@ -309,16 +442,18 @@ export default function AgendaPage() {
         )}
       </section>
 
-      {/* Info Card Banner */}
       <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pb-16">
         <div className="rounded-2xl bg-gradient-to-r from-[#1E2B7A] to-[#0097DF] p-8 text-white flex flex-col md:flex-row items-center justify-between gap-6 shadow-lg">
           <div>
             <span className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-[#FFE500]">
               <Sparkles className="h-3.5 w-3.5" /> Sinkronisasi Jadwal
             </span>
-            <h2 className="text-xl sm:text-2xl font-bold mt-1">Perlu Konfirmasi Kegiatan Sekolah?</h2>
+            <h2 className="text-xl sm:text-2xl font-bold mt-1">
+              Perlu Konfirmasi Kegiatan Sekolah?
+            </h2>
             <p className="mt-2 text-sm text-slate-100 max-w-2xl">
-              Informasi undangan dinas, izin peminjaman aula/laboratorium, dan kemitraan kegiatan dapat dikomunikasikan dengan bagian Tata Usaha.
+              Informasi undangan dinas, izin peminjaman aula/laboratorium, dan
+              kemitraan kegiatan dapat dikomunikasikan dengan bagian Tata Usaha.
             </p>
           </div>
           <Link

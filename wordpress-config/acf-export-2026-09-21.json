@@ -1,0 +1,1065 @@
+[
+    {
+        "key": "group_agenda_fields",
+        "title": "Data Agenda Kegiatan",
+        "fields": [
+            {
+                "key": "field_agenda_tanggal",
+                "label": "Tanggal Pelaksanaan",
+                "name": "tanggal_kegiatan",
+                "aria-label": "",
+                "type": "date_picker",
+                "instructions": "",
+                "required": 1,
+                "conditional_logic": false,
+                "wrapper": {
+                    "width": "",
+                    "class": "",
+                    "id": ""
+                },
+                "display_format": "d\/m\/Y",
+                "return_format": "Y-m-d",
+                "show_in_graphql": 1,
+                "first_day": 1,
+                "default_to_current_date": 0
+            },
+            {
+                "key": "field_agenda_waktu",
+                "label": "Waktu Pelaksanaan",
+                "name": "waktu",
+                "aria-label": "",
+                "type": "text",
+                "instructions": "Contoh: 07.30 - 12.00 WIB",
+                "required": 1,
+                "conditional_logic": false,
+                "wrapper": {
+                    "width": "",
+                    "class": "",
+                    "id": ""
+                },
+                "show_in_graphql": 1,
+                "default_value": "",
+                "maxlength": "",
+                "placeholder": "",
+                "prepend": "",
+                "append": ""
+            },
+            {
+                "key": "field_agenda_lokasi",
+                "label": "Lokasi",
+                "name": "lokasi",
+                "aria-label": "",
+                "type": "text",
+                "instructions": "Contoh: Lapangan Utama SMPN 1 Ngawi",
+                "required": 1,
+                "conditional_logic": false,
+                "wrapper": {
+                    "width": "",
+                    "class": "",
+                    "id": ""
+                },
+                "show_in_graphql": 1,
+                "default_value": "",
+                "maxlength": "",
+                "placeholder": "",
+                "prepend": "",
+                "append": ""
+            }
+        ],
+        "location": [
+            [
+                {
+                    "param": "post_type",
+                    "operator": "==",
+                    "value": "agenda"
+                }
+            ]
+        ],
+        "menu_order": 0,
+        "position": "normal",
+        "style": "default",
+        "label_placement": "top",
+        "instruction_placement": "label",
+        "hide_on_screen": [],
+        "active": true,
+        "description": "",
+        "show_in_rest": false,
+        "display_title": "",
+        "allow_ai_access": false,
+        "ai_description": "",
+        "show_in_graphql": 1,
+        "graphql_field_name": "dataAgenda"
+    },
+    {
+        "key": "group_ekskul_fields",
+        "title": "Data Ekstrakurikuler",
+        "fields": [
+            {
+                "key": "field_ekskul_pembina",
+                "label": "Pembina \/ Pelatih",
+                "name": "pembina",
+                "aria-label": "",
+                "type": "text",
+                "instructions": "Nama guru pembina atau pelatih ekstrakurikuler",
+                "required": 1,
+                "conditional_logic": false,
+                "wrapper": {
+                    "width": "",
+                    "class": "",
+                    "id": ""
+                },
+                "show_in_graphql": 1,
+                "default_value": "",
+                "maxlength": "",
+                "placeholder": "",
+                "prepend": "",
+                "append": ""
+            },
+            {
+                "key": "field_ekskul_jadwal",
+                "label": "Jadwal Latihan",
+                "name": "jadwal",
+                "aria-label": "",
+                "type": "text",
+                "instructions": "Contoh: Setiap Jumat, 15.00 - 17.00 WIB",
+                "required": 1,
+                "conditional_logic": false,
+                "wrapper": {
+                    "width": "",
+                    "class": "",
+                    "id": ""
+                },
+                "show_in_graphql": 1,
+                "default_value": "",
+                "maxlength": "",
+                "placeholder": "",
+                "prepend": "",
+                "append": ""
+            },
+            {
+                "key": "field_ekskul_deskripsi_singkat",
+                "label": "Deskripsi Singkat",
+                "name": "deskripsi_singkat",
+                "aria-label": "",
+                "type": "textarea",
+                "instructions": "Ringkasan kegiatan ekskul untuk ditampilkan pada kartu halaman akademik",
+                "required": false,
+                "conditional_logic": false,
+                "wrapper": {
+                    "width": "",
+                    "class": "",
+                    "id": ""
+                },
+                "rows": 3,
+                "show_in_graphql": 1,
+                "default_value": "",
+                "new_lines": "",
+                "maxlength": "",
+                "placeholder": ""
+            }
+        ],
+        "location": [
+            [
+                {
+                    "param": "post_type",
+                    "operator": "==",
+                    "value": "ekstrakurikuler"
+                }
+            ]
+        ],
+        "menu_order": 0,
+        "position": "normal",
+        "style": "default",
+        "label_placement": "top",
+        "instruction_placement": "label",
+        "hide_on_screen": [],
+        "active": true,
+        "description": "",
+        "show_in_rest": false,
+        "display_title": "",
+        "allow_ai_access": false,
+        "ai_description": "",
+        "show_in_graphql": 1,
+        "graphql_field_name": "dataEkstrakurikuler"
+    },
+    {
+        "key": "group_galeri_fields",
+        "title": "Data Galeri & Video",
+        "fields": [
+            {
+                "key": "field_galeri_tipe",
+                "label": "Tipe Media",
+                "name": "tipe_media",
+                "aria-label": "",
+                "type": "select",
+                "instructions": "",
+                "required": 1,
+                "conditional_logic": false,
+                "wrapper": {
+                    "width": "",
+                    "class": "",
+                    "id": ""
+                },
+                "choices": {
+                    "Foto": "Foto",
+                    "Video": "Video"
+                },
+                "default_value": "Foto",
+                "show_in_graphql": 1,
+                "multiple": 0,
+                "allow_null": 0,
+                "ui": 0,
+                "ajax": 0,
+                "placeholder": "",
+                "return_format": "value",
+                "create_options": 0,
+                "save_options": 0
+            },
+            {
+                "key": "field_galeri_youtube",
+                "label": "URL Video YouTube",
+                "name": "youtube_url",
+                "aria-label": "",
+                "type": "url",
+                "instructions": "Hanya diisi jika Tipe Media adalah Video (Contoh: https:\/\/www.youtube.com\/watch?v=xxxx)",
+                "required": 0,
+                "conditional_logic": false,
+                "wrapper": {
+                    "width": "",
+                    "class": "",
+                    "id": ""
+                },
+                "show_in_graphql": 1,
+                "default_value": "",
+                "placeholder": ""
+            }
+        ],
+        "location": [
+            [
+                {
+                    "param": "post_type",
+                    "operator": "==",
+                    "value": "galeri"
+                }
+            ]
+        ],
+        "menu_order": 0,
+        "position": "normal",
+        "style": "default",
+        "label_placement": "top",
+        "instruction_placement": "label",
+        "hide_on_screen": [],
+        "active": true,
+        "description": "",
+        "show_in_rest": false,
+        "display_title": "",
+        "allow_ai_access": false,
+        "ai_description": "",
+        "show_in_graphql": 1,
+        "graphql_field_name": "dataGaleri"
+    },
+    {
+        "key": "group_guru_fields",
+        "title": "Data Guru & Staf",
+        "fields": [
+            {
+                "key": "field_guru_nip",
+                "label": "NIP",
+                "name": "nip",
+                "aria-label": "",
+                "type": "text",
+                "instructions": "Masukkan NIP (kosongkan jika belum ada \/ non-PNS)",
+                "required": 0,
+                "conditional_logic": false,
+                "wrapper": {
+                    "width": "",
+                    "class": "",
+                    "id": ""
+                },
+                "show_in_graphql": 1,
+                "default_value": "",
+                "maxlength": "",
+                "placeholder": "",
+                "prepend": "",
+                "append": ""
+            },
+            {
+                "key": "field_guru_jabatan",
+                "label": "Jabatan",
+                "name": "jabatan",
+                "aria-label": "",
+                "type": "text",
+                "instructions": "Contoh: Kepala Sekolah, Guru Mata Pelajaran, Staf Tata Usaha",
+                "required": 1,
+                "conditional_logic": false,
+                "wrapper": {
+                    "width": "",
+                    "class": "",
+                    "id": ""
+                },
+                "show_in_graphql": 1,
+                "default_value": "",
+                "maxlength": "",
+                "placeholder": "",
+                "prepend": "",
+                "append": ""
+            },
+            {
+                "key": "field_guru_mapel",
+                "label": "Mata Pelajaran",
+                "name": "mata_pelajaran",
+                "aria-label": "",
+                "type": "text",
+                "instructions": "Contoh: Matematika, Bahasa Indonesia (kosongkan jika tenaga kependidikan\/staf)",
+                "required": 0,
+                "conditional_logic": false,
+                "wrapper": {
+                    "width": "",
+                    "class": "",
+                    "id": ""
+                },
+                "show_in_graphql": 1,
+                "default_value": "",
+                "maxlength": "",
+                "placeholder": "",
+                "prepend": "",
+                "append": ""
+            },
+            {
+                "key": "field_guru_email",
+                "label": "Email",
+                "name": "email",
+                "aria-label": "",
+                "type": "email",
+                "instructions": "Email resmi guru\/staf",
+                "required": 0,
+                "conditional_logic": false,
+                "wrapper": {
+                    "width": "",
+                    "class": "",
+                    "id": ""
+                },
+                "show_in_graphql": 1,
+                "default_value": "",
+                "placeholder": "",
+                "prepend": "",
+                "append": ""
+            },
+            {
+                "key": "field_guru_kategori",
+                "label": "Kategori \/ Rumpun",
+                "name": "kategori",
+                "aria-label": "",
+                "type": "select",
+                "instructions": "",
+                "required": 1,
+                "conditional_logic": false,
+                "wrapper": {
+                    "width": "",
+                    "class": "",
+                    "id": ""
+                },
+                "choices": {
+                    "Pimpinan": "Pimpinan",
+                    "Matematika & IPA": "Matematika & IPA",
+                    "Bahasa": "Bahasa",
+                    "Sosial & Agama": "Sosial & Agama",
+                    "Olahraga & Seni": "Olahraga & Seni",
+                    "Teknologi & Vokasi": "Teknologi & Vokasi",
+                    "Layanan Siswa": "Layanan Siswa",
+                    "Tenaga Kependidikan": "Tenaga Kependidikan"
+                },
+                "default_value": "Matematika & IPA",
+                "show_in_graphql": 1,
+                "multiple": 0,
+                "allow_null": 0,
+                "ui": 0,
+                "ajax": 0,
+                "placeholder": "",
+                "return_format": "value",
+                "create_options": 0,
+                "save_options": 0
+            }
+        ],
+        "location": [
+            [
+                {
+                    "param": "post_type",
+                    "operator": "==",
+                    "value": "guru"
+                }
+            ]
+        ],
+        "menu_order": 0,
+        "position": "normal",
+        "style": "default",
+        "label_placement": "top",
+        "instruction_placement": "label",
+        "hide_on_screen": "",
+        "active": true,
+        "description": "",
+        "show_in_rest": 1,
+        "display_title": "",
+        "allow_ai_access": false,
+        "ai_description": "",
+        "show_in_graphql": 1,
+        "graphql_field_name": "dataGuru",
+        "map_graphql_types_from_location_rules": 1,
+        "graphql_types": [
+            "Guru"
+        ]
+    },
+    {
+        "key": "group_pengumuman_fields",
+        "title": "Data Pengumuman",
+        "fields": [
+            {
+                "key": "field_pengumuman_tanggal",
+                "label": "Tanggal Pengumuman",
+                "name": "tanggal_pengumuman",
+                "aria-label": "",
+                "type": "date_picker",
+                "instructions": "",
+                "required": 1,
+                "conditional_logic": false,
+                "wrapper": {
+                    "width": "",
+                    "class": "",
+                    "id": ""
+                },
+                "display_format": "d\/m\/Y",
+                "return_format": "Y-m-d",
+                "show_in_graphql": 1,
+                "first_day": 1,
+                "default_to_current_date": 0
+            },
+            {
+                "key": "field_pengumuman_urgensi",
+                "label": "Status Urgensi",
+                "name": "urgensi",
+                "aria-label": "",
+                "type": "select",
+                "instructions": "",
+                "required": 1,
+                "conditional_logic": false,
+                "wrapper": {
+                    "width": "",
+                    "class": "",
+                    "id": ""
+                },
+                "choices": {
+                    "Biasa": "Biasa",
+                    "Penting": "Penting",
+                    "Mendesak": "Mendesak"
+                },
+                "default_value": "Biasa",
+                "show_in_graphql": 1,
+                "multiple": 0,
+                "allow_null": 0,
+                "ui": 0,
+                "ajax": 0,
+                "placeholder": "",
+                "return_format": "value",
+                "create_options": 0,
+                "save_options": 0
+            },
+            {
+                "key": "field_pengumuman_file",
+                "label": "File Lampiran (PDF \/ Dokumen)",
+                "name": "file_lampiran",
+                "aria-label": "",
+                "type": "file",
+                "instructions": "Upload dokumen surat\/edaran resmi jika ada",
+                "required": 0,
+                "conditional_logic": false,
+                "wrapper": {
+                    "width": "",
+                    "class": "",
+                    "id": ""
+                },
+                "return_format": "array",
+                "show_in_graphql": 1,
+                "library": "all",
+                "min_size": 0,
+                "max_size": 0,
+                "mime_types": ""
+            }
+        ],
+        "location": [
+            [
+                {
+                    "param": "post_type",
+                    "operator": "==",
+                    "value": "pengumuman"
+                }
+            ]
+        ],
+        "menu_order": 0,
+        "position": "normal",
+        "style": "default",
+        "label_placement": "top",
+        "instruction_placement": "label",
+        "hide_on_screen": [],
+        "active": true,
+        "description": "",
+        "show_in_rest": false,
+        "display_title": "",
+        "allow_ai_access": false,
+        "ai_description": "",
+        "show_in_graphql": 1,
+        "graphql_field_name": "dataPengumuman"
+    },
+    {
+        "key": "group_struktur_organisasi_item_fields",
+        "title": "Data Pengurus Struktur Organisasi",
+        "fields": [
+            {
+                "key": "field_so_role",
+                "label": "Jabatan",
+                "name": "role",
+                "aria-label": "",
+                "type": "text",
+                "instructions": "Contoh: Kepala Sekolah, Wakasek Bidang Kurikulum, Komite Sekolah",
+                "required": 1,
+                "conditional_logic": false,
+                "wrapper": {
+                    "width": "",
+                    "class": "",
+                    "id": ""
+                },
+                "show_in_graphql": 1,
+                "default_value": "",
+                "maxlength": "",
+                "placeholder": "",
+                "prepend": "",
+                "append": ""
+            },
+            {
+                "key": "field_so_nip",
+                "label": "NIP",
+                "name": "nip",
+                "aria-label": "",
+                "type": "text",
+                "instructions": "Masukkan NIP (kosongkan atau isi tanda - jika tidak ada)",
+                "required": 0,
+                "conditional_logic": false,
+                "wrapper": {
+                    "width": "",
+                    "class": "",
+                    "id": ""
+                },
+                "show_in_graphql": 1,
+                "default_value": "",
+                "maxlength": "",
+                "placeholder": "",
+                "prepend": "",
+                "append": ""
+            },
+            {
+                "key": "field_so_category",
+                "label": "Kategori \/ Tingkatan",
+                "name": "category",
+                "aria-label": "",
+                "type": "select",
+                "instructions": "",
+                "required": 1,
+                "conditional_logic": false,
+                "wrapper": {
+                    "width": "",
+                    "class": "",
+                    "id": ""
+                },
+                "choices": {
+                    "Pimpinan Utama": "Pimpinan Utama",
+                    "Mitra & Pengawas": "Mitra & Pengawas",
+                    "Manajemen": "Manajemen",
+                    "Administrasi": "Administrasi",
+                    "Layanan Siswa": "Layanan Siswa"
+                },
+                "default_value": "Manajemen",
+                "show_in_graphql": 1,
+                "multiple": 0,
+                "allow_null": 0,
+                "ui": 0,
+                "ajax": 0,
+                "placeholder": "",
+                "return_format": "value",
+                "create_options": 0,
+                "save_options": 0
+            },
+            {
+                "key": "field_so_urutan",
+                "label": "Urutan Tampil",
+                "name": "urutan",
+                "aria-label": "",
+                "type": "number",
+                "instructions": "Nomor urut posisi bagan (1 untuk Kepala Sekolah, 2 untuk Komite, dst)",
+                "required": 0,
+                "conditional_logic": false,
+                "wrapper": {
+                    "width": "",
+                    "class": "",
+                    "id": ""
+                },
+                "default_value": 1,
+                "show_in_graphql": 1,
+                "min": "",
+                "max": "",
+                "step": "",
+                "placeholder": "",
+                "prepend": "",
+                "append": ""
+            },
+            {
+                "key": "field_6aafe8c7f84c3",
+                "label": "foto",
+                "name": "foto",
+                "aria-label": "",
+                "type": "image",
+                "instructions": "",
+                "required": 0,
+                "conditional_logic": 0,
+                "wrapper": {
+                    "width": "",
+                    "class": "",
+                    "id": ""
+                },
+                "return_format": "array",
+                "library": "all",
+                "min_width": "",
+                "min_height": "",
+                "min_size": "",
+                "max_width": "",
+                "max_height": "",
+                "max_size": "",
+                "mime_types": "",
+                "allow_in_bindings": 0,
+                "preview_size": "medium",
+                "show_in_graphql": 1,
+                "graphql_description": "",
+                "graphql_field_name": "foto"
+            }
+        ],
+        "location": [
+            [
+                {
+                    "param": "post_type",
+                    "operator": "==",
+                    "value": "struktur_organisasi"
+                }
+            ]
+        ],
+        "menu_order": 0,
+        "position": "normal",
+        "style": "default",
+        "label_placement": "top",
+        "instruction_placement": "label",
+        "hide_on_screen": "",
+        "active": true,
+        "description": "",
+        "show_in_rest": 1,
+        "display_title": "",
+        "allow_ai_access": false,
+        "ai_description": "",
+        "show_in_graphql": 1,
+        "graphql_field_name": "dataStruktur",
+        "map_graphql_types_from_location_rules": 0,
+        "graphql_types": ""
+    },
+    {
+        "key": "group_prestasi_fields",
+        "title": "Data Prestasi",
+        "fields": [
+            {
+                "key": "field_prestasi_kategori",
+                "label": "Kategori",
+                "name": "kategori",
+                "aria-label": "",
+                "type": "select",
+                "instructions": "",
+                "required": 1,
+                "conditional_logic": false,
+                "wrapper": {
+                    "width": "",
+                    "class": "",
+                    "id": ""
+                },
+                "choices": {
+                    "Akademik": "Akademik",
+                    "Non-Akademik": "Non-Akademik"
+                },
+                "default_value": "Akademik",
+                "show_in_graphql": 1,
+                "multiple": 0,
+                "allow_null": 0,
+                "ui": 0,
+                "ajax": 0,
+                "placeholder": "",
+                "return_format": "value",
+                "create_options": 0,
+                "save_options": 0
+            },
+            {
+                "key": "field_prestasi_tingkat",
+                "label": "Tingkat Kejuaraan",
+                "name": "tingkat",
+                "aria-label": "",
+                "type": "select",
+                "instructions": "",
+                "required": 1,
+                "conditional_logic": false,
+                "wrapper": {
+                    "width": "",
+                    "class": "",
+                    "id": ""
+                },
+                "choices": {
+                    "Kabupaten": "Kabupaten",
+                    "Karesidenan": "Karesidenan",
+                    "Provinsi": "Provinsi",
+                    "Nasional": "Nasional",
+                    "Internasional": "Internasional"
+                },
+                "default_value": "Kabupaten",
+                "show_in_graphql": 1,
+                "multiple": 0,
+                "allow_null": 0,
+                "ui": 0,
+                "ajax": 0,
+                "placeholder": "",
+                "return_format": "value",
+                "create_options": 0,
+                "save_options": 0
+            },
+            {
+                "key": "field_6ab01796ffd4e",
+                "label": "Peringkat",
+                "name": "peringkat",
+                "aria-label": "",
+                "type": "checkbox",
+                "instructions": "",
+                "required": 0,
+                "conditional_logic": 0,
+                "wrapper": {
+                    "width": "",
+                    "class": "",
+                    "id": ""
+                },
+                "choices": {
+                    "Juara 1": "Juara 1",
+                    "Juara 2": "Juara 2",
+                    "Juara 3": "Juara 3",
+                    "Juara Harapan 1": "Juara Harapan 1",
+                    "Juara Harapan 2": "Juara Harapan 2",
+                    "Juara Harapan 3": "Juara Harapan 3"
+                },
+                "default_value": [],
+                "return_format": "value",
+                "allow_custom": 0,
+                "allow_in_bindings": 0,
+                "layout": "vertical",
+                "toggle": 0,
+                "show_in_graphql": 1,
+                "graphql_description": "",
+                "graphql_field_name": "peringkat",
+                "graphql_non_null": 0,
+                "save_custom": 0,
+                "custom_choice_button_text": "Add new choice"
+            },
+            {
+                "key": "field_prestasi_tahun",
+                "label": "Tahun",
+                "name": "tahun",
+                "aria-label": "",
+                "type": "number",
+                "instructions": "",
+                "required": 1,
+                "conditional_logic": false,
+                "wrapper": {
+                    "width": "",
+                    "class": "",
+                    "id": ""
+                },
+                "default_value": 2024,
+                "show_in_graphql": 1,
+                "min": "",
+                "max": "",
+                "step": "",
+                "placeholder": "",
+                "prepend": "",
+                "append": ""
+            },
+            {
+                "key": "field_prestasi_peraih",
+                "label": "Nama Peraih \/ Tim",
+                "name": "peraih",
+                "aria-label": "",
+                "type": "text",
+                "instructions": "Contoh: Tim Futsal SMPN 1 Ngawi \/ Muhammad Rizky (Kelas 8B)",
+                "required": 1,
+                "conditional_logic": false,
+                "wrapper": {
+                    "width": "",
+                    "class": "",
+                    "id": ""
+                },
+                "show_in_graphql": 1,
+                "default_value": "",
+                "maxlength": "",
+                "placeholder": "",
+                "prepend": "",
+                "append": ""
+            },
+            {
+                "key": "field_prestasi_penyelenggara",
+                "label": "Penyelenggara",
+                "name": "penyelenggara",
+                "aria-label": "",
+                "type": "text",
+                "instructions": "Contoh: Dinas Pendidikan dan Kebudayaan Kabupaten Ngawi",
+                "required": 0,
+                "conditional_logic": false,
+                "wrapper": {
+                    "width": "",
+                    "class": "",
+                    "id": ""
+                },
+                "show_in_graphql": 1,
+                "default_value": "",
+                "maxlength": "",
+                "placeholder": "",
+                "prepend": "",
+                "append": ""
+            }
+        ],
+        "location": [
+            [
+                {
+                    "param": "post_type",
+                    "operator": "==",
+                    "value": "prestasi"
+                }
+            ]
+        ],
+        "menu_order": 0,
+        "position": "normal",
+        "style": "default",
+        "label_placement": "top",
+        "instruction_placement": "label",
+        "hide_on_screen": "",
+        "active": true,
+        "description": "",
+        "show_in_rest": 1,
+        "display_title": "",
+        "allow_ai_access": false,
+        "ai_description": "",
+        "show_in_graphql": 1,
+        "graphql_field_name": "dataPrestasi",
+        "map_graphql_types_from_location_rules": 0,
+        "graphql_types": ""
+    },
+    {
+        "key": "group_profil_sekolah_fields",
+        "title": "Pengaturan Halaman Profil Sekolah",
+        "fields": [
+            {
+                "key": "field_profil_sejarah_judul",
+                "label": "Judul Sejarah",
+                "name": "sejarah_judul",
+                "aria-label": "",
+                "type": "text",
+                "instructions": "",
+                "required": 0,
+                "conditional_logic": false,
+                "wrapper": {
+                    "width": "",
+                    "class": "",
+                    "id": ""
+                },
+                "default_value": "Sejarah Singkat SMP Negeri 1 Ngawi",
+                "show_in_graphql": 1,
+                "maxlength": "",
+                "placeholder": "",
+                "prepend": "",
+                "append": ""
+            },
+            {
+                "key": "field_profil_sejarah_subjudul",
+                "label": "Subjudul Sejarah",
+                "name": "sejarah_subjudul",
+                "aria-label": "",
+                "type": "text",
+                "instructions": "",
+                "required": 0,
+                "conditional_logic": false,
+                "wrapper": {
+                    "width": "",
+                    "class": "",
+                    "id": ""
+                },
+                "default_value": "Tumbuh dan berkembang selama berpuluh-puluh tahun sebagai pelopor pendidikan tingkat menengah di jantung Kabupaten Ngawi.",
+                "show_in_graphql": 1,
+                "maxlength": "",
+                "placeholder": "",
+                "prepend": "",
+                "append": ""
+            },
+            {
+                "key": "field_profil_sejarah_highlight_judul",
+                "label": "Judul Kotak Sorotan Sejarah",
+                "name": "sejarah_highlight_judul",
+                "aria-label": "",
+                "type": "text",
+                "instructions": "",
+                "required": 0,
+                "conditional_logic": false,
+                "wrapper": {
+                    "width": "",
+                    "class": "",
+                    "id": ""
+                },
+                "default_value": "Pusat Keunggulan Daerah",
+                "show_in_graphql": 1,
+                "maxlength": "",
+                "placeholder": "",
+                "prepend": "",
+                "append": ""
+            },
+            {
+                "key": "field_profil_sejarah_highlight_teks",
+                "label": "Teks Kotak Sorotan Sejarah",
+                "name": "sejarah_highlight_teks",
+                "aria-label": "",
+                "type": "textarea",
+                "instructions": "",
+                "required": 0,
+                "conditional_logic": false,
+                "wrapper": {
+                    "width": "",
+                    "class": "",
+                    "id": ""
+                },
+                "rows": 3,
+                "default_value": "Meluluskan puluhan ribu alumni yang kini berkontribusi aktif dalam berbagai bidang profesional, pemerintahan, akademisi, hingga wirausaha di seluruh Indonesia.",
+                "show_in_graphql": 1,
+                "new_lines": "",
+                "maxlength": "",
+                "placeholder": ""
+            },
+            {
+                "key": "field_profil_sejarah_konten",
+                "label": "Uraian Narasi Sejarah (Paragraf)",
+                "name": "sejarah_konten",
+                "aria-label": "",
+                "type": "textarea",
+                "instructions": "Pisahkan tiap paragraf dengan satu baris kosong (Enter 2x)",
+                "required": 0,
+                "conditional_logic": false,
+                "wrapper": {
+                    "width": "",
+                    "class": "",
+                    "id": ""
+                },
+                "rows": 8,
+                "show_in_graphql": 1,
+                "default_value": "",
+                "new_lines": "",
+                "maxlength": "",
+                "placeholder": ""
+            },
+            {
+                "key": "field_profil_visi",
+                "label": "Visi Sekolah",
+                "name": "visi",
+                "aria-label": "",
+                "type": "textarea",
+                "instructions": "",
+                "required": 0,
+                "conditional_logic": false,
+                "wrapper": {
+                    "width": "",
+                    "class": "",
+                    "id": ""
+                },
+                "rows": 3,
+                "show_in_graphql": 1,
+                "default_value": "",
+                "new_lines": "",
+                "maxlength": "",
+                "placeholder": ""
+            },
+            {
+                "key": "field_profil_misi",
+                "label": "Misi Sekolah",
+                "name": "misi",
+                "aria-label": "",
+                "type": "textarea",
+                "instructions": "Tuliskan butir-butir misi sekolah, satu butir per baris baru (tekan Enter untuk butir berikutnya)",
+                "required": 0,
+                "conditional_logic": false,
+                "wrapper": {
+                    "width": "",
+                    "class": "",
+                    "id": ""
+                },
+                "rows": 6,
+                "show_in_graphql": 1,
+                "default_value": "",
+                "new_lines": "",
+                "maxlength": "",
+                "placeholder": ""
+            },
+            {
+                "key": "field_profil_struktur_organisasi",
+                "label": "Daftar Struktur Organisasi",
+                "name": "struktur_organisasi",
+                "aria-label": "",
+                "type": "textarea",
+                "instructions": "Format per baris: Jabatan | Nama Lengkap | NIP | Kategori (Contoh: Kepala Sekolah | Drs. H. Sudarsono, M.Pd. | 19680512 199412 1 002 | Pimpinan Utama)",
+                "required": 0,
+                "conditional_logic": false,
+                "wrapper": {
+                    "width": "",
+                    "class": "",
+                    "id": ""
+                },
+                "rows": 10,
+                "show_in_graphql": 1,
+                "default_value": "",
+                "new_lines": "",
+                "maxlength": "",
+                "placeholder": ""
+            }
+        ],
+        "location": [
+            [
+                {
+                    "param": "page",
+                    "operator": "==",
+                    "value": "profil"
+                }
+            ],
+            [
+                {
+                    "param": "post_type",
+                    "operator": "==",
+                    "value": "page"
+                }
+            ]
+        ],
+        "menu_order": 0,
+        "position": "normal",
+        "style": "default",
+        "label_placement": "top",
+        "instruction_placement": "label",
+        "hide_on_screen": [],
+        "active": true,
+        "description": "",
+        "show_in_rest": false,
+        "display_title": "",
+        "allow_ai_access": false,
+        "ai_description": "",
+        "show_in_graphql": 1,
+        "graphql_field_name": "dataProfil"
+    }
+]
