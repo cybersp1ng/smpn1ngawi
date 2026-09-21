@@ -1,5 +1,6 @@
-import React from 'react';
-import Link from 'next/link';
+import React from "react";
+import Link from "next/link";
+import Image from "next/image";
 import {
   ArrowRight,
   BookOpen,
@@ -13,9 +14,9 @@ import {
   ChevronRight,
   GraduationCap,
   FileText,
-} from 'lucide-react';
-import SchoolLogo from '@/components/SchoolLogo';
-import { fetchGraphQL } from '@/lib/graphql';
+} from "lucide-react";
+import SchoolLogo from "@/components/SchoolLogo";
+import { fetchGraphQL } from "@/lib/graphql";
 
 // Tipe data untuk konten dinamis
 interface PostItem {
@@ -29,6 +30,40 @@ interface PostItem {
 interface HomepageData {
   posts?: {
     nodes: PostItem[];
+  };
+}
+
+interface HomepageWelcomeData {
+  title: string;
+  subtitle: string;
+  content: string;
+  name: string;
+  role: string;
+  fotoUrl?: string;
+}
+
+interface WPHomepageWelcomeResponse {
+  pageBy?: {
+    dataHomepage?: {
+      sambutanJudul?: string;
+      sambutanNama?: string;
+      sambutanJabatan?: string;
+      sambutanIsi?: string;
+      sambutanFoto?: {
+        sourceUrl?: string;
+      };
+    };
+  };
+  pageBy2?: {
+    dataHomepage?: {
+      sambutanJudul?: string;
+      sambutanNama?: string;
+      sambutanJabatan?: string;
+      sambutanIsi?: string;
+      sambutanFoto?: {
+        sourceUrl?: string;
+      };
+    };
   };
 }
 
@@ -51,34 +86,100 @@ async function getHomepageContent() {
   return data?.posts?.nodes || [];
 }
 
+async function getHomepageWelcome(): Promise<HomepageWelcomeData> {
+  const query = `
+    query GetHomepageWelcome {
+      pageBy(uri: "beranda") {
+        dataHomepage {
+          sambutanJudul
+          sambutanNama
+          sambutanJabatan
+          sambutanIsi
+          sambutanFoto {
+            sourceUrl
+          }
+        }
+      }
+      pageBy2: pageBy(uri: "home") {
+        dataHomepage {
+          sambutanJudul
+          sambutanNama
+          sambutanJabatan
+          sambutanIsi
+          sambutanFoto {
+            sourceUrl
+          }
+        }
+      }
+    }
+  `;
+
+  const defaultWelcome: HomepageWelcomeData = {
+    title: "Sambutan Pimpinan",
+    subtitle:
+      "Membangun Generasi Emas yang Cerdas, Santun, dan Bertanggung Jawab",
+    content:
+      "Puji syukur kita panjatkan ke hadirat Tuhan Yang Maha Esa. Website ini hadir sebagai jembatan komunikasi, transparansi informasi, dan media literasi digital antara keluarga besar SMP Negeri 1 Ngawi dengan seluruh lapisan masyarakat, siswa, dan para orang tua/wali murid. Kami terus berkomitmen mewujudkan iklim belajar yang inklusif, adaptif terhadap perkembangan teknologi, dan berakar kuat pada nilai-nilai kearifan lokal serta keimanan.",
+    name: "Kepala SMPN 1 Ngawi",
+    role: "Pembina Tk. I / IV-b",
+  };
+
+  try {
+    const { data } = await fetchGraphQL<WPHomepageWelcomeResponse>(query, {
+      revalidate: 60,
+    });
+    const source = data?.pageBy?.dataHomepage || data?.pageBy2?.dataHomepage;
+
+    if (!source) return defaultWelcome;
+
+    const cleanedContent = (source.sambutanIsi || defaultWelcome.content)
+      .replace(/<[^>]*>/g, " ")
+      .replace(/\s+/g, " ")
+      .trim();
+
+    return {
+      title: source.sambutanJudul || defaultWelcome.title,
+      subtitle: defaultWelcome.subtitle,
+      content: cleanedContent,
+      name: source.sambutanNama || defaultWelcome.name,
+      role: source.sambutanJabatan || defaultWelcome.role,
+      fotoUrl: source.sambutanFoto?.sourceUrl,
+    };
+  } catch {
+    return defaultWelcome;
+  }
+}
+
 export default async function HomePage() {
   const latestPosts = await getHomepageContent();
+  const welcome = await getHomepageWelcome();
 
   // Fallback berita jika WordPress belum ada data
   const fallbackNews = [
     {
-      id: '1',
-      title: 'Peringatan Hari Guru Nasional dan Apresiasi Pendidik Berprestasi',
+      id: "1",
+      title: "Peringatan Hari Guru Nasional dan Apresiasi Pendidik Berprestasi",
       excerpt:
-        'SMPN 1 Ngawi menyelenggarakan upacara khidmat serta pemberian penghargaan kepada para guru inovatif tingkat kabupaten.',
-      date: '2026-03-15',
-      category: 'Kegiatan',
+        "SMPN 1 Ngawi menyelenggarakan upacara khidmat serta pemberian penghargaan kepada para guru inovatif tingkat kabupaten.",
+      date: "2026-03-15",
+      category: "Kegiatan",
     },
     {
-      id: '2',
-      title: 'Siswa SMPN 1 Ngawi Raih Medali Emas Olimpiade Sains Nasional (OSN)',
+      id: "2",
+      title:
+        "Siswa SMPN 1 Ngawi Raih Medali Emas Olimpiade Sains Nasional (OSN)",
       excerpt:
-        'Prestasi membanggakan kembali ditorehkan oleh siswa dalam bidang Matematika dan IPA tingkat provinsi.',
-      date: '2026-03-10',
-      category: 'Prestasi',
+        "Prestasi membanggakan kembali ditorehkan oleh siswa dalam bidang Matematika dan IPA tingkat provinsi.",
+      date: "2026-03-10",
+      category: "Prestasi",
     },
     {
-      id: '3',
-      title: 'Workshop Penguatan Karakter Profil Pelajar Pancasila',
+      id: "3",
+      title: "Workshop Penguatan Karakter Profil Pelajar Pancasila",
       excerpt:
-        'Kegiatan kolaboratif antara siswa, guru, dan komite sekolah dalam membangun etika dan wawasan kebangsaan.',
-      date: '2026-03-05',
-      category: 'Akademik',
+        "Kegiatan kolaboratif antara siswa, guru, dan komite sekolah dalam membangun etika dan wawasan kebangsaan.",
+      date: "2026-03-05",
+      category: "Akademik",
     },
   ];
 
@@ -87,88 +188,90 @@ export default async function HomePage() {
       ? latestPosts.map((p, i) => ({
           id: p.id,
           title: p.title,
-          excerpt: p.excerpt?.replace(/<[^>]+>/g, '').slice(0, 120) + '...',
-          date: new Date(p.date).toLocaleDateString('id-ID', {
-            day: 'numeric',
-            month: 'long',
-            year: 'numeric',
+          excerpt: p.excerpt?.replace(/<[^>]+>/g, "").slice(0, 120) + "...",
+          date: new Date(p.date).toLocaleDateString("id-ID", {
+            day: "numeric",
+            month: "long",
+            year: "numeric",
           }),
-          category: 'Warta Sekolah',
+          category: "Warta Sekolah",
         }))
       : fallbackNews;
 
   const announcements = [
     {
-      id: '1',
-      title: 'Jadwal Asesmen Sumatif Akhir Semester Genap TP 2025/2026',
-      date: '20 Maret 2026',
-      badge: 'Penting',
+      id: "1",
+      title: "Jadwal Asesmen Sumatif Akhir Semester Genap TP 2025/2026",
+      date: "20 Maret 2026",
+      badge: "Penting",
     },
     {
-      id: '2',
-      title: 'Sosialisasi Persiapan Penerimaan Peserta Didik Baru (PPDB) 2026/2027',
-      date: '18 Maret 2026',
-      badge: 'Info PPDB',
+      id: "2",
+      title:
+        "Sosialisasi Persiapan Penerimaan Peserta Didik Baru (PPDB) 2026/2027",
+      date: "18 Maret 2026",
+      badge: "Info PPDB",
     },
     {
-      id: '3',
-      title: 'Edaran Kegiatan Pondok Ramadhan dan Jam Belajar Selama Bulan Puasa',
-      date: '12 Maret 2026',
-      badge: 'Umum',
+      id: "3",
+      title:
+        "Edaran Kegiatan Pondok Ramadhan dan Jam Belajar Selama Bulan Puasa",
+      date: "12 Maret 2026",
+      badge: "Umum",
     },
   ];
 
   const upcomingAgendas = [
     {
-      id: '1',
-      title: 'Gelar Karya P5 (Projek Penguatan Profil Pelajar Pancasila)',
-      date: '25',
-      month: 'MAR',
-      time: '08.00 - 13.00 WIB',
-      location: 'Aula & Halaman Utama',
+      id: "1",
+      title: "Gelar Karya P5 (Projek Penguatan Profil Pelajar Pancasila)",
+      date: "25",
+      month: "MAR",
+      time: "08.00 - 13.00 WIB",
+      location: "Aula & Halaman Utama",
     },
     {
-      id: '2',
-      title: 'Pertemuan Rutin Komite Sekolah & Wali Murid Kelas IX',
-      date: '28',
-      month: 'MAR',
-      time: '09.00 - 11.30 WIB',
-      location: 'Ruang Pertemuan Lt. 2',
+      id: "2",
+      title: "Pertemuan Rutin Komite Sekolah & Wali Murid Kelas IX",
+      date: "28",
+      month: "MAR",
+      time: "09.00 - 11.30 WIB",
+      location: "Ruang Pertemuan Lt. 2",
     },
     {
-      id: '3',
-      title: 'Latihan Gabungan Pramuka Penggalang Se-Kecamatan Ngawi',
-      date: '04',
-      month: 'APR',
-      time: '07.30 - 15.00 WIB',
-      location: 'Bumi Perkemahan Ngawi',
+      id: "3",
+      title: "Latihan Gabungan Pramuka Penggalang Se-Kecamatan Ngawi",
+      date: "04",
+      month: "APR",
+      time: "07.30 - 15.00 WIB",
+      location: "Bumi Perkemahan Ngawi",
     },
   ];
 
   const highlights = [
     {
       icon: GraduationCap,
-      title: 'Kurikulum Merdeka',
-      desc: 'Pembelajaran interaktif berorientasi pada pengembangan nalar kritis dan minat bakat siswa.',
-      link: '/akademik#kurikulum',
+      title: "Kurikulum Merdeka",
+      desc: "Pembelajaran interaktif berorientasi pada pengembangan nalar kritis dan minat bakat siswa.",
+      link: "/akademik#kurikulum",
     },
     {
       icon: Award,
-      title: 'Tradisi Prestasi',
-      desc: 'Konsisten mencetak juara di kompetisi OSN, O2SN, FLS2N tingkat regional hingga nasional.',
-      link: '/akademik/prestasi',
+      title: "Tradisi Prestasi",
+      desc: "Konsisten mencetak juara di kompetisi OSN, O2SN, FLS2N tingkat regional hingga nasional.",
+      link: "/akademik/prestasi",
     },
     {
       icon: Users,
-      title: 'Ekstrakurikuler Aktif',
-      desc: 'Wadah pembinaan 20+ bidang ekskul mulai dari kepramukaan, olahraga, hingga teknologi informasi.',
-      link: '/akademik/ekstrakurikuler',
+      title: "Ekstrakurikuler Aktif",
+      desc: "Wadah pembinaan 20+ bidang ekskul mulai dari kepramukaan, olahraga, hingga teknologi informasi.",
+      link: "/akademik/ekstrakurikuler",
     },
     {
       icon: Sparkles,
-      title: 'Lingkungan Asri & Nyaman',
-      desc: 'Sekolah ramah anak dengan fasilitas laboratorium modern, perpustakaan digital, dan sarana olahraga.',
-      link: '/profil',
+      title: "Lingkungan Asri & Nyaman",
+      desc: "Sekolah ramah anak dengan fasilitas laboratorium modern, perpustakaan digital, dan sarana olahraga.",
+      link: "/profil",
     },
   ];
 
@@ -191,16 +294,17 @@ export default async function HomePage() {
               </div>
 
               <h1 className="text-3xl sm:text-5xl lg:text-6xl font-black tracking-tight leading-tight sm:leading-none">
-                Membentuk Generasi{' '}
+                Membentuk Generasi{" "}
                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#FFE500] via-yellow-200 to-[#0097DF]">
                   Berkarakter & Berprestasi
                 </span>
               </h1>
 
               <p className="text-slate-200 text-base sm:text-lg max-w-2xl mx-auto lg:mx-0 leading-relaxed font-normal">
-                Selamat datang di website resmi SMP Negeri 1 Ngawi. Lembaga pendidikan terdepan yang
-                mengembangkan potensi kognitif, keimanan, kemandirian literasi, dan prestasi siswa
-                di Kabupaten Ngawi.
+                Selamat datang di website resmi SMP Negeri 1 Ngawi. Lembaga
+                pendidikan terdepan yang mengembangkan potensi kognitif,
+                keimanan, kemandirian literasi, dan prestasi siswa di Kabupaten
+                Ngawi.
               </p>
 
               <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4 pt-2">
@@ -221,16 +325,28 @@ export default async function HomePage() {
               {/* Stat Counter */}
               <div className="grid grid-cols-3 gap-6 pt-6 border-t border-white/15 text-left">
                 <div>
-                  <span className="block text-2xl sm:text-3xl font-extrabold text-[#FFE500]">950+</span>
-                  <span className="block text-xs sm:text-sm text-slate-300">Siswa Aktif</span>
+                  <span className="block text-2xl sm:text-3xl font-extrabold text-[#FFE500]">
+                    950+
+                  </span>
+                  <span className="block text-xs sm:text-sm text-slate-300">
+                    Siswa Aktif
+                  </span>
                 </div>
                 <div>
-                  <span className="block text-2xl sm:text-3xl font-extrabold text-white">55+</span>
-                  <span className="block text-xs sm:text-sm text-slate-300">Guru & Staf</span>
+                  <span className="block text-2xl sm:text-3xl font-extrabold text-white">
+                    55+
+                  </span>
+                  <span className="block text-xs sm:text-sm text-slate-300">
+                    Guru & Staf
+                  </span>
                 </div>
                 <div>
-                  <span className="block text-2xl sm:text-3xl font-extrabold text-[#0097DF]">100+</span>
-                  <span className="block text-xs sm:text-sm text-slate-300">Prestasi Juara</span>
+                  <span className="block text-2xl sm:text-3xl font-extrabold text-[#0097DF]">
+                    100+
+                  </span>
+                  <span className="block text-xs sm:text-sm text-slate-300">
+                    Prestasi Juara
+                  </span>
                 </div>
               </div>
             </div>
@@ -246,7 +362,9 @@ export default async function HomePage() {
                       <h2 className="text-white font-extrabold text-base tracking-tight">
                         SMPN 1 NGAWI
                       </h2>
-                      <p className="text-xs text-[#0097DF] font-semibold">NPSN: 20508537</p>
+                      <p className="text-xs text-[#0097DF] font-semibold">
+                        NPSN: 20508537
+                      </p>
                     </div>
                   </div>
                   <span className="px-3 py-1 bg-[#FFE500]/20 text-[#FFE500] text-xs font-bold rounded-full border border-[#FFE500]/40">
@@ -261,7 +379,9 @@ export default async function HomePage() {
                   </div>
                   <div className="flex items-start gap-3 text-slate-200">
                     <CheckCircle2 className="w-5 h-5 text-[#0097DF] shrink-0 mt-0.5" />
-                    <span>Sekolah Ramah Anak & Berwawasan Adiwiyata Mandiri</span>
+                    <span>
+                      Sekolah Ramah Anak & Berwawasan Adiwiyata Mandiri
+                    </span>
                   </div>
                   <div className="flex items-start gap-3 text-slate-200">
                     <CheckCircle2 className="w-5 h-5 text-[#0097DF] shrink-0 mt-0.5" />
@@ -269,7 +389,9 @@ export default async function HomePage() {
                   </div>
                   <div className="flex items-start gap-3 text-slate-200">
                     <CheckCircle2 className="w-5 h-5 text-[#0097DF] shrink-0 mt-0.5" />
-                    <span>Akses Perpustakaan Cerdas & Pojok Literasi Siswa</span>
+                    <span>
+                      Akses Perpustakaan Cerdas & Pojok Literasi Siswa
+                    </span>
                   </div>
                 </div>
 
@@ -295,52 +417,64 @@ export default async function HomePage() {
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="bg-white rounded-3xl border border-slate-200/80 shadow-sm p-8 sm:p-12">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
-            {/* Foto / Ilustrasi Kepala Sekolah */}
             <div className="lg:col-span-4 text-center">
-              <div className="relative mx-auto w-48 h-56 sm:w-56 sm:h-64 rounded-2xl bg-gradient-to-t from-blue-900 to-slate-800 flex items-center justify-center text-slate-400 shadow-md overflow-hidden border-4 border-slate-50">
-                <div className="text-center p-4">
-                  <GraduationCap className="w-16 h-16 text-blue-400/80 mx-auto mb-2" />
-                  <span className="block text-xs font-semibold text-slate-300 uppercase tracking-wider">
-                    Foto Resmi
-                  </span>
-                  <span className="block text-sm font-bold text-white mt-1">
-                    Kepala Sekolah
-                  </span>
+              {welcome.fotoUrl ? (
+                <div className="relative mx-auto w-48 h-56 sm:w-56 sm:h-64 overflow-hidden rounded-2xl border-4 border-slate-50 bg-slate-100 shadow-md">
+                  <Image
+                    src={welcome.fotoUrl}
+                    alt={welcome.name}
+                    fill
+                    className="object-cover"
+                    sizes="(max-width: 768px) 224px, 224px"
+                  />
                 </div>
-              </div>
+              ) : (
+                <div className="relative mx-auto w-48 h-56 sm:w-56 sm:h-64 rounded-2xl bg-gradient-to-t from-blue-900 to-slate-800 flex items-center justify-center text-slate-400 shadow-md overflow-hidden border-4 border-slate-50">
+                  <div className="text-center p-4">
+                    <GraduationCap className="w-16 h-16 text-blue-400/80 mx-auto mb-2" />
+                    <span className="block text-xs font-semibold text-slate-300 uppercase tracking-wider">
+                      Foto Resmi
+                    </span>
+                    <span className="block text-sm font-bold text-white mt-1">
+                      Kepala Sekolah
+                    </span>
+                  </div>
+                </div>
+              )}
               <div className="mt-4">
-                <h3 className="font-bold text-slate-900 text-lg">Kepala SMPN 1 Ngawi</h3>
-                <p className="text-xs text-blue-600 font-medium">Pembina Tk. I / IV-b</p>
+                <h3 className="font-bold text-slate-900 text-lg">
+                  {welcome.name}
+                </h3>
+                <p className="text-xs text-blue-600 font-medium">
+                  {welcome.role}
+                </p>
               </div>
             </div>
 
-            {/* Isi Sambutan */}
             <div className="lg:col-span-8 space-y-4">
               <div className="inline-flex items-center gap-2 text-[#1E2B7A] font-bold text-xs tracking-wider uppercase bg-blue-50/80 px-3.5 py-1.5 rounded-lg border-l-3 border-[#FFE500]">
-                Sambutan Pimpinan
+                {welcome.title}
               </div>
               <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
-                Membangun Generasi Emas yang Cerdas, Santun, dan Bertanggung Jawab
+                {welcome.subtitle}
               </h2>
               <div className="space-y-3 text-slate-600 text-sm sm:text-base leading-relaxed">
-                <p>
-                  &ldquo;Puji syukur kita panjatkan ke hadirat Tuhan Yang Maha Esa. Website ini hadir
-                  sebagai jembatan komunikasi, transparansi informasi, dan media literasi digital
-                  antara keluarga besar SMP Negeri 1 Ngawi dengan seluruh lapisan masyarakat, siswa,
-                  dan para orang tua/wali murid.&rdquo;
-                </p>
-                <p>
-                  &ldquo;Kami terus berkomitmen mewujudkan iklim belajar yang inklusif, adaptif
-                  terhadap perkembangan teknologi, dan berakar kuat pada nilai-nilai kearifan lokal
-                  serta keimanan.&rdquo;
-                </p>
+                {welcome.content
+                  .split(/\n\s*\n/)
+                  .filter(Boolean)
+                  .map((paragraph, index) => (
+                    <p key={`${paragraph.slice(0, 12)}-${index}`}>
+                      &ldquo;{paragraph.trim()}&rdquo;
+                    </p>
+                  ))}
               </div>
               <div className="pt-2">
                 <Link
                   href="/profil"
                   className="inline-flex items-center gap-1.5 text-sm font-bold text-[#1E2B7A] hover:text-[#0097DF] transition group"
                 >
-                  Pelajari Visi & Misi Kami <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition text-[#0097DF]" />
+                  Pelajari Visi & Misi Kami{" "}
+                  <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition text-[#0097DF]" />
                 </Link>
               </div>
             </div>
@@ -358,8 +492,8 @@ export default async function HomePage() {
             Keunggulan & Karakter SMPN 1 Ngawi
           </h2>
           <p className="text-slate-600 text-sm sm:text-base mt-2">
-            Kami mendedikasikan seluruh sarana dan metode pengajaran terbaik untuk menumbuhkan
-            potensi unik setiap peserta didik.
+            Kami mendedikasikan seluruh sarana dan metode pengajaran terbaik
+            untuk menumbuhkan potensi unik setiap peserta didik.
           </p>
         </div>
 
@@ -378,7 +512,9 @@ export default async function HomePage() {
                   <h3 className="font-bold text-slate-900 text-lg group-hover:text-[#1E2B7A] transition">
                     {item.title}
                   </h3>
-                  <p className="text-sm text-slate-600 leading-relaxed">{item.desc}</p>
+                  <p className="text-sm text-slate-600 leading-relaxed">
+                    {item.desc}
+                  </p>
                 </div>
                 <div className="pt-6">
                   <Link
@@ -402,7 +538,8 @@ export default async function HomePage() {
             <div className="flex items-center justify-between border-b border-slate-200 pb-4">
               <div>
                 <h2 className="text-2xl font-bold text-slate-900 tracking-tight flex items-center gap-2">
-                  <BookOpen className="w-6 h-6 text-blue-600" /> Warta & Berita Terbaru
+                  <BookOpen className="w-6 h-6 text-blue-600" /> Warta & Berita
+                  Terbaru
                 </h2>
                 <p className="text-xs text-slate-500 mt-0.5">
                   Informasi seputar agenda dan aktivitas siswa terkini
@@ -447,7 +584,8 @@ export default async function HomePage() {
                         href="/informasi/berita"
                         className="text-xs font-semibold text-blue-600 hover:text-blue-700 flex items-center gap-1"
                       >
-                        Baca Selengkapnya <ChevronRight className="w-3.5 h-3.5" />
+                        Baca Selengkapnya{" "}
+                        <ChevronRight className="w-3.5 h-3.5" />
                       </Link>
                     </div>
                   </div>
@@ -499,7 +637,8 @@ export default async function HomePage() {
             <div className="bg-white rounded-2xl border border-slate-200/80 p-6 shadow-sm space-y-5">
               <div className="flex items-center justify-between border-b border-slate-100 pb-3">
                 <h3 className="font-bold text-slate-900 text-base flex items-center gap-2">
-                  <Calendar className="w-5 h-5 text-indigo-600" /> Agenda Terdekat
+                  <Calendar className="w-5 h-5 text-indigo-600" /> Agenda
+                  Terdekat
                 </h3>
                 <Link
                   href="/informasi/agenda"
@@ -527,8 +666,12 @@ export default async function HomePage() {
                       <h4 className="text-xs font-bold text-slate-900 leading-snug">
                         {agenda.title}
                       </h4>
-                      <p className="text-[11px] text-slate-500">{agenda.time}</p>
-                      <p className="text-[11px] text-[#0097DF] font-semibold">{agenda.location}</p>
+                      <p className="text-[11px] text-slate-500">
+                        {agenda.time}
+                      </p>
+                      <p className="text-[11px] text-[#0097DF] font-semibold">
+                        {agenda.location}
+                      </p>
                     </div>
                   </div>
                 ))}
@@ -549,8 +692,9 @@ export default async function HomePage() {
               Ingin Mengetahui Lebih Banyak Tentang SMPN 1 Ngawi?
             </h2>
             <p className="text-slate-200 text-sm sm:text-base leading-relaxed">
-              Tim bimbingan dan administrasi kami siap melayani pertanyaan seputar kurikulum, jadwal
-              kegiatan, atau proses pendaftaran peserta didik baru.
+              Tim bimbingan dan administrasi kami siap melayani pertanyaan
+              seputar kurikulum, jadwal kegiatan, atau proses pendaftaran
+              peserta didik baru.
             </p>
             <div className="flex flex-wrap gap-4 pt-4">
               <Link
