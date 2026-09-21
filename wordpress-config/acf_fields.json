@@ -324,6 +324,88 @@
     "graphql_field_name": "dataGaleri"
   },
   {
+    "key": "group_homepage_fields",
+    "title": "Pengaturan Halaman Beranda",
+    "fields": [
+      {
+        "key": "field_homepage_sambutan_judul",
+        "label": "Judul Sambutan",
+        "name": "sambutan_judul",
+        "type": "text",
+        "default_value": "Sambutan Pimpinan",
+        "instructions": "Judul label di bagian sambutan kepala sekolah",
+        "required": 0,
+        "show_in_graphql": 1
+      },
+      {
+        "key": "field_homepage_sambutan_nama",
+        "label": "Nama Kepala Sekolah",
+        "name": "sambutan_nama",
+        "type": "text",
+        "default_value": "Kepala SMPN 1 Ngawi",
+        "required": 0,
+        "show_in_graphql": 1
+      },
+      {
+        "key": "field_homepage_sambutan_jabatan",
+        "label": "Jabatan / Gelar",
+        "name": "sambutan_jabatan",
+        "type": "text",
+        "default_value": "Pembina Tk. I / IV-b",
+        "required": 0,
+        "show_in_graphql": 1
+      },
+      {
+        "key": "field_homepage_sambutan_isi",
+        "label": "Isi Sambutan",
+        "name": "sambutan_isi",
+        "type": "wysiwyg",
+        "instructions": "Tulis sambutan kepala sekolah yang ingin ditampilkan di beranda",
+        "tabs": "all",
+        "toolbar": "full",
+        "media_upload": 1,
+        "required": 0,
+        "show_in_graphql": 1
+      },
+      {
+        "key": "field_homepage_sambutan_foto",
+        "label": "Foto Kepala Sekolah",
+        "name": "sambutan_foto",
+        "type": "image",
+        "instructions": "Upload foto resmi kepala sekolah untuk ditampilkan di halaman beranda",
+        "return_format": "array",
+        "preview_size": "medium",
+        "required": 0,
+        "show_in_graphql": 1
+      }
+    ],
+    "location": [
+      [
+        {
+          "param": "page",
+          "operator": "==",
+          "value": "front-page"
+        }
+      ],
+      [
+        {
+          "param": "page",
+          "operator": "==",
+          "value": "beranda"
+        }
+      ],
+      [
+        {
+          "param": "post_type",
+          "operator": "==",
+          "value": "page"
+        }
+      ]
+    ],
+    "show_in_graphql": 1,
+    "graphql_field_name": "dataHomepage"
+  },
+  {
     "key": "group_profil_sekolah_fields",
     "title": "Pengaturan Halaman Profil Sekolah",
     "fields": [
@@ -485,5 +567,3 @@
     "graphql_field_name": "dataStruktur"
   }
 ]
-
-
