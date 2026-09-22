@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import {
   Video,
@@ -9,15 +9,13 @@ import {
   Filter,
   Calendar,
   Clock,
-  Sparkles,
-  ExternalLink,
   X,
 } from "lucide-react";
 
 interface VideoItem {
   id: string;
   title: string;
-  category: "Profil" | "Dokumenter" | "Karya Siswa" | "Pentas Seni" | "Prestasi";
+  category: string;
   date: string;
   duration: string;
   youtubeId: string;
@@ -25,71 +23,111 @@ interface VideoItem {
   description: string;
 }
 
-const mockVideos: VideoItem[] = [
-  {
-    id: "1",
-    title: "Profil Resmi SMP Negeri 1 Ngawi - Terwujudnya Insan Berkarakter & Unggul",
-    category: "Profil",
-    date: "10 Januari 2026",
-    duration: "06:42",
-    youtubeId: "dQw4w9WgXcQ", // Representative embed id
-    thumbnail: "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?auto=format&fit=crop&w=1200&q=80",
-    description:
-      "Video pengenalan lingkungan kampus, sarana prasarana modern, kurikulum unggulan, serta jejak prestasi emas siswa-siswi Spensa Ngawi.",
-  },
-  {
-    id: "2",
-    title: "Kilau Budaya Spensa: Pagelaran Seni Karawitan & Tari Tradisional",
-    category: "Pentas Seni",
-    date: "15 November 2025",
-    duration: "12:15",
-    youtubeId: "dQw4w9WgXcQ",
-    thumbnail: "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?auto=format&fit=crop&w=1200&q=80",
-    description:
-      "Dokumentasi penampilan spektakuler kolaborasi gamelan karawitan dan tari kolosal pada Gebyar Seni Nusantara memperingati Hari Pahlawan.",
-  },
-  {
-    id: "3",
-    title: "Dokumenter Gelar Karya P5: Inovasi Olah Sampah Mandiri Ramah Lingkungan",
-    category: "Karya Siswa",
-    date: "20 Desember 2025",
-    duration: "08:30",
-    youtubeId: "dQw4w9WgXcQ",
-    thumbnail: "https://images.unsplash.com/photo-1577896851231-70ef18881754?auto=format&fit=crop&w=1200&q=80",
-    description:
-      "Perjalanan siswa kelas 7 dan 8 dalam mengeksplorasi proyek Profil Pelajar Pancasila mengubah limbah plastik menjadi produk siap guna.",
-  },
-  {
-    id: "4",
-    title: "Highlight Laga Final Kejuaraan Futsal Antar Pelajar Se-Karesidenan",
-    category: "Prestasi",
-    date: "25 Oktober 2025",
-    duration: "04:55",
-    youtubeId: "dQw4w9WgXcQ",
-    thumbnail: "https://images.unsplash.com/photo-1574629810360-7efbbe195018?auto=format&fit=crop&w=1200&q=80",
-    description:
-      "Detik-detik kemenangan tim futsal SMPN 1 Ngawi mengangkat trofi juara pertama diiringi riuh yel-yel supporter setia.",
-  },
-  {
-    id: "5",
-    title: "Dokumentasi MPLS Ramah Anak: Menembus Batas Mengukir Prestasi",
-    category: "Dokumenter",
-    date: "22 Juli 2025",
-    duration: "10:18",
-    youtubeId: "dQw4w9WgXcQ",
-    thumbnail: "https://images.unsplash.com/photo-1541829070764-84a7d30dd3f3?auto=format&fit=crop&w=1200&q=80",
-    description:
-      "Rangkuman Masa Pengenalan Lingkungan Sekolah bagi peserta didik baru angkatan 2025/2026 yang penuh kehangatan, edukatif, dan bebas perpeloncoan.",
-  },
-];
+interface WpGalleryVideo {
+  id: number;
+  date: string;
+  title?: { rendered?: string };
+  content?: { rendered?: string };
+  _embedded?: {
+    "wp:featuredmedia"?: Array<{ source_url?: string }>;
+  };
+  acf?: {
+    tipe_media?: string;
+    youtube_url?: string;
+    kategori?: string;
+    durasi?: string;
+  };
+}
 
-const categories = ["Semua", "Profil", "Dokumenter", "Karya Siswa", "Pentas Seni", "Prestasi"];
+function decodeHtml(value: string): string {
+  return value
+    .replace(/<[^>]*>/g, " ")
+    .replace(/&amp;/g, "&")
+    .replace(/&quot;/g, '"')
+    .replace(/&#039;/g, "'")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function formatDate(value: string): string {
+  const date = new Date(value);
+  return Number.isNaN(date.getTime())
+    ? value
+    : new Intl.DateTimeFormat("id-ID", {
+        day: "2-digit",
+        month: "long",
+        year: "numeric",
+      }).format(date);
+}
+
+function getYoutubeId(url?: string): string | undefined {
+  if (!url) return undefined;
+  try {
+    const parsed = new URL(url);
+    return parsed.hostname.includes("youtu.be")
+      ? parsed.pathname.slice(1)
+      : parsed.searchParams.get("v") || parsed.pathname.split("/").pop();
+  } catch {
+    return undefined;
+  }
+}
 
 export default function VideoPage() {
+  const [videos, setVideos] = useState<VideoItem[]>([]);
+  const [categories, setCategories] = useState(["Semua"]);
+  const [isLoading, setIsLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState("Semua");
   const [activeVideo, setActiveVideo] = useState<VideoItem | null>(null);
 
-  const filteredVideos = mockVideos.filter((video) => {
+  useEffect(() => {
+    async function loadVideos() {
+      try {
+        const wpUrl =
+          process.env.NEXT_PUBLIC_WORDPRESS_API_URL?.replace(/\/graphql\/?$/, "") ||
+          "https://sp1ng.smpn1ngawi.sch.id/wp";
+        const response = await fetch(
+          `${wpUrl}/wp-json/wp/v2/galeri?_embed&per_page=100&orderby=date&order=desc`,
+          { cache: "no-store" },
+        );
+        if (!response.ok) throw new Error(`WordPress API: ${response.status}`);
+
+        const posts: WpGalleryVideo[] = await response.json();
+        const mapped: VideoItem[] = posts
+          .filter((post) => post.acf?.tipe_media === "Video")
+          .map((post) => {
+            const acf = post.acf || {};
+            const content = decodeHtml(post.content?.rendered || "");
+            const youtubeId = getYoutubeId(acf.youtube_url);
+            return {
+              id: String(post.id),
+              title: decodeHtml(post.title?.rendered || "Video sekolah"),
+              category: acf.kategori || "Kegiatan",
+              date: formatDate(post.date),
+              duration: acf.durasi || "-",
+              youtubeId: youtubeId || "",
+              thumbnail:
+                post._embedded?.["wp:featuredmedia"]?.[0]?.source_url ||
+                (youtubeId ? `https://img.youtube.com/vi/${youtubeId}/hqdefault.jpg` : ""),
+              description: content || "Video dokumentasi SMPN 1 Ngawi.",
+            };
+          })
+          .filter((video) => video.youtubeId);
+        setVideos(mapped);
+        setCategories(["Semua", ...Array.from(new Set(mapped.map((video) => video.category)))]);
+      } catch (error) {
+        console.error("Gagal memuat video dari WordPress:", error);
+        setVideos([]);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+
+    loadVideos();
+  }, []);
+
+  const filteredVideos = videos.filter((video) => {
     if (selectedCategory === "Semua") return true;
     return video.category === selectedCategory;
   });
@@ -151,6 +189,15 @@ export default function VideoPage() {
 
       {/* Video Grid */}
       <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10">
+        {isLoading ? (
+          <div className="rounded-2xl bg-white border border-slate-100 p-12 text-center text-sm text-slate-500">
+            Memuat video dari WordPress...
+          </div>
+        ) : filteredVideos.length === 0 ? (
+          <div className="rounded-2xl bg-white border border-slate-100 p-12 text-center text-sm text-slate-500">
+            Belum ada video yang sesuai.
+          </div>
+        ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredVideos.map((video) => (
             <div
@@ -218,6 +265,7 @@ export default function VideoPage() {
             </div>
           ))}
         </div>
+        )}
       </section>
 
       {/* Video Modal Player */}
