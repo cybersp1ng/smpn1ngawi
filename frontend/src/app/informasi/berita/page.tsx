@@ -207,7 +207,7 @@ export default function BeritaPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {isLoading ? (
               <div className="md:col-span-2 lg:col-span-3 rounded-3xl border border-slate-200 bg-white p-10 text-center text-sm text-slate-500">
-                Memuat berita dari WordPress...
+                Memuat berita dari cyber sp1ng...
               </div>
             ) : filteredBerita.length === 0 ? (
               <div className="md:col-span-2 lg:col-span-3 rounded-3xl border border-slate-200 bg-white p-10 text-center text-sm text-slate-500">
