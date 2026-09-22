@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import {
   BookOpen,
@@ -10,8 +10,6 @@ import {
   Clock,
   ChevronRight,
   ArrowRight,
-  Sparkles,
-  Tag,
   X,
 } from 'lucide-react';
 
@@ -24,85 +22,102 @@ interface BeritaItem {
   ringkasan: string;
   isiLengkap: string;
   bacaMenit: string;
+  gambar?: string;
 }
 
-const DAFTAR_BERITA: BeritaItem[] = [
-  {
-    id: '1',
-    judul: 'SMPN 1 Ngawi Sukses Gelar Panen Karya P5 Bertema Kearifan Lokal & Gaya Hidup Berkelanjutan',
-    kategori: 'Kurikulum & P5',
-    tanggal: '16 Maret 2026',
-    penulis: 'Humas SMPN 1 Ngawi',
-    bacaMenit: '3 mnt baca',
-    ringkasan:
-      'Ratusan karya seni, produk olahan pangan lokal khas Ngawi, serta inovasi daur ulang sampah karya siswa kelas VII dan VIII dipamerkan dengan meriah di halaman sekolah.',
-    isiLengkap:
-      'Kegiatan Gelar Karya Projek Penguatan Profil Pelajar Pancasila (P5) SMP Negeri 1 Ngawi berlangsung spektakuler. Acara ini dihadiri oleh Kepala Dinas Pendidikan Kabupaten Ngawi, pengawas sekolah, komite, dan perwakilan orang tua murid. Para siswa memamerkan berbagai kreasi mulai dari kain batik jumputan motif khas Ngawi, miniatur benteng Pendem, hingga inovasi pengolahan kompos organik dari dedaunan sekolah.',
-  },
-  {
-    id: '2',
-    judul: 'Kontingen Spenza Raih Juara Umum Pada Ajang Olimpiade Sains dan Seni Tingkat Kabupaten',
-    kategori: 'Prestasi',
-    tanggal: '12 Maret 2026',
-    penulis: 'Tim Pembina Prestasi',
-    bacaMenit: '4 mnt baca',
-    ringkasan:
-      'Dengan perolehan 7 medali emas, 4 perak, dan 3 perunggu, SMP Negeri 1 Ngawi dinobatkan kembali sebagai Juara Umum kejuaraan pelajar tahun 2026.',
-    isiLengkap:
-      'Hasil membanggakan kembali dipersembahkan oleh putra-putri terbaik SMPN 1 Ngawi. Melalui perjuangan sengit di babak final olimpiade matematika, IPA terpadu, dan lomba tari kreasi, kontingen sekolah berhasil membawa pulang piala bergilir juara umum yang diserahkan langsung oleh Bupati Ngawi.',
-  },
-  {
-    id: '3',
-    judul: 'Workshop Peningkatan Kompetensi Guru: Optimalisasi AI dan Media Digital Dalam Pembelajaran',
-    kategori: 'Workshop Guru',
-    tanggal: '05 Maret 2026',
-    penulis: 'Wakasek Kurikulum',
-    bacaMenit: '3 mnt baca',
-    ringkasan:
-      'Seluruh dewan guru mengikuti bimbingan teknis pemanfaatan media interaktif dan kecerdasan buatan etis untuk menyusun modul ajar berdiferensiasi.',
-    isiLengkap:
-      'Sebagai wujud komitmen sekolah dalam adaptasi teknologi, SMPN 1 Ngawi menyelenggarakan workshop internal selama dua hari. Narasumber ahli dari perguruan tinggi dihadirkan untuk mendampingi para pendidik merancang materi pembelajaran berbasis visual animasi dan kuis digital interaktif.',
-  },
-  {
-    id: '4',
-    judul: 'Peringatan Isra Miraj 1447 H: Memperteguh Sholat dan Karakter Moral Generasi Muda',
-    kategori: 'Kegiatan Siswa',
-    tanggal: '24 Februari 2026',
-    penulis: 'Rohis Al-Ikhlas',
-    bacaMenit: '2 mnt baca',
-    ringkasan:
-      'Rangkaian pengajian akbar, penampilan tim hadrah banjari siswa, serta santunan anak yatim diselenggarakan khidmat di aula sekolah.',
-    isiLengkap:
-      'Keluarga besar SMP Negeri 1 Ngawi memperingati Isra Miraj Nabi Muhammad SAW dengan penuh kekhidmatan. Acara diawali dengan pembacaan ayat suci Al-Qur’an oleh siswa berprestasi MTQ dan dilanjutkan tausiyah interaktif mengenai pentingnya menjaga adab, kejujuran, dan kedisiplinan beribadah di era digital.',
-  },
-  {
-    id: '5',
-    judul: 'Aksi Bersih Lingkungan & Penanaman Pohon Rindang Menuju Adiwiyata Mandiri Nasional',
-    kategori: 'Kegiatan Siswa',
-    tanggal: '15 Februari 2026',
-    penulis: 'Tim Adiwiyata',
-    bacaMenit: '3 mnt baca',
-    ringkasan:
-      'Seluruh warga sekolah bergotong royong membersihkan taman edukasi, merawat green house, dan menanam 100 bibit pohon peneduh di sekitar lingkungan sekolah.',
-    isiLengkap:
-      'Gerakan Jumat Bersih dan Peduli Lingkungan merupakan agenda rutin SMP Negeri 1 Ngawi. Pada kesempatan kali ini, kader Adiwiyata sekolah mengkampanyekan pengurangan sampah plastik sekali pakai dengan membagikan tumbler minum kepada peserta didik baru.',
-  },
-];
+interface WpPost {
+  id: number;
+  date: string;
+  title?: { rendered?: string };
+  excerpt?: { rendered?: string };
+  content?: { rendered?: string };
+  _embedded?: {
+    author?: Array<{ name?: string }>;
+    'wp:term'?: Array<Array<{ name?: string }>>;
+    'wp:featuredmedia'?: Array<{ source_url?: string }>;
+  };
+}
 
-const KATEGORI_BERITA = [
-  'Semua',
-  'Kurikulum & P5',
-  'Prestasi',
-  'Kegiatan Siswa',
-  'Workshop Guru',
-];
+function decodeHtml(value: string): string {
+  return value
+    .replace(/<[^>]*>/g, ' ')
+    .replace(/&amp;/g, '&')
+    .replace(/&quot;/g, '"')
+    .replace(/&#039;/g, "'")
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function formatDate(value: string): string {
+  const date = new Date(value);
+  return Number.isNaN(date.getTime())
+    ? value
+    : new Intl.DateTimeFormat('id-ID', {
+        day: '2-digit',
+        month: 'long',
+        year: 'numeric',
+      }).format(date);
+}
+
+function readingTime(content: string): string {
+  const minutes = Math.max(1, Math.ceil(content.split(/\s+/).filter(Boolean).length / 200));
+  return `${minutes} mnt baca`;
+}
 
 export default function BeritaPage() {
+  const [daftarBerita, setDaftarBerita] = useState<BeritaItem[]>([]);
+  const [kategoriBerita, setKategoriBerita] = useState<string[]>(['Semua']);
+  const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedKategori, setSelectedKategori] = useState('Semua');
   const [activeArticle, setActiveArticle] = useState<BeritaItem | null>(null);
 
-  const filteredBerita = DAFTAR_BERITA.filter((item) => {
+  useEffect(() => {
+    async function loadBerita() {
+      try {
+        const wpUrl =
+          process.env.NEXT_PUBLIC_WORDPRESS_API_URL?.replace(/\/graphql\/?$/, '') ||
+          'https://sp1ng.smpn1ngawi.sch.id/wp';
+        const response = await fetch(
+          `${wpUrl}/wp-json/wp/v2/posts?_embed&per_page=100&orderby=date&order=desc`,
+          { cache: 'no-store' },
+        );
+        if (!response.ok) throw new Error(`WordPress API: ${response.status}`);
+
+        const posts: WpPost[] = await response.json();
+        const mapped = posts.map((post) => {
+          const content = decodeHtml(post.content?.rendered || '');
+          const categories = post._embedded?.['wp:term']?.flatMap((terms) =>
+            terms.map((term) => term.name || '').filter(Boolean),
+          ) || [];
+          return {
+            id: String(post.id),
+            judul: decodeHtml(post.title?.rendered || 'Berita sekolah'),
+            kategori: categories[0] || 'Berita Sekolah',
+            tanggal: formatDate(post.date),
+            penulis: post._embedded?.author?.[0]?.name || 'SMPN 1 Ngawi',
+            ringkasan: decodeHtml(post.excerpt?.rendered || content).slice(0, 240),
+            isiLengkap: content,
+            bacaMenit: readingTime(content),
+            gambar: post._embedded?.['wp:featuredmedia']?.[0]?.source_url,
+          };
+        });
+        setDaftarBerita(mapped);
+        setKategoriBerita(['Semua', ...Array.from(new Set(mapped.map((item) => item.kategori)))]);
+      } catch (error) {
+        console.error('Gagal memuat berita dari WordPress:', error);
+        setDaftarBerita([]);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+
+    loadBerita();
+  }, []);
+
+  const filteredBerita = daftarBerita.filter((item) => {
     const matchesSearch =
       item.judul.toLowerCase().includes(searchQuery.toLowerCase()) ||
       item.ringkasan.toLowerCase().includes(searchQuery.toLowerCase());
@@ -172,7 +187,7 @@ export default function BeritaPage() {
             {/* Filter Kategori Chips */}
             <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-slate-100">
               <span className="text-xs font-bold text-slate-400 mr-2">Topik:</span>
-              {KATEGORI_BERITA.map((kat) => (
+              {kategoriBerita.map((kat) => (
                 <button
                   key={kat}
                   onClick={() => setSelectedKategori(kat)}
@@ -190,14 +205,24 @@ export default function BeritaPage() {
 
           {/* Grid Artikel Berita */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {filteredBerita.map((item) => (
+            {isLoading ? (
+              <div className="md:col-span-2 lg:col-span-3 rounded-3xl border border-slate-200 bg-white p-10 text-center text-sm text-slate-500">
+                Memuat berita dari WordPress...
+              </div>
+            ) : filteredBerita.length === 0 ? (
+              <div className="md:col-span-2 lg:col-span-3 rounded-3xl border border-slate-200 bg-white p-10 text-center text-sm text-slate-500">
+                Tidak ada berita yang sesuai.
+              </div>
+            ) : filteredBerita.map((item) => (
               <article
                 key={item.id}
                 className="bg-white rounded-3xl border border-slate-200/80 shadow-sm hover:shadow-md hover:-translate-y-1 hover:border-[#0097DF]/40 transition-all overflow-hidden flex flex-col justify-between group"
               >
                 <div>
-                  {/* Banner Image Placeholder */}
-                  <div className="h-48 bg-gradient-to-tr from-[#111A4D] to-[#1E2B7A] relative p-6 flex flex-col justify-between">
+                  <div
+                    className="h-48 bg-gradient-to-tr from-[#111A4D] to-[#1E2B7A] relative p-6 flex flex-col justify-between bg-cover bg-center"
+                    style={item.gambar ? { backgroundImage: `linear-gradient(135deg, rgba(17,26,77,.85), rgba(30,43,122,.6)), url("${item.gambar}")` } : undefined}
+                  >
                     <span className="self-start px-3 py-1 rounded-full text-[11px] font-bold bg-[#FFE500] text-[#111A4D] shadow-xs">
                       {item.kategori}
                     </span>
