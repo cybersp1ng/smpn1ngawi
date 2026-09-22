@@ -191,7 +191,7 @@ export default function VideoPage() {
       <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10">
         {isLoading ? (
           <div className="rounded-2xl bg-white border border-slate-100 p-12 text-center text-sm text-slate-500">
-            Memuat video dari WordPress...
+            Memuat video dari cyber sp1ng...
           </div>
         ) : filteredVideos.length === 0 ? (
           <div className="rounded-2xl bg-white border border-slate-100 p-12 text-center text-sm text-slate-500">
