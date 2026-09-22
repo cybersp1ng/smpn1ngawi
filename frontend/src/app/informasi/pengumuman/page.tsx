@@ -1,14 +1,12 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import {
   Bell,
   Search,
   Download,
-  FileText,
   Calendar,
-  AlertCircle,
   ChevronRight,
   ShieldCheck,
 } from 'lucide-react';
@@ -22,71 +20,113 @@ interface PengumumanItem {
   sasaran: string;
   deskripsi: string;
   ukuranFile: string;
+  fileUrl?: string;
 }
 
-const DAFTAR_PENGUMUMAN: PengumumanItem[] = [
-  {
-    id: '1',
-    nomorSurat: '421.3/145/404.301.01/2026',
-    judul: 'Edaran Pelaksanaan Asesmen Sumatif Akhir Semester (ASAS) Genap TP 2025/2026',
-    tanggal: '18 Maret 2026',
-    urgensi: 'Penting',
-    sasaran: 'Seluruh Siswa Kelas VII, VIII, IX & Orang Tua',
-    deskripsi:
-      'Pemberitahuan resmi mengenai jadwal, tata tertib, pembagian sesi ujian berbasis komputer (CBT), serta syarat kehadiran asesmen.',
-    ukuranFile: '340 KB (PDF)',
-  },
-  {
-    id: '2',
-    nomorSurat: '421.3/128/404.301.01/2026',
-    judul: 'Informasi Alur & Verifikasi Berkas Penerimaan Peserta Didik Baru (PPDB) 2026/2027',
-    tanggal: '15 Maret 2026',
-    urgensi: 'PPDB',
-    sasaran: 'Calon Peserta Didik & Orang Tua/Wali',
-    deskripsi:
-      'Panduan lengkap tahapan pendaftaran jalur zonasi, afirmasi, prestasi, dan perpindahan tugas orang tua beserta jadwal verifikasi berkas.',
-    ukuranFile: '1.2 MB (PDF)',
-  },
-  {
-    id: '3',
-    nomorSurat: '421.3/095/404.301.01/2026',
-    judul: 'Edaran Jam Belajar dan Rangkaian Kegiatan Pondok Ramadhan 1447 H',
-    tanggal: '10 Maret 2026',
-    urgensi: 'Umum',
-    sasaran: 'Keluarga Besar SMPN 1 Ngawi',
-    deskripsi:
-      'Penyesuaian durasi jam tatap muka KBM selama bulan suci Ramadhan, agenda tadarus bersama, bakti sosial, dan sholat tarawih berjamaah.',
-    ukuranFile: '420 KB (PDF)',
-  },
-  {
-    id: '4',
-    nomorSurat: '421.3/082/404.301.01/2026',
-    judul: 'Undangan Rapat Koordinasi Komite Sekolah dan Orang Tua/Wali Murid Kelas IX',
-    tanggal: '02 Maret 2026',
-    urgensi: 'Penting',
-    sasaran: 'Wali Murid Kelas IX',
-    deskripsi:
-      'Penyampaian program pendalaman materi, simulasi try out ujian kelulusan, dan sosialisasi bimbingan karir seleksi masuk SMA/SMK.',
-    ukuranFile: '280 KB (PDF)',
-  },
-  {
-    id: '5',
-    nomorSurat: '421.3/050/404.301.01/2026',
-    judul: 'Pemberitahuan Libur Resmi dan Pembelajaran Mandiri Pasca Asesmen Tengah Semester',
-    tanggal: '20 Februari 2026',
-    urgensi: 'Umum',
-    sasaran: 'Seluruh Siswa',
-    deskripsi:
-      'Informasi hari libur fakultatif dan penugasan proyek literasi mandiri di rumah dalam rangka jeda tengah semester.',
-    ukuranFile: '215 KB (PDF)',
-  },
-];
+type Urgensi = 'Penting' | 'Mendesak' | 'Umum' | 'PPDB';
+
+interface WpFile {
+  url?: string;
+  filesize?: number;
+  mime_type?: string;
+}
+
+interface WpPengumuman {
+  id: number;
+  date: string;
+  title?: { rendered?: string };
+  content?: { rendered?: string };
+  acf?: {
+    nomor_surat?: string;
+    tanggal_pengumuman?: string;
+    urgensi?: string;
+    sasaran?: string;
+    file_lampiran?: WpFile | string | number;
+  };
+}
+
+function decodeHtml(value: string): string {
+  return value
+    .replace(/<[^>]*>/g, ' ')
+    .replace(/&amp;/g, '&')
+    .replace(/&quot;/g, '"')
+    .replace(/&#039;/g, "'")
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function formatDate(value: string): string {
+  const date = new Date(`${value}T00:00:00`);
+  if (Number.isNaN(date.getTime())) return value;
+  return new Intl.DateTimeFormat('id-ID', {
+    day: '2-digit',
+    month: 'long',
+    year: 'numeric',
+  }).format(date);
+}
+
+function getFileDetails(file: WpFile | string | number | undefined): { url?: string; label: string } {
+  if (!file) return { label: 'Tidak ada lampiran' };
+  if (typeof file === 'string') return { url: file, label: 'Dokumen' };
+  if (typeof file === 'number') return { label: 'Dokumen' };
+  const size = file.filesize ? `${Math.ceil(file.filesize / 1024)} KB` : 'Dokumen';
+  const type = file.mime_type?.split('/').pop()?.toUpperCase() || 'PDF';
+  return { url: file.url, label: `${size} (${type})` };
+}
 
 export default function PengumumanPage() {
+  const [daftarPengumuman, setDaftarPengumuman] = useState<PengumumanItem[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedUrgensi, setSelectedUrgensi] = useState<string>('Semua');
 
-  const filteredPengumuman = DAFTAR_PENGUMUMAN.filter((item) => {
+  useEffect(() => {
+    async function loadPengumuman() {
+      try {
+        const wpUrl =
+          process.env.NEXT_PUBLIC_WORDPRESS_API_URL?.replace(/\/graphql\/?$/, '') ||
+          'https://sp1ng.smpn1ngawi.sch.id/wp';
+        const response = await fetch(
+          `${wpUrl}/wp-json/wp/v2/pengumuman?_embed&per_page=100&orderby=date&order=desc`,
+          { cache: 'no-store' },
+        );
+        if (!response.ok) throw new Error(`WordPress API: ${response.status}`);
+
+        const posts: WpPengumuman[] = await response.json();
+        setDaftarPengumuman(
+          posts.map((post) => {
+            const acf = post.acf || {};
+            const file = getFileDetails(acf.file_lampiran);
+            const urgensi: Urgensi = acf.urgensi === 'Mendesak' || acf.urgensi === 'Penting' || acf.urgensi === 'PPDB'
+              ? acf.urgensi
+              : 'Umum';
+            return {
+              id: String(post.id),
+              nomorSurat: acf.nomor_surat || '-',
+              judul: decodeHtml(post.title?.rendered || 'Pengumuman'),
+              tanggal: formatDate(acf.tanggal_pengumuman || post.date),
+              urgensi,
+              sasaran: acf.sasaran || 'Keluarga besar SMPN 1 Ngawi',
+              deskripsi: decodeHtml(post.content?.rendered || ''),
+              ukuranFile: file.label,
+              fileUrl: file.url,
+            };
+          }),
+        );
+      } catch (error) {
+        console.error('Gagal memuat pengumuman dari WordPress:', error);
+        setDaftarPengumuman([]);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+
+    loadPengumuman();
+  }, []);
+
+  const filteredPengumuman = daftarPengumuman.filter((item) => {
     const matchesSearch =
       item.judul.toLowerCase().includes(searchQuery.toLowerCase()) ||
       item.nomorSurat.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -175,7 +215,15 @@ export default function PengumumanPage() {
 
           {/* List Kartu Pengumuman */}
           <div className="space-y-4">
-            {filteredPengumuman.map((item) => (
+            {isLoading ? (
+              <div className="rounded-3xl border border-slate-200 bg-white p-10 text-center text-sm text-slate-500">
+                Memuat pengumuman dari WordPress...
+              </div>
+            ) : filteredPengumuman.length === 0 ? (
+              <div className="rounded-3xl border border-slate-200 bg-white p-10 text-center text-sm text-slate-500">
+                Tidak ada pengumuman yang sesuai.
+              </div>
+            ) : filteredPengumuman.map((item) => (
               <div
                 key={item.id}
                 className="bg-white rounded-3xl border border-slate-200/80 shadow-sm hover:shadow-md hover:border-[#0097DF]/40 transition-all p-6 sm:p-8 flex flex-col lg:flex-row lg:items-center justify-between gap-6 group"
@@ -217,13 +265,18 @@ export default function PengumumanPage() {
 
                 {/* Tombol Unduh Lampiran */}
                 <div className="shrink-0 pt-4 lg:pt-0 border-t lg:border-t-0 border-slate-100 flex flex-col sm:flex-row lg:flex-col items-start sm:items-center lg:items-end gap-2">
-                  <button
-                    type="button"
-                    onClick={() => alert(`Mengunduh dokumen: ${item.judul}`)}
+                  <a
+                    href={item.fileUrl || '#'}
+                    target={item.fileUrl ? '_blank' : undefined}
+                    rel={item.fileUrl ? 'noreferrer' : undefined}
+                    aria-disabled={!item.fileUrl}
+                    onClick={(event) => {
+                      if (!item.fileUrl) event.preventDefault();
+                    }}
                     className="inline-flex items-center gap-2 px-5 py-3 rounded-2xl bg-[#1E2B7A] hover:bg-[#151E54] text-[#FFE500] font-extrabold text-xs transition shadow-sm"
                   >
-                    <Download className="w-4 h-4" /> Unduh Dokumen (PDF)
-                  </button>
+                    <Download className="w-4 h-4" /> {item.fileUrl ? 'Unduh Dokumen' : 'Tidak Ada Lampiran'}
+                  </a>
                   <span className="text-[11px] text-slate-400 font-mono">
                     Ukuran: {item.ukuranFile}
                   </span>
