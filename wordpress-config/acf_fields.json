@@ -203,12 +203,46 @@
         "show_in_graphql": 1
       },
       {
+        "key": "field_agenda_tanggal_selesai",
+        "label": "Tanggal Selesai",
+        "name": "tanggal_selesai",
+        "type": "date_picker",
+        "display_format": "d/m/Y",
+        "return_format": "Y-m-d",
+        "required": 0,
+        "show_in_graphql": 1
+      },
+      {
         "key": "field_agenda_waktu",
         "label": "Waktu Pelaksanaan",
         "name": "waktu",
         "type": "text",
         "instructions": "Contoh: 07.30 - 12.00 WIB",
         "required": 1,
+        "show_in_graphql": 1
+      },
+      {
+        "key": "field_agenda_kategori",
+        "label": "Kategori Kegiatan",
+        "name": "kategori",
+        "type": "select",
+        "choices": {
+          "Akademik": "Akademik",
+          "Kesiswaan": "Kesiswaan",
+          "Ujian": "Ujian",
+          "Keagamaan": "Keagamaan",
+          "Upacara": "Upacara"
+        },
+        "default_value": "Akademik",
+        "required": 1,
+        "show_in_graphql": 1
+      },
+      {
+        "key": "field_agenda_penyelenggara",
+        "label": "Penyelenggara",
+        "name": "penyelenggara",
+        "type": "text",
+        "required": 0,
         "show_in_graphql": 1
       },
       {
@@ -245,6 +279,22 @@
         "display_format": "d/m/Y",
         "return_format": "Y-m-d",
         "required": 1,
+        "show_in_graphql": 1
+      },
+      {
+        "key": "field_pengumuman_nomor_surat",
+        "label": "Nomor Surat",
+        "name": "nomor_surat",
+        "type": "text",
+        "required": 0,
+        "show_in_graphql": 1
+      },
+      {
+        "key": "field_pengumuman_sasaran",
+        "label": "Sasaran Pengumuman",
+        "name": "sasaran",
+        "type": "text",
+        "required": 0,
         "show_in_graphql": 1
       },
       {
@@ -307,6 +357,32 @@
         "name": "youtube_url",
         "type": "url",
         "instructions": "Hanya diisi jika Tipe Media adalah Video (Contoh: https://www.youtube.com/watch?v=xxxx)",
+        "required": 0,
+        "show_in_graphql": 1
+      },
+      {
+        "key": "field_galeri_kategori",
+        "label": "Kategori Galeri",
+        "name": "kategori",
+        "type": "select",
+        "choices": {
+          "Kegiatan": "Kegiatan",
+          "Prestasi": "Prestasi",
+          "Lomba": "Lomba",
+          "Fasilitas": "Fasilitas",
+          "Seni & Budaya": "Seni & Budaya",
+          "P5": "P5"
+        },
+        "default_value": "Kegiatan",
+        "required": 1,
+        "show_in_graphql": 1
+      },
+      {
+        "key": "field_galeri_durasi",
+        "label": "Durasi Video",
+        "name": "durasi",
+        "type": "text",
+        "instructions": "Contoh: 06:42",
         "required": 0,
         "show_in_graphql": 1
       }
@@ -485,5 +561,3 @@
     "graphql_field_name": "dataStruktur"
   }
 ]
-
-
