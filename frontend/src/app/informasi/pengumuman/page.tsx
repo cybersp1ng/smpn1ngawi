@@ -217,7 +217,7 @@ export default function PengumumanPage() {
           <div className="space-y-4">
             {isLoading ? (
               <div className="rounded-3xl border border-slate-200 bg-white p-10 text-center text-sm text-slate-500">
-                Memuat pengumuman dari WordPress...
+                Memuat pengumuman dari cyber sp1ng...
               </div>
             ) : filteredPengumuman.length === 0 ? (
               <div className="rounded-3xl border border-slate-200 bg-white p-10 text-center text-sm text-slate-500">
