@@ -86,8 +86,10 @@ export default function GaleriPage() {
     async function loadGallery() {
       try {
         const wpUrl =
-          process.env.NEXT_PUBLIC_WORDPRESS_API_URL?.replace(/\/graphql\/?$/, "") ||
-          "https://sp1ng.smpn1ngawi.sch.id/wp";
+          process.env.NEXT_PUBLIC_WORDPRESS_API_URL?.replace(
+            /\/graphql\/?$/,
+            "",
+          ) || "https://sp1ng.smpn1ngawi.sch.id/wp";
         const response = await fetch(
           `${wpUrl}/wp-json/wp/v2/galeri?_embed&per_page=100&orderby=date&order=desc`,
           { cache: "no-store" },
@@ -95,25 +97,31 @@ export default function GaleriPage() {
         if (!response.ok) throw new Error(`WordPress API: ${response.status}`);
 
         const posts: WpGallery[] = await response.json();
-        const mapped: GalleryItem[] = posts.map((post) => {
-          const acf = post.acf || {};
-          const content = decodeHtml(post.content?.rendered || "");
-          const mediaType = acf.tipe_media === "Video" ? "Video" : "Foto";
-          return {
-            id: String(post.id),
-            title: decodeHtml(post.title?.rendered || "Dokumentasi sekolah"),
-            category: acf.kategori || "Kegiatan",
-            date: formatDate(post.date),
-            image: post._embedded?.["wp:featuredmedia"]?.[0]?.source_url || "",
-            caption: content || "Dokumentasi kegiatan SMPN 1 Ngawi.",
-            mediaType,
-            videoUrl: getYoutubeEmbedUrl(acf.youtube_url),
-          };
-        });
+        const mapped: GalleryItem[] = posts
+          .filter((post) => post.acf?.tipe_media !== "Video")
+          .map((post) => {
+            const acf = post.acf || {};
+            const content = decodeHtml(post.content?.rendered || "");
+            const mediaType = acf.tipe_media === "Video" ? "Video" : "Foto";
+            return {
+              id: String(post.id),
+              title: decodeHtml(post.title?.rendered || "Dokumentasi sekolah"),
+              category: acf.kategori || "Kegiatan",
+              date: formatDate(post.date),
+              image:
+                post._embedded?.["wp:featuredmedia"]?.[0]?.source_url || "",
+              caption: content || "Dokumentasi kegiatan SMPN 1 Ngawi.",
+              mediaType,
+              videoUrl: getYoutubeEmbedUrl(acf.youtube_url),
+            };
+          });
         setGallery(mapped);
-        setCategories(["Semua", ...Array.from(new Set(mapped.map((item) => item.category)))]);
+        setCategories([
+          "Semua",
+          ...Array.from(new Set(mapped.map((item) => item.category))),
+        ]);
       } catch (error) {
-        console.error("Gagal memuat galeri dari WordPress:", error);
+        console.error("Gagal memuat galeri:", error);
         setGallery([]);
       } finally {
         setIsLoading(false);
@@ -135,9 +143,13 @@ export default function GaleriPage() {
         <div className="absolute inset-0 bg-[radial-gradient(#0097DF_1px,transparent_1px)] [background-size:24px_24px] opacity-20" />
         <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="flex items-center gap-2 text-sm text-[#0097DF] mb-4 font-medium">
-            <Link href="/" className="hover:underline">Beranda</Link>
+            <Link href="/" className="hover:underline">
+              Beranda
+            </Link>
             <ChevronRight className="h-4 w-4" />
-            <Link href="/informasi" className="hover:underline">Informasi</Link>
+            <Link href="/informasi" className="hover:underline">
+              Informasi
+            </Link>
             <ChevronRight className="h-4 w-4" />
             <span className="text-white">Galeri Foto</span>
           </div>
@@ -147,10 +159,15 @@ export default function GaleriPage() {
               <Camera className="h-3.5 w-3.5" /> Dokumentasi Visual
             </div>
             <h1 className="text-3xl font-extrabold tracking-tight sm:text-5xl text-white">
-              Galeri Kegiatan <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#FFE500] to-amber-300">SMPN 1 Ngawi</span>
+              Galeri Kegiatan{" "}
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#FFE500] to-amber-300">
+                SMPN 1 Ngawi
+              </span>
             </h1>
             <p className="mt-4 text-base sm:text-lg text-slate-200">
-              Koleksi dokumentasi momen bersejarah, ragam kegiatan belajar mengajar, prestasi kejuaraan, serta sarana fasilitas modern sekolah.
+              Koleksi dokumentasi momen bersejarah, ragam kegiatan belajar
+              mengajar, prestasi kejuaraan, serta sarana fasilitas modern
+              sekolah.
             </p>
           </div>
         </div>
@@ -161,7 +178,9 @@ export default function GaleriPage() {
         <div className="rounded-2xl bg-white p-4 sm:p-5 shadow-xl border border-slate-100 flex items-center justify-between gap-4">
           <div className="flex items-center gap-2 overflow-x-auto pb-1 sm:pb-0 w-full">
             <Filter className="h-4 w-4 text-slate-400 shrink-0 mr-1" />
-            <span className="text-xs font-semibold text-slate-500 mr-2 shrink-0">Kategori:</span>
+            <span className="text-xs font-semibold text-slate-500 mr-2 shrink-0">
+              Kategori:
+            </span>
             {categories.map((cat) => (
               <button
                 key={cat}
@@ -178,7 +197,9 @@ export default function GaleriPage() {
           </div>
 
           <span className="text-xs text-slate-400 shrink-0 hidden md:block">
-            Menampilkan <strong className="text-slate-800">{filteredPhotos.length}</strong> media
+            Menampilkan{" "}
+            <strong className="text-slate-800">{filteredPhotos.length}</strong>{" "}
+            media
           </span>
         </div>
       </section>
@@ -187,68 +208,71 @@ export default function GaleriPage() {
       <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10">
         {isLoading ? (
           <div className="rounded-2xl bg-white border border-slate-100 p-12 text-center text-sm text-slate-500">
-            Memuat galeri dari WordPress...
+            Memuat galeri...
           </div>
         ) : filteredPhotos.length === 0 ? (
           <div className="rounded-2xl bg-white border border-slate-100 p-12 text-center text-sm text-slate-500">
             Belum ada media galeri yang sesuai.
           </div>
         ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {filteredPhotos.map((photo) => (
-            <div
-              key={photo.id}
-              onClick={() => setActivePhoto(photo)}
-              className="group relative cursor-pointer overflow-hidden rounded-2xl bg-white shadow-sm border border-slate-200 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
-            >
-              {/* Image */}
-              <div className="relative aspect-[4/3] w-full overflow-hidden bg-slate-100">
-                {photo.image ? (
-                  <Image
-                    src={photo.image}
-                    alt={photo.title}
-                    fill
-                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
-                    className="object-cover transition-transform duration-500 group-hover:scale-105"
-                  />
-                ) : (
-                  <div className="h-full w-full flex items-center justify-center text-slate-400">
-                    <Camera className="h-12 w-12" />
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {filteredPhotos.map((photo) => (
+              <div
+                key={photo.id}
+                onClick={() => setActivePhoto(photo)}
+                className="group relative cursor-pointer overflow-hidden rounded-2xl bg-white shadow-sm border border-slate-200 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
+              >
+                {/* Image */}
+                <div className="relative aspect-[4/3] w-full overflow-hidden bg-slate-100">
+                  {photo.image ? (
+                    <Image
+                      src={photo.image}
+                      alt={photo.title}
+                      fill
+                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
+                      className="object-cover transition-transform duration-500 group-hover:scale-105"
+                    />
+                  ) : (
+                    <div className="h-full w-full flex items-center justify-center text-slate-400">
+                      <Camera className="h-12 w-12" />
+                    </div>
+                  )}
+                  <div className="absolute inset-0 bg-gradient-to-t from-slate-900/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-4">
+                    <div className="flex items-center gap-1.5 text-xs text-white font-medium">
+                      <ZoomIn className="h-4 w-4 text-[#FFE500]" />{" "}
+                      {photo.mediaType === "Video"
+                        ? "Putar Video"
+                        : "Perbesar Foto"}
+                    </div>
                   </div>
-                )}
-                <div className="absolute inset-0 bg-gradient-to-t from-slate-900/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-4">
-                  <div className="flex items-center gap-1.5 text-xs text-white font-medium">
-                    <ZoomIn className="h-4 w-4 text-[#FFE500]" /> {photo.mediaType === "Video" ? "Putar Video" : "Perbesar Foto"}
-                  </div>
-                </div>
 
-                {/* Category Badge */}
-                <span className="absolute top-3 left-3 rounded-full bg-[#1E2B7A]/80 backdrop-blur-md px-2.5 py-1 text-[10px] font-semibold text-white">
-                  {photo.category}
-                </span>
-                {photo.mediaType === "Video" && (
-                  <span className="absolute top-3 right-3 rounded-full bg-red-600/90 px-2.5 py-1 text-[10px] font-semibold text-white">
-                    Video
+                  {/* Category Badge */}
+                  <span className="absolute top-3 left-3 rounded-full bg-[#1E2B7A]/80 backdrop-blur-md px-2.5 py-1 text-[10px] font-semibold text-white">
+                    {photo.category}
                   </span>
-                )}
-              </div>
-
-              {/* Text Info */}
-              <div className="p-4">
-                <div className="flex items-center gap-1.5 text-[11px] text-slate-500 mb-1.5">
-                  <Calendar className="h-3.5 w-3.5 text-[#0097DF]" />
-                  <span>{photo.date}</span>
+                  {photo.mediaType === "Video" && (
+                    <span className="absolute top-3 right-3 rounded-full bg-red-600/90 px-2.5 py-1 text-[10px] font-semibold text-white">
+                      Video
+                    </span>
+                  )}
                 </div>
-                <h3 className="text-sm font-bold text-slate-900 line-clamp-1 group-hover:text-[#0097DF] transition-colors">
-                  {photo.title}
-                </h3>
-                <p className="mt-1 text-xs text-slate-600 line-clamp-2">
-                  {photo.caption}
-                </p>
+
+                {/* Text Info */}
+                <div className="p-4">
+                  <div className="flex items-center gap-1.5 text-[11px] text-slate-500 mb-1.5">
+                    <Calendar className="h-3.5 w-3.5 text-[#0097DF]" />
+                    <span>{photo.date}</span>
+                  </div>
+                  <h3 className="text-sm font-bold text-slate-900 line-clamp-1 group-hover:text-[#0097DF] transition-colors">
+                    {photo.title}
+                  </h3>
+                  <p className="mt-1 text-xs text-slate-600 line-clamp-2">
+                    {photo.caption}
+                  </p>
+                </div>
               </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
         )}
       </section>
 
