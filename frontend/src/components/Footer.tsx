@@ -1,18 +1,12 @@
-import React from 'react';
-import { Dancing_Script } from 'next/font/google';
-import Link from 'next/link';
-import {
-  MapPin,
-  Phone,
-  Mail,
-  ExternalLink,
-  Clock,
-} from 'lucide-react';
-import SchoolLogo from '@/components/SchoolLogo';
+import React from "react";
+import { Dancing_Script } from "next/font/google";
+import Link from "next/link";
+import { MapPin, Phone, Mail, ExternalLink, Clock } from "lucide-react";
+import SchoolLogo from "@/components/SchoolLogo";
 
 const dancingScript = Dancing_Script({
-  subsets: ['latin'],
-  display: 'swap',
+  subsets: ["latin"],
+  display: "swap",
 });
 
 export default function Footer() {
@@ -31,14 +25,17 @@ export default function Footer() {
                 <span className="block font-extrabold text-white text-base tracking-tight">
                   SMP NEGERI 1 NGAWI
                 </span>
-                <span className={`block text-sm text-[#FFE500] ${dancingScript.className}`}>
+                <span
+                  className={`block text-sm text-[#FFE500] ${dancingScript.className}`}
+                >
                   Juara dan Berbudaya
                 </span>
               </div>
             </div>
             <p className="text-sm text-slate-400 leading-relaxed">
-              Mewujudkan peserta didik yang berkarakter Pancasila, berwawasan global, unggul dalam
-              prestasi akademik maupun non-akademik, serta berbudaya lingkungan.
+              Mewujudkan peserta didik yang berkarakter Pancasila, berwawasan
+              global, unggul dalam prestasi akademik maupun non-akademik, serta
+              berbudaya lingkungan.
             </p>
             <div className="flex items-center gap-3 pt-2">
               <a
@@ -95,27 +92,42 @@ export default function Footer() {
             </h3>
             <ul className="space-y-2.5 text-sm">
               <li>
-                <Link href="/profil#sejarah" className="hover:text-[#FFE500] transition">
+                <Link
+                  href="/profil#sejarah"
+                  className="hover:text-[#FFE500] transition"
+                >
                   Sejarah Sekolah
                 </Link>
               </li>
               <li>
-                <Link href="/profil#visi-misi" className="hover:text-[#FFE500] transition">
+                <Link
+                  href="/profil#visi-misi"
+                  className="hover:text-[#FFE500] transition"
+                >
                   Visi dan Misi
                 </Link>
               </li>
               <li>
-                <Link href="/profil/guru" className="hover:text-[#FFE500] transition">
+                <Link
+                  href="/profil/guru"
+                  className="hover:text-[#FFE500] transition"
+                >
                   Direktori Guru & Staf
                 </Link>
               </li>
               <li>
-                <Link href="/akademik#kurikulum" className="hover:text-[#FFE500] transition">
+                <Link
+                  href="/akademik#kurikulum"
+                  className="hover:text-[#FFE500] transition"
+                >
                   Kurikulum Pembelajaran
                 </Link>
               </li>
               <li>
-                <Link href="/akademik/prestasi" className="hover:text-[#FFE500] transition">
+                <Link
+                  href="/akademik/prestasi"
+                  className="hover:text-[#FFE500] transition"
+                >
                   Galeri Prestasi
                 </Link>
               </li>
@@ -129,27 +141,42 @@ export default function Footer() {
             </h3>
             <ul className="space-y-2.5 text-sm">
               <li>
-                <Link href="/informasi/pengumuman" className="hover:text-[#FFE500] transition">
+                <Link
+                  href="/informasi/pengumuman"
+                  className="hover:text-[#FFE500] transition"
+                >
                   Pengumuman Resmi
                 </Link>
               </li>
               <li>
-                <Link href="/informasi/berita" className="hover:text-[#FFE500] transition">
+                <Link
+                  href="/informasi/berita"
+                  className="hover:text-[#FFE500] transition"
+                >
                   Warta & Berita Kegiatan
                 </Link>
               </li>
               <li>
-                <Link href="/informasi/agenda" className="hover:text-[#FFE500] transition">
+                <Link
+                  href="/informasi/agenda"
+                  className="hover:text-[#FFE500] transition"
+                >
                   Agenda Sekolah
                 </Link>
               </li>
               <li>
-                <Link href="/informasi/galeri" className="hover:text-[#FFE500] transition">
+                <Link
+                  href="/informasi/galeri"
+                  className="hover:text-[#FFE500] transition"
+                >
                   Dokumentasi Foto
                 </Link>
               </li>
               <li>
-                <Link href="/akademik/ekstrakurikuler" className="hover:text-[#FFE500] transition">
+                <Link
+                  href="/akademik/ekstrakurikuler"
+                  className="hover:text-[#FFE500] transition"
+                >
                   Kegiatan Ekstrakurikuler
                 </Link>
               </li>
@@ -164,7 +191,10 @@ export default function Footer() {
             <ul className="space-y-3 text-sm text-slate-300">
               <li className="flex items-start gap-2.5">
                 <MapPin className="w-4 h-4 text-[#0097DF] shrink-0 mt-0.5" />
-                <span>Jl. Ronggowarsito No.1, Kluncing, Ketanggi, Kec. Ngawi, Kabupaten Ngawi, Jawa Timur 63211</span>
+                <span>
+                  Jl. Ronggowarsito No.1, Kluncing, Ketanggi, Kec. Ngawi,
+                  Kabupaten Ngawi, Jawa Timur 63211
+                </span>
               </li>
               <li className="flex items-center gap-2.5">
                 <Phone className="w-4 h-4 text-[#0097DF] shrink-0" />
@@ -186,7 +216,8 @@ export default function Footer() {
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-1.5 text-xs text-[#0097DF] hover:text-[#FFE500] font-semibold transition"
               >
-                Lihat lokasi di Google Maps <ExternalLink className="w-3.5 h-3.5" />
+                Lihat lokasi di Google Maps{" "}
+                <ExternalLink className="w-3.5 h-3.5" />
               </a>
             </div>
           </div>
@@ -196,7 +227,18 @@ export default function Footer() {
       {/* Copyright Bar */}
       <div className="border-t border-slate-800/80 bg-[#0C1236] py-5">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-400 gap-3">
-          <p>© {currentYear} SMP Negeri 1 Ngawi. Seluruh Hak Cipta Dilindungi.</p>
+          <p>
+            © {currentYear} SMP Negeri 1 Ngawi. Dibuat oleh{" "}
+            <a
+              href="https://github.com/cybersp1ng"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-slate-300 hover:text-[#FFE500] transition"
+            >
+              cyber sp1ng
+            </a>
+            .
+          </p>
           <div className="flex items-center gap-6">
             <Link href="/profil" className="hover:text-[#FFE500] transition">
               Profil
