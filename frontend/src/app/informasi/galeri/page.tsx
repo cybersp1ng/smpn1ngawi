@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import {
@@ -9,102 +9,121 @@ import {
   Filter,
   X,
   Calendar,
-  Eye,
   ZoomIn,
-  Sparkles,
 } from "lucide-react";
 
 interface GalleryItem {
   id: string;
   title: string;
-  category: "Kegiatan" | "Prestasi" | "Fasilitas" | "Seni & Budaya" | "P5";
+  category: string;
   date: string;
   image: string;
   caption: string;
+  mediaType: "Foto" | "Video";
+  videoUrl?: string;
 }
 
-const mockGallery: GalleryItem[] = [
-  {
-    id: "1",
-    title: "Upacara Peringatan Hari Kemerdekaan RI Ke-80",
-    category: "Kegiatan",
-    date: "17 Agustus 2025",
-    image: "https://images.unsplash.com/photo-1541829070764-84a7d30dd3f3?auto=format&fit=crop&w=1200&q=80",
-    caption:
-      "Keluarga besar SMPN 1 Ngawi mengikuti jalannya pengibaran sang saka merah putih secara khidmat di halaman utama sekolah.",
-  },
-  {
-    id: "2",
-    title: "Pentas Tari Tradisional & Karawitan Spensa",
-    category: "Seni & Budaya",
-    date: "10 November 2025",
-    image: "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?auto=format&fit=crop&w=1200&q=80",
-    caption:
-      "Penampilan tari kolosal dan ansambel gamelan oleh ekstrakurikuler Karawitan dalam Festival Budaya Pelajar.",
-  },
-  {
-    id: "3",
-    title: "Penerimaan Medali Emas Olimpiade Sains",
-    category: "Prestasi",
-    date: "04 Oktober 2025",
-    image: "https://images.unsplash.com/photo-1567168544813-cc03465b4fa8?auto=format&fit=crop&w=1200&q=80",
-    caption:
-      "Perwakilan kontingen OSN SMPN 1 Ngawi saat menerima piagam dan medali juara pertama tingkat Provinsi.",
-  },
-  {
-    id: "4",
-    title: "Gelar Karya Proyek P5 Inovasi Lingkungan Hijau",
-    category: "P5",
-    date: "12 Januari 2026",
-    image: "https://images.unsplash.com/photo-1577896851231-70ef18881754?auto=format&fit=crop&w=1200&q=80",
-    caption:
-      "Karya daur ulang sampah bernilai ekonomis dan hidroponik organik hasil karya kolaborasi peserta didik kelas 7.",
-  },
-  {
-    id: "5",
-    title: "Laboratorium Komputer & Media Multimedia Modern",
-    category: "Fasilitas",
-    date: "20 Februari 2026",
-    image: "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=1200&q=80",
-    caption:
-      "Kesiapan sarana perangkat PC All-In-One berkecepatan tinggi untuk ujian CBT dan praktikum pemrograman peserta didik.",
-  },
-  {
-    id: "6",
-    title: "Latihan Gabungan Pramuka Penggalang Ramu & Rakit",
-    category: "Kegiatan",
-    date: "18 Januari 2026",
-    image: "https://images.unsplash.com/photo-1526778548025-fa2f459cd5c1?auto=format&fit=crop&w=1200&q=80",
-    caption:
-      "Ketangkasan pionering, navigasi kompas, dan sandi morse dalam perkemahan sabtu-minggu (Persami) Spensa Scout.",
-  },
-  {
-    id: "7",
-    title: "Ruang Perpustakaan Ramah Anak & E-Library",
-    category: "Fasilitas",
-    date: "05 Februari 2026",
-    image: "https://images.unsplash.com/photo-1521587760476-6c12a4b040da?auto=format&fit=crop&w=1200&q=80",
-    caption:
-      "Sudut baca yang nyaman dan fasilitas peminjaman buku digital guna mendorong budaya literasi aktif siswa.",
-  },
-  {
-    id: "8",
-    title: "Final Turnamen Futsal Antar Pelajar Se-Karesidenan",
-    category: "Prestasi",
-    date: "15 November 2025",
-    image: "https://images.unsplash.com/photo-1574629810360-7efbbe195018?auto=format&fit=crop&w=1200&q=80",
-    caption:
-      "Aksi tim futsal Spensa menjuarai piala bergilir setelah melewati laga final penuh tensi dan sportivitas tinggi.",
-  },
-];
+interface WpGallery {
+  id: number;
+  date: string;
+  title?: { rendered?: string };
+  content?: { rendered?: string };
+  featured_media?: number;
+  _embedded?: {
+    "wp:featuredmedia"?: Array<{ source_url?: string }>;
+  };
+  acf?: {
+    tipe_media?: string;
+    youtube_url?: string;
+    kategori?: string;
+  };
+}
 
-const categories = ["Semua", "Kegiatan", "Prestasi", "Fasilitas", "Seni & Budaya", "P5"];
+function decodeHtml(value: string): string {
+  return value
+    .replace(/<[^>]*>/g, " ")
+    .replace(/&amp;/g, "&")
+    .replace(/&quot;/g, '"')
+    .replace(/&#039;/g, "'")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function formatDate(value: string): string {
+  const date = new Date(value);
+  return Number.isNaN(date.getTime())
+    ? value
+    : new Intl.DateTimeFormat("id-ID", {
+        day: "2-digit",
+        month: "long",
+        year: "numeric",
+      }).format(date);
+}
+
+function getYoutubeEmbedUrl(url?: string): string | undefined {
+  if (!url) return undefined;
+  try {
+    const parsed = new URL(url);
+    const videoId = parsed.hostname.includes("youtu.be")
+      ? parsed.pathname.slice(1)
+      : parsed.searchParams.get("v") || parsed.pathname.split("/").pop();
+    return videoId ? `https://www.youtube.com/embed/${videoId}` : undefined;
+  } catch {
+    return undefined;
+  }
+}
 
 export default function GaleriPage() {
+  const [gallery, setGallery] = useState<GalleryItem[]>([]);
+  const [categories, setCategories] = useState(["Semua"]);
+  const [isLoading, setIsLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState("Semua");
   const [activePhoto, setActivePhoto] = useState<GalleryItem | null>(null);
 
-  const filteredPhotos = mockGallery.filter((item) => {
+  useEffect(() => {
+    async function loadGallery() {
+      try {
+        const wpUrl =
+          process.env.NEXT_PUBLIC_WORDPRESS_API_URL?.replace(/\/graphql\/?$/, "") ||
+          "https://sp1ng.smpn1ngawi.sch.id/wp";
+        const response = await fetch(
+          `${wpUrl}/wp-json/wp/v2/galeri?_embed&per_page=100&orderby=date&order=desc`,
+          { cache: "no-store" },
+        );
+        if (!response.ok) throw new Error(`WordPress API: ${response.status}`);
+
+        const posts: WpGallery[] = await response.json();
+        const mapped: GalleryItem[] = posts.map((post) => {
+          const acf = post.acf || {};
+          const content = decodeHtml(post.content?.rendered || "");
+          const mediaType = acf.tipe_media === "Video" ? "Video" : "Foto";
+          return {
+            id: String(post.id),
+            title: decodeHtml(post.title?.rendered || "Dokumentasi sekolah"),
+            category: acf.kategori || "Kegiatan",
+            date: formatDate(post.date),
+            image: post._embedded?.["wp:featuredmedia"]?.[0]?.source_url || "",
+            caption: content || "Dokumentasi kegiatan SMPN 1 Ngawi.",
+            mediaType,
+            videoUrl: getYoutubeEmbedUrl(acf.youtube_url),
+          };
+        });
+        setGallery(mapped);
+        setCategories(["Semua", ...Array.from(new Set(mapped.map((item) => item.category)))]);
+      } catch (error) {
+        console.error("Gagal memuat galeri dari WordPress:", error);
+        setGallery([]);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+
+    loadGallery();
+  }, []);
+
+  const filteredPhotos = gallery.filter((item) => {
     if (selectedCategory === "Semua") return true;
     return item.category === selectedCategory;
   });
@@ -159,13 +178,22 @@ export default function GaleriPage() {
           </div>
 
           <span className="text-xs text-slate-400 shrink-0 hidden md:block">
-            Menampilkan <strong className="text-slate-800">{filteredPhotos.length}</strong> foto
+            Menampilkan <strong className="text-slate-800">{filteredPhotos.length}</strong> media
           </span>
         </div>
       </section>
 
       {/* Gallery Masonry Grid */}
       <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10">
+        {isLoading ? (
+          <div className="rounded-2xl bg-white border border-slate-100 p-12 text-center text-sm text-slate-500">
+            Memuat galeri dari WordPress...
+          </div>
+        ) : filteredPhotos.length === 0 ? (
+          <div className="rounded-2xl bg-white border border-slate-100 p-12 text-center text-sm text-slate-500">
+            Belum ada media galeri yang sesuai.
+          </div>
+        ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {filteredPhotos.map((photo) => (
             <div
@@ -175,16 +203,22 @@ export default function GaleriPage() {
             >
               {/* Image */}
               <div className="relative aspect-[4/3] w-full overflow-hidden bg-slate-100">
-                <Image
-                  src={photo.image}
-                  alt={photo.title}
-                  fill
-                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
-                  className="object-cover transition-transform duration-500 group-hover:scale-105"
-                />
+                {photo.image ? (
+                  <Image
+                    src={photo.image}
+                    alt={photo.title}
+                    fill
+                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
+                    className="object-cover transition-transform duration-500 group-hover:scale-105"
+                  />
+                ) : (
+                  <div className="h-full w-full flex items-center justify-center text-slate-400">
+                    <Camera className="h-12 w-12" />
+                  </div>
+                )}
                 <div className="absolute inset-0 bg-gradient-to-t from-slate-900/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-4">
                   <div className="flex items-center gap-1.5 text-xs text-white font-medium">
-                    <ZoomIn className="h-4 w-4 text-[#FFE500]" /> Perbesar Foto
+                    <ZoomIn className="h-4 w-4 text-[#FFE500]" /> {photo.mediaType === "Video" ? "Putar Video" : "Perbesar Foto"}
                   </div>
                 </div>
 
@@ -192,6 +226,11 @@ export default function GaleriPage() {
                 <span className="absolute top-3 left-3 rounded-full bg-[#1E2B7A]/80 backdrop-blur-md px-2.5 py-1 text-[10px] font-semibold text-white">
                   {photo.category}
                 </span>
+                {photo.mediaType === "Video" && (
+                  <span className="absolute top-3 right-3 rounded-full bg-red-600/90 px-2.5 py-1 text-[10px] font-semibold text-white">
+                    Video
+                  </span>
+                )}
               </div>
 
               {/* Text Info */}
@@ -210,6 +249,7 @@ export default function GaleriPage() {
             </div>
           ))}
         </div>
+        )}
       </section>
 
       {/* Lightbox Modal */}
@@ -230,15 +270,29 @@ export default function GaleriPage() {
               <X className="h-5 w-5" />
             </button>
 
-            {/* Modal Image */}
+            {/* Modal Media */}
             <div className="relative aspect-video w-full bg-slate-900">
-              <Image
-                src={activePhoto.image}
-                alt={activePhoto.title}
-                fill
-                priority
-                className="object-contain"
-              />
+              {activePhoto.mediaType === "Video" && activePhoto.videoUrl ? (
+                <iframe
+                  src={activePhoto.videoUrl}
+                  title={activePhoto.title}
+                  className="h-full w-full"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                  allowFullScreen
+                />
+              ) : activePhoto.image ? (
+                <Image
+                  src={activePhoto.image}
+                  alt={activePhoto.title}
+                  fill
+                  priority
+                  className="object-contain"
+                />
+              ) : (
+                <div className="h-full flex items-center justify-center text-slate-500">
+                  <Camera className="h-16 w-16" />
+                </div>
+              )}
             </div>
 
             {/* Modal Details */}
