@@ -13,7 +13,7 @@ import {
 } from 'lucide-react';
 import { fetchGraphQL } from '@/lib/graphql';
 
-export interface GuruItem {
+interface GuruItem {
   id: string;
   nama: string;
   nip: string;
@@ -77,7 +77,6 @@ export default function GuruPage() {
 
   useEffect(() => {
     async function loadGuruFromWordPress() {
-      setIsLoading(true);
       // 1. Coba fetch via WPGraphQL terlebih dahulu
       const query = `
         query GetDaftarGuru {
@@ -117,12 +116,11 @@ export default function GuruPage() {
             fotoUrl: node.featuredImage?.node?.sourceUrl,
           }));
           setDaftarGuru(mapped);
-          setIsLoading(false);
           return;
         }
 
         // Jika GraphQL mengembalikan error / null, coba lewat REST API resmi
-        if (error || !nodes) {
+        if (error || !nodes || nodes.length === 0) {
           await loadFromRestApi();
         }
       } catch {
@@ -186,18 +184,20 @@ export default function GuruPage() {
     loadGuruFromWordPress();
   }, []);
 
-  const filteredGurus = daftarGuru.filter((guru) => {
-    const matchesSearch =
-      guru.nama.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      guru.mataPelajaran.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      guru.jabatan.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      guru.nip.includes(searchQuery);
+  const filteredGurus = daftarGuru
+    .filter((guru) => {
+      const matchesSearch =
+        guru.nama.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        guru.mataPelajaran.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        guru.jabatan.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        guru.nip.includes(searchQuery);
 
-    const matchesKategori =
-      selectedKategori === 'Semua' || guru.kategori === selectedKategori;
+      const matchesKategori =
+        selectedKategori === 'Semua' || guru.kategori === selectedKategori;
 
-    return matchesSearch && matchesKategori;
-  });
+      return matchesSearch && matchesKategori;
+    })
+    .sort((a, b) => a.nama.localeCompare(b.nama, 'id-ID', { sensitivity: 'base' }));
 
   return (
     <div className="space-y-12 sm:space-y-16 pb-20">
@@ -400,4 +400,3 @@ export default function GuruPage() {
     </div>
   );
 }
-
