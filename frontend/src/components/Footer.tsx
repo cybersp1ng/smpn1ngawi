@@ -236,20 +236,17 @@ export default function Footer() {
               className="text-slate-300 hover:text-[#FFE500] transition"
             >
               cyber sp1ng
+            </a>{" "}
+            &{" "}
+            <a
+              href="https://github.com/haviedzmiftah"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-slate-300 hover:text-[#FFE500] transition"
+            >
+              haviedz miftah
             </a>
-            .
           </p>
-          <div className="flex items-center gap-6">
-            <Link href="/profil" className="hover:text-[#FFE500] transition">
-              Profil
-            </Link>
-            <Link href="/akademik" className="hover:text-[#FFE500] transition">
-              Akademik
-            </Link>
-            <Link href="/kontak" className="hover:text-[#FFE500] transition">
-              Kontak
-            </Link>
-          </div>
         </div>
       </div>
     </footer>
