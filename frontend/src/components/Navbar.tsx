@@ -122,7 +122,7 @@ export default function Navbar() {
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
   const [scrolled, setScrolled] = useState(false);
   const pathname = usePathname();
-  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const handleMouseEnter = (label: string) => {
     if (timeoutRef.current) clearTimeout(timeoutRef.current);
@@ -152,13 +152,20 @@ export default function Navbar() {
       setScrolled(window.scrollY > 20);
     };
     window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    };
   }, []);
 
   // Tutup menu mobile ketika rute berubah
   useEffect(() => {
-    setMobileMenuOpen(false);
-    setActiveDropdown(null);
+    const resetNavigation = setTimeout(() => {
+      setMobileMenuOpen(false);
+      setActiveDropdown(null);
+    }, 0);
+
+    return () => clearTimeout(resetNavigation);
   }, [pathname]);
 
   return (
@@ -208,6 +215,8 @@ export default function Navbar() {
                     <button
                       type="button"
                       onClick={() => handleToggleClick(item.label)}
+                      aria-expanded={activeDropdown === item.label}
+                      aria-haspopup="menu"
                       className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-sm font-semibold transition cursor-pointer ${
                         isActive
                           ? "text-[#1E2B7A] bg-blue-50/80 shadow-xs"
@@ -275,9 +284,12 @@ export default function Navbar() {
           {/* Mobile Menu Button */}
           <div className="flex lg:hidden items-center gap-2">
             <button
+              type="button"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               className="p-2 rounded-lg text-slate-700 hover:text-blue-700 hover:bg-slate-100 transition"
               aria-label="Toggle menu"
+              aria-expanded={mobileMenuOpen}
+              aria-controls="mobile-navigation"
             >
               {mobileMenuOpen ? (
                 <X className="w-6 h-6" />
@@ -290,7 +302,10 @@ export default function Navbar() {
 
         {/* Mobile Navigation Drawer */}
         {mobileMenuOpen && (
-          <div className="lg:hidden border-t border-slate-100 bg-white px-4 pt-3 pb-6 space-y-2 animate-in slide-in-from-top-2">
+          <div
+            id="mobile-navigation"
+            className="lg:hidden border-t border-slate-100 bg-white px-4 pt-3 pb-6 space-y-2 animate-in slide-in-from-top-2"
+          >
             {NAV_ITEMS.map((item) => (
               <div key={item.label} className="border-b border-slate-50 pb-2">
                 {item.children ? (
@@ -318,6 +333,10 @@ export default function Navbar() {
                           <Link
                             key={child.label}
                             href={child.href}
+                            onClick={() => {
+                              setMobileMenuOpen(false);
+                              setActiveDropdown(null);
+                            }}
                             className="block py-1.5 text-sm text-slate-600 hover:text-blue-700"
                           >
                             {child.label}
@@ -329,6 +348,10 @@ export default function Navbar() {
                 ) : (
                   <Link
                     href={item.href}
+                    onClick={() => {
+                      setMobileMenuOpen(false);
+                      setActiveDropdown(null);
+                    }}
                     className="block py-2 text-base font-semibold text-slate-800 hover:text-blue-700"
                   >
                     {item.label}
@@ -339,6 +362,10 @@ export default function Navbar() {
             <div className="pt-2">
               <Link
                 href="/kontak"
+                onClick={() => {
+                  setMobileMenuOpen(false);
+                  setActiveDropdown(null);
+                }}
                 className="w-full inline-flex items-center justify-center px-4 py-2.5 rounded-xl text-white bg-blue-600 font-semibold text-sm shadow"
               >
                 Hubungi Kami
