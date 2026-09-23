@@ -15,6 +15,9 @@ import {
   FileText,
 } from 'lucide-react';
 import SchoolLogo from '@/components/SchoolLogo';
+
+export const dynamic = 'force-dynamic';
+
 interface WpPost {
   id: number;
   date: string;
@@ -610,7 +613,7 @@ export default async function HomePage() {
                   >
                     <div className="bg-[#1E2B7A] text-[#FFE500] border border-[#FFE500]/30 rounded-xl px-2.5 py-1.5 text-center shrink-0 shadow-xs">
                       <span className="block text-base font-black leading-tight">
-                        {agenda.date}
+                        {agenda.day}
                       </span>
                       <span className="block text-[10px] font-extrabold uppercase tracking-wider text-[#0097DF]">
                         {agenda.month}
