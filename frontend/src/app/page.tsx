@@ -15,135 +15,205 @@ import {
   FileText,
 } from 'lucide-react';
 import SchoolLogo from '@/components/SchoolLogo';
-import { fetchGraphQL } from '@/lib/graphql';
-
-// Tipe data untuk konten dinamis
-interface PostItem {
-  id: string;
-  title: string;
-  excerpt?: string;
+interface WpPost {
+  id: number;
   date: string;
-  slug: string;
+  title?: { rendered?: string };
+  excerpt?: { rendered?: string };
+  content?: { rendered?: string };
+  _embedded?: {
+    'wp:term'?: Array<Array<{ name?: string }>>;
+    'wp:featuredmedia'?: Array<{ source_url?: string }>;
+  };
 }
 
-interface HomepageData {
-  posts?: {
-    nodes: PostItem[];
+interface WpPengumuman {
+  id: number;
+  date: string;
+  title?: { rendered?: string };
+  acf?: {
+    tanggal_pengumuman?: string;
+    urgensi?: string;
+  };
+}
+
+interface WpAgenda {
+  id: number;
+  title?: { rendered?: string };
+  acf?: {
+    tanggal_kegiatan?: string;
+    waktu?: string;
+    lokasi?: string;
+  };
+}
+
+function decodeHtml(value: string): string {
+  return value
+    .replace(/<[^>]*>/g, ' ')
+    .replace(/&amp;/g, '&')
+    .replace(/&quot;/g, '"')
+    .replace(/&#039;/g, "'")
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function formatNewsDate(value: string): string {
+  const date = new Date(value);
+  return Number.isNaN(date.getTime())
+    ? value
+    : new Intl.DateTimeFormat('id-ID', {
+        day: '2-digit',
+        month: 'long',
+        year: 'numeric',
+      }).format(date);
+}
+
+function formatAnnouncementDate(value: string): string {
+  const date = new Date(`${value}T00:00:00`);
+  return Number.isNaN(date.getTime())
+    ? value
+    : new Intl.DateTimeFormat('id-ID', {
+        day: '2-digit',
+        month: 'long',
+        year: 'numeric',
+      }).format(date);
+}
+
+function getAgendaDateParts(value: string): { day: string; month: string } {
+  const date = new Date(`${value}T00:00:00`);
+  if (Number.isNaN(date.getTime())) {
+    return { day: value, month: '' };
+  }
+
+  return {
+    day: new Intl.DateTimeFormat('id-ID', { day: '2-digit' }).format(date),
+    month: new Intl.DateTimeFormat('id-ID', { month: 'short' })
+      .format(date)
+      .replace('.', '')
+      .toUpperCase(),
   };
 }
 
 async function getHomepageContent() {
-  const query = `
-    query GetLatestNews {
-      posts(first: 3) {
-        nodes {
-          id
-          title
-          excerpt
-          date
-          slug
-        }
-      }
-    }
-  `;
+  const wpUrl =
+    process.env.NEXT_PUBLIC_WORDPRESS_API_URL?.replace(/\/graphql\/?$/, '') ||
+    'https://sp1ng.smpn1ngawi.sch.id/wp';
 
-  const { data } = await fetchGraphQL<HomepageData>(query);
-  return data?.posts?.nodes || [];
+  try {
+    const response = await fetch(
+      `${wpUrl}/wp-json/wp/v2/posts?_embed&per_page=3&orderby=date&order=desc`,
+      { cache: 'no-store' },
+    );
+
+    if (!response.ok) {
+      throw new Error(`WordPress API: ${response.status}`);
+    }
+
+    const posts: WpPost[] = await response.json();
+    return posts.map((post) => {
+      const content = decodeHtml(post.content?.rendered || '');
+      const categories =
+        post._embedded?.['wp:term']?.flatMap((terms) =>
+          terms.map((term) => term.name || '').filter(Boolean),
+        ) || [];
+
+      return {
+        id: String(post.id),
+        title: decodeHtml(post.title?.rendered || 'Berita sekolah'),
+        excerpt: decodeHtml(post.excerpt?.rendered || content).slice(0, 240),
+        date: formatNewsDate(post.date),
+        category: categories[0] || 'Berita Sekolah',
+        image: post._embedded?.['wp:featuredmedia']?.[0]?.source_url,
+      };
+    });
+  } catch (error) {
+    console.error('Gagal memuat berita terbaru dari WordPress:', error);
+    return [];
+  }
+}
+
+async function getHomepageAnnouncements() {
+  const wpUrl =
+    process.env.NEXT_PUBLIC_WORDPRESS_API_URL?.replace(/\/graphql\/?$/, '') ||
+    'https://sp1ng.smpn1ngawi.sch.id/wp';
+
+  try {
+    const response = await fetch(
+      `${wpUrl}/wp-json/wp/v2/pengumuman?_embed&per_page=3&orderby=date&order=desc`,
+      { cache: 'no-store' },
+    );
+
+    if (!response.ok) {
+      throw new Error(`WordPress API: ${response.status}`);
+    }
+
+    const posts: WpPengumuman[] = await response.json();
+    return posts.map((post) => ({
+      id: String(post.id),
+      title: decodeHtml(post.title?.rendered || 'Pengumuman'),
+      date: formatAnnouncementDate(
+        post.acf?.tanggal_pengumuman || post.date,
+      ),
+      badge:
+        post.acf?.urgensi === 'Mendesak' ||
+        post.acf?.urgensi === 'Penting' ||
+        post.acf?.urgensi === 'PPDB'
+          ? post.acf.urgensi
+          : 'Umum',
+    }));
+  } catch (error) {
+    console.error('Gagal memuat pengumuman terbaru dari WordPress:', error);
+    return [];
+  }
+}
+
+async function getHomepageAgendas() {
+  const wpUrl =
+    process.env.NEXT_PUBLIC_WORDPRESS_API_URL?.replace(/\/graphql\/?$/, '') ||
+    'https://sp1ng.smpn1ngawi.sch.id/wp';
+
+  try {
+    const response = await fetch(
+      `${wpUrl}/wp-json/wp/v2/agenda?_embed&per_page=100&orderby=date&order=desc`,
+      { cache: 'no-store' },
+    );
+
+    if (!response.ok) {
+      throw new Error(`WordPress API: ${response.status}`);
+    }
+
+    const posts: WpAgenda[] = await response.json();
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    return posts
+      .filter((post) => post.acf?.tanggal_kegiatan)
+      .map((post) => {
+        const date = post.acf?.tanggal_kegiatan || '';
+        return {
+          id: String(post.id),
+          title: decodeHtml(post.title?.rendered || 'Agenda kegiatan'),
+          dateValue: new Date(`${date}T00:00:00`),
+          ...getAgendaDateParts(date),
+          time: post.acf?.waktu || '-',
+          location: post.acf?.lokasi || '-',
+        };
+      })
+      .filter((agenda) => !Number.isNaN(agenda.dateValue.getTime()) && agenda.dateValue >= today)
+      .sort((a, b) => a.dateValue.getTime() - b.dateValue.getTime())
+      .slice(0, 3);
+  } catch (error) {
+    console.error('Gagal memuat agenda terdekat dari WordPress:', error);
+    return [];
+  }
 }
 
 export default async function HomePage() {
   const latestPosts = await getHomepageContent();
-
-  // Fallback berita jika WordPress belum ada data
-  const fallbackNews = [
-    {
-      id: '1',
-      title: 'Peringatan Hari Guru Nasional dan Apresiasi Pendidik Berprestasi',
-      excerpt:
-        'SMPN 1 Ngawi menyelenggarakan upacara khidmat serta pemberian penghargaan kepada para guru inovatif tingkat kabupaten.',
-      date: '2026-03-15',
-      category: 'Kegiatan',
-    },
-    {
-      id: '2',
-      title: 'Siswa SMPN 1 Ngawi Raih Medali Emas Olimpiade Sains Nasional (OSN)',
-      excerpt:
-        'Prestasi membanggakan kembali ditorehkan oleh siswa dalam bidang Matematika dan IPA tingkat provinsi.',
-      date: '2026-03-10',
-      category: 'Prestasi',
-    },
-    {
-      id: '3',
-      title: 'Workshop Penguatan Karakter Profil Pelajar Pancasila',
-      excerpt:
-        'Kegiatan kolaboratif antara siswa, guru, dan komite sekolah dalam membangun etika dan wawasan kebangsaan.',
-      date: '2026-03-05',
-      category: 'Akademik',
-    },
-  ];
-
-  const newsToDisplay =
-    latestPosts.length > 0
-      ? latestPosts.map((p, i) => ({
-          id: p.id,
-          title: p.title,
-          excerpt: p.excerpt?.replace(/<[^>]+>/g, '').slice(0, 120) + '...',
-          date: new Date(p.date).toLocaleDateString('id-ID', {
-            day: 'numeric',
-            month: 'long',
-            year: 'numeric',
-          }),
-          category: 'Warta Sekolah',
-        }))
-      : fallbackNews;
-
-  const announcements = [
-    {
-      id: '1',
-      title: 'Jadwal Asesmen Sumatif Akhir Semester Genap TP 2025/2026',
-      date: '20 Maret 2026',
-      badge: 'Penting',
-    },
-    {
-      id: '2',
-      title: 'Sosialisasi Persiapan Penerimaan Peserta Didik Baru (PPDB) 2026/2027',
-      date: '18 Maret 2026',
-      badge: 'Info PPDB',
-    },
-    {
-      id: '3',
-      title: 'Edaran Kegiatan Pondok Ramadhan dan Jam Belajar Selama Bulan Puasa',
-      date: '12 Maret 2026',
-      badge: 'Umum',
-    },
-  ];
-
-  const upcomingAgendas = [
-    {
-      id: '1',
-      title: 'Gelar Karya P5 (Projek Penguatan Profil Pelajar Pancasila)',
-      date: '25',
-      month: 'MAR',
-      time: '08.00 - 13.00 WIB',
-      location: 'Aula & Halaman Utama',
-    },
-    {
-      id: '2',
-      title: 'Pertemuan Rutin Komite Sekolah & Wali Murid Kelas IX',
-      date: '28',
-      month: 'MAR',
-      time: '09.00 - 11.30 WIB',
-      location: 'Ruang Pertemuan Lt. 2',
-    },
-    {
-      id: '3',
-      title: 'Latihan Gabungan Pramuka Penggalang Se-Kecamatan Ngawi',
-      date: '04',
-      month: 'APR',
-      time: '07.30 - 15.00 WIB',
-      location: 'Bumi Perkemahan Ngawi',
-    },
-  ];
+  const announcements = await getHomepageAnnouncements();
+  const upcomingAgendas = await getHomepageAgendas();
 
   const highlights = [
     {
@@ -417,13 +487,27 @@ export default async function HomePage() {
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {newsToDisplay.map((news) => (
+              {latestPosts.length === 0 ? (
+                <div className="sm:col-span-2 lg:col-span-3 rounded-2xl border border-slate-200 bg-white p-8 text-center text-sm text-slate-500">
+                  Belum ada berita terbaru.
+                </div>
+              ) : (
+                latestPosts.map((news) => (
                 <article
                   key={news.id}
                   className="bg-white rounded-2xl border border-slate-200/80 overflow-hidden shadow-sm hover:shadow-md transition flex flex-col justify-between"
                 >
-                  <div className="h-36 bg-gradient-to-tr from-slate-200 to-blue-100 flex items-center justify-center text-slate-400">
-                    <FileText className="w-10 h-10 text-blue-300" />
+                  <div
+                    className="h-36 bg-gradient-to-tr from-slate-200 to-blue-100 flex items-center justify-center text-slate-400 bg-cover bg-center"
+                    style={
+                      news.image
+                        ? {
+                            backgroundImage: `linear-gradient(135deg, rgba(226,232,240,.75), rgba(219,234,254,.65)), url("${news.image}")`,
+                          }
+                        : undefined
+                    }
+                  >
+                    {!news.image && <FileText className="w-10 h-10 text-blue-300" />}
                   </div>
                   <div className="p-5 flex-1 flex flex-col justify-between space-y-3">
                     <div className="space-y-2">
@@ -452,7 +536,8 @@ export default async function HomePage() {
                     </div>
                   </div>
                 </article>
-              ))}
+                ))
+              )}
             </div>
           </div>
 
@@ -473,7 +558,11 @@ export default async function HomePage() {
               </div>
 
               <div className="space-y-3.5">
-                {announcements.map((item) => (
+                {announcements.length === 0 ? (
+                  <p className="rounded-xl border border-slate-100 bg-slate-50 p-4 text-xs text-slate-500">
+                    Belum ada pengumuman terbaru.
+                  </p>
+                ) : announcements.map((item) => (
                   <div
                     key={item.id}
                     className="p-3 rounded-xl bg-slate-50 hover:bg-blue-50/60 border border-slate-100 transition space-y-1.5"
@@ -510,7 +599,11 @@ export default async function HomePage() {
               </div>
 
               <div className="space-y-3.5">
-                {upcomingAgendas.map((agenda) => (
+                {upcomingAgendas.length === 0 ? (
+                  <p className="rounded-xl border border-slate-100 bg-slate-50 p-4 text-xs text-slate-500">
+                    Belum ada agenda terdekat.
+                  </p>
+                ) : upcomingAgendas.map((agenda) => (
                   <div
                     key={agenda.id}
                     className="flex items-start gap-3.5 p-3 rounded-xl bg-slate-50 border border-slate-100 hover:border-[#0097DF]/40 transition"
