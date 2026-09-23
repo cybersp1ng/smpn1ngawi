@@ -85,8 +85,10 @@ export default function VideoPage() {
     async function loadVideos() {
       try {
         const wpUrl =
-          process.env.NEXT_PUBLIC_WORDPRESS_API_URL?.replace(/\/graphql\/?$/, "") ||
-          "https://sp1ng.smpn1ngawi.sch.id/wp";
+          process.env.NEXT_PUBLIC_WORDPRESS_API_URL?.replace(
+            /\/graphql\/?$/,
+            "",
+          ) || "https://sp1ng.smpn1ngawi.sch.id/wp";
         const response = await fetch(
           `${wpUrl}/wp-json/wp/v2/galeri?_embed&per_page=100&orderby=date&order=desc`,
           { cache: "no-store" },
@@ -109,13 +111,18 @@ export default function VideoPage() {
               youtubeId: youtubeId || "",
               thumbnail:
                 post._embedded?.["wp:featuredmedia"]?.[0]?.source_url ||
-                (youtubeId ? `https://img.youtube.com/vi/${youtubeId}/hqdefault.jpg` : ""),
+                (youtubeId
+                  ? `https://img.youtube.com/vi/${youtubeId}/hqdefault.jpg`
+                  : ""),
               description: content || "Video dokumentasi SMPN 1 Ngawi.",
             };
           })
           .filter((video) => video.youtubeId);
         setVideos(mapped);
-        setCategories(["Semua", ...Array.from(new Set(mapped.map((video) => video.category)))]);
+        setCategories([
+          "Semua",
+          ...Array.from(new Set(mapped.map((video) => video.category))),
+        ]);
       } catch (error) {
         console.error("Gagal memuat video dari WordPress:", error);
         setVideos([]);
@@ -139,9 +146,13 @@ export default function VideoPage() {
         <div className="absolute inset-0 bg-[radial-gradient(#0097DF_1px,transparent_1px)] [background-size:24px_24px] opacity-20" />
         <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="flex items-center gap-2 text-sm text-[#0097DF] mb-4 font-medium">
-            <Link href="/" className="hover:underline">Beranda</Link>
+            <Link href="/" className="hover:underline">
+              Beranda
+            </Link>
             <ChevronRight className="h-4 w-4" />
-            <Link href="/informasi" className="hover:underline">Informasi</Link>
+            <Link href="/informasi" className="hover:underline">
+              Informasi
+            </Link>
             <ChevronRight className="h-4 w-4" />
             <span className="text-white">Video Dokumentasi</span>
           </div>
@@ -151,11 +162,11 @@ export default function VideoPage() {
               <Video className="h-3.5 w-3.5" /> Media & Dokumenter
             </div>
             <h1 className="text-3xl font-extrabold tracking-tight sm:text-5xl text-white">
-              Galeri Video <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#FFE500] to-amber-300">Spensa TV</span>
+              Galeri{" "}
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#FFE500] to-amber-300">
+                Video
+              </span>
             </h1>
-            <p className="mt-4 text-base sm:text-lg text-slate-200">
-              Saksikan tayangan visual dokumentasi resmi sekolah, profil akademik, pameran seni, serta karya kreatif peserta didik SMPN 1 Ngawi.
-            </p>
           </div>
         </div>
       </section>
@@ -165,7 +176,9 @@ export default function VideoPage() {
         <div className="rounded-2xl bg-white p-4 sm:p-5 shadow-xl border border-slate-100 flex items-center justify-between gap-4">
           <div className="flex items-center gap-2 overflow-x-auto pb-1 sm:pb-0 w-full">
             <Filter className="h-4 w-4 text-slate-400 shrink-0 mr-1" />
-            <span className="text-xs font-semibold text-slate-500 mr-2 shrink-0">Kategori:</span>
+            <span className="text-xs font-semibold text-slate-500 mr-2 shrink-0">
+              Kategori:
+            </span>
             {categories.map((cat) => (
               <button
                 key={cat}
@@ -182,7 +195,8 @@ export default function VideoPage() {
           </div>
 
           <span className="text-xs text-slate-400 shrink-0 hidden md:block">
-            <strong className="text-slate-800">{filteredVideos.length}</strong> video tersedia
+            <strong className="text-slate-800">{filteredVideos.length}</strong>{" "}
+            video tersedia
           </span>
         </div>
       </section>
@@ -198,73 +212,75 @@ export default function VideoPage() {
             Belum ada video yang sesuai.
           </div>
         ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredVideos.map((video) => (
-            <div
-              key={video.id}
-              className="group overflow-hidden rounded-2xl bg-white shadow-sm border border-slate-200 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl flex flex-col"
-            >
-              {/* Thumbnail with Play Button */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {filteredVideos.map((video) => (
               <div
-                onClick={() => setActiveVideo(video)}
-                className="relative aspect-video w-full overflow-hidden bg-slate-900 cursor-pointer"
+                key={video.id}
+                className="group overflow-hidden rounded-2xl bg-white shadow-sm border border-slate-200 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl flex flex-col"
               >
-                {/* Background image simulated */}
+                {/* Thumbnail with Play Button */}
                 <div
-                  className="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-105"
-                  style={{ backgroundImage: `url(${video.thumbnail})` }}
-                />
-                <div className="absolute inset-0 bg-slate-950/40 group-hover:bg-slate-950/20 transition-colors" />
+                  onClick={() => setActiveVideo(video)}
+                  className="relative aspect-video w-full overflow-hidden bg-slate-900 cursor-pointer"
+                >
+                  {/* Background image simulated */}
+                  <div
+                    className="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-105"
+                    style={{ backgroundImage: `url(${video.thumbnail})` }}
+                  />
+                  <div className="absolute inset-0 bg-slate-950/40 group-hover:bg-slate-950/20 transition-colors" />
 
-                {/* Play Icon */}
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="flex h-14 w-14 items-center justify-center rounded-full bg-[#0097DF] text-white shadow-lg transition-transform group-hover:scale-110 group-hover:bg-[#1E2B7A]">
-                    <Play className="h-6 w-6 fill-current translate-x-0.5" />
+                  {/* Play Icon */}
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="flex h-14 w-14 items-center justify-center rounded-full bg-[#0097DF] text-white shadow-lg transition-transform group-hover:scale-110 group-hover:bg-[#1E2B7A]">
+                      <Play className="h-6 w-6 fill-current translate-x-0.5" />
+                    </div>
+                  </div>
+
+                  {/* Duration Badge */}
+                  <span className="absolute bottom-3 right-3 rounded-md bg-slate-900/80 px-2 py-0.5 text-xs font-medium text-white backdrop-blur-sm flex items-center gap-1">
+                    <Clock className="h-3 w-3" /> {video.duration}
+                  </span>
+
+                  {/* Category Badge */}
+                  <span className="absolute top-3 left-3 rounded-full bg-[#1E2B7A]/90 backdrop-blur-md px-2.5 py-1 text-[10px] font-semibold text-white">
+                    {video.category}
+                  </span>
+                </div>
+
+                {/* Info */}
+                <div className="p-5 flex-1 flex flex-col justify-between">
+                  <div>
+                    <div className="flex items-center gap-1.5 text-xs text-slate-500 mb-2">
+                      <Calendar className="h-3.5 w-3.5 text-[#0097DF]" />
+                      <span>{video.date}</span>
+                    </div>
+                    <h3
+                      onClick={() => setActiveVideo(video)}
+                      className="text-base font-bold text-slate-900 group-hover:text-[#0097DF] transition-colors cursor-pointer line-clamp-2"
+                    >
+                      {video.title}
+                    </h3>
+                    <p className="mt-2 text-xs sm:text-sm text-slate-600 line-clamp-2">
+                      {video.description}
+                    </p>
+                  </div>
+
+                  <div className="mt-4 pt-4 border-t border-slate-100 flex items-center justify-between">
+                    <button
+                      onClick={() => setActiveVideo(video)}
+                      className="text-xs font-semibold text-[#1E2B7A] group-hover:text-[#0097DF] flex items-center gap-1"
+                    >
+                      Tonton Video <Play className="h-3 w-3 fill-current" />
+                    </button>
+                    <span className="text-[11px] text-slate-400">
+                      SMPN 1 Ngawi TV
+                    </span>
                   </div>
                 </div>
-
-                {/* Duration Badge */}
-                <span className="absolute bottom-3 right-3 rounded-md bg-slate-900/80 px-2 py-0.5 text-xs font-medium text-white backdrop-blur-sm flex items-center gap-1">
-                  <Clock className="h-3 w-3" /> {video.duration}
-                </span>
-
-                {/* Category Badge */}
-                <span className="absolute top-3 left-3 rounded-full bg-[#1E2B7A]/90 backdrop-blur-md px-2.5 py-1 text-[10px] font-semibold text-white">
-                  {video.category}
-                </span>
               </div>
-
-              {/* Info */}
-              <div className="p-5 flex-1 flex flex-col justify-between">
-                <div>
-                  <div className="flex items-center gap-1.5 text-xs text-slate-500 mb-2">
-                    <Calendar className="h-3.5 w-3.5 text-[#0097DF]" />
-                    <span>{video.date}</span>
-                  </div>
-                  <h3
-                    onClick={() => setActiveVideo(video)}
-                    className="text-base font-bold text-slate-900 group-hover:text-[#0097DF] transition-colors cursor-pointer line-clamp-2"
-                  >
-                    {video.title}
-                  </h3>
-                  <p className="mt-2 text-xs sm:text-sm text-slate-600 line-clamp-2">
-                    {video.description}
-                  </p>
-                </div>
-
-                <div className="mt-4 pt-4 border-t border-slate-100 flex items-center justify-between">
-                  <button
-                    onClick={() => setActiveVideo(video)}
-                    className="text-xs font-semibold text-[#1E2B7A] group-hover:text-[#0097DF] flex items-center gap-1"
-                  >
-                    Tonton Video <Play className="h-3 w-3 fill-current" />
-                  </button>
-                  <span className="text-[11px] text-slate-400">SMPN 1 Ngawi TV</span>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
         )}
       </section>
 
