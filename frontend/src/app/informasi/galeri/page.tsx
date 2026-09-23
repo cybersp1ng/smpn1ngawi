@@ -98,7 +98,7 @@ export default function GaleriPage() {
 
         const posts: WpGallery[] = await response.json();
         const mapped: GalleryItem[] = posts
-          .filter((post) => post.acf?.tipe_media !== "Video")
+          .filter((post) => post.acf?.tipe_media === "Foto")
           .map((post) => {
             const acf = post.acf || {};
             const content = decodeHtml(post.content?.rendered || "");

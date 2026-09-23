@@ -371,7 +371,8 @@
           "Lomba": "Lomba",
           "Fasilitas": "Fasilitas",
           "Seni & Budaya": "Seni & Budaya",
-          "P5": "P5"
+          "Kokurikuler": "Kokurikuler",
+          "Olahraga": "Olahraga"
         },
         "default_value": "Kegiatan",
         "required": 1,
@@ -396,6 +397,7 @@
         }
       ]
     ],
+    "show_in_rest": 1,
     "show_in_graphql": 1,
     "graphql_field_name": "dataGaleri"
   },

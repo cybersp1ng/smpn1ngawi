@@ -61,6 +61,7 @@ Setiap kali ada commit atau perubahan yang di-push ke branch `main`, Vercel akan
 3. Import pengaturan CPT UI dan ACF field group dari folder `wordpress-config/` di repository ini:
    - `wordpress-config/cptui_settings.json` (via menu *CPT UI* &rarr; *Tools* &rarr; *Import/Export Post Types*)
    - `wordpress-config/acf_fields.json` (via menu *Custom Fields* &rarr; *Tools* &rarr; *Import Field Groups*)
+   - Setelah import, pastikan field group **Data Galeri & Video** berstatus **Active** dan opsi **Show in REST API** aktif. Field `Tipe Media` wajib bernilai **Foto** atau **Video** agar item tampil pada menu yang sesuai.
 
 ---
 
@@ -103,4 +104,3 @@ Setiap kali ada commit atau perubahan yang di-push ke branch `main`, Vercel akan
      - *Email*: Alamat email resmi guru (misal: `guru@smpn1ngawi.sch.id`).
      - *Kategori / Rumpun*: Pilih kategori (Pimpinan, Matematika & IPA, Bahasa, Sosial & Agama, Olahraga & Seni, Teknologi & Vokasi, Layanan Siswa, Tenaga Kependidikan).
 3. Klik **Publish (Terbitkan)**. Halaman `/profil/guru` akan langsung menyajikan data guru terbaru secara dinamis.
-
