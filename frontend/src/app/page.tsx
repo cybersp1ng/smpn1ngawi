@@ -45,6 +45,7 @@ interface WpAgenda {
   title?: { rendered?: string };
   acf?: {
     tanggal_kegiatan?: string;
+    tanggal_selesai?: string;
     waktu?: string;
     lokasi?: string;
   };
@@ -84,8 +85,15 @@ function formatAnnouncementDate(value: string): string {
       }).format(date);
 }
 
+function parseAgendaDate(value: string): Date {
+  const normalized = /^\d{8}$/.test(value)
+    ? `${value.slice(0, 4)}-${value.slice(4, 6)}-${value.slice(6, 8)}`
+    : value;
+  return new Date(`${normalized}T00:00:00`);
+}
+
 function getAgendaDateParts(value: string): { day: string; month: string } {
-  const date = new Date(`${value}T00:00:00`);
+  const date = parseAgendaDate(value);
   if (Number.isNaN(date.getTime())) {
     return { day: value, month: '' };
   }
@@ -97,6 +105,21 @@ function getAgendaDateParts(value: string): { day: string; month: string } {
       .replace('.', '')
       .toUpperCase(),
   };
+}
+
+function getAgendaStatus(
+  startDate: string,
+  endDate?: string,
+): 'upcoming' | 'ongoing' | 'past' {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const start = parseAgendaDate(startDate);
+  const end = parseAgendaDate(endDate || startDate);
+  end.setHours(23, 59, 59, 999);
+
+  if (today < start) return 'upcoming';
+  if (today <= end) return 'ongoing';
+  return 'past';
 }
 
 async function getHomepageContent() {
@@ -188,23 +211,27 @@ async function getHomepageAgendas() {
     }
 
     const posts: WpAgenda[] = await response.json();
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
 
     return posts
       .filter((post) => post.acf?.tanggal_kegiatan)
       .map((post) => {
         const date = post.acf?.tanggal_kegiatan || '';
+        const endDate = post.acf?.tanggal_selesai || undefined;
         return {
           id: String(post.id),
           title: decodeHtml(post.title?.rendered || 'Agenda kegiatan'),
-          dateValue: new Date(`${date}T00:00:00`),
+          dateValue: parseAgendaDate(date),
+          status: getAgendaStatus(date, endDate),
           ...getAgendaDateParts(date),
           time: post.acf?.waktu || '-',
           location: post.acf?.lokasi || '-',
         };
       })
-      .filter((agenda) => !Number.isNaN(agenda.dateValue.getTime()) && agenda.dateValue >= today)
+      .filter(
+        (agenda) =>
+          !Number.isNaN(agenda.dateValue.getTime()) &&
+          agenda.status !== 'past',
+      )
       .sort((a, b) => a.dateValue.getTime() - b.dateValue.getTime())
       .slice(0, 3);
   } catch (error) {

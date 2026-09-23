@@ -41,7 +41,14 @@ interface WpAgenda {
   };
 }
 
-const defaultCategories = ["Semua", "Ujian", "Upacara", "Kesiswaan", "Keagamaan", "Akademik"];
+const defaultCategories = [
+  "Semua",
+  "Ujian",
+  "Upacara",
+  "Kesiswaan",
+  "Keagamaan",
+  "Akademik",
+];
 
 function decodeHtml(value: string): string {
   return value
@@ -56,14 +63,19 @@ function decodeHtml(value: string): string {
 }
 
 function formatDate(value: string): string {
-  const date = new Date(`${value}T00:00:00`);
+  const normalized = /^\d{8}$/.test(value)
+    ? `${value.slice(0, 4)}-${value.slice(4, 6)}-${value.slice(6, 8)}`
+    : value;
+  const date = new Date(`${normalized}T00:00:00`);
   return Number.isNaN(date.getTime())
     ? value
     : new Intl.DateTimeFormat("id-ID", {
         day: "2-digit",
-        month: "long",
+        month: "short",
         year: "numeric",
-      }).format(date);
+      })
+        .format(date)
+        .toLowerCase();
 }
 
 function getStatus(date: string, endDate?: string): AgendaItem["status"] {
@@ -81,15 +93,19 @@ export default function AgendaPage() {
   const [categories, setCategories] = useState(defaultCategories);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState("Semua");
-  const [statusFilter, setStatusFilter] = useState<"all" | "upcoming" | "past">("all");
+  const [statusFilter, setStatusFilter] = useState<"all" | "upcoming" | "past">(
+    "all",
+  );
   const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
     async function loadAgenda() {
       try {
         const wpUrl =
-          process.env.NEXT_PUBLIC_WORDPRESS_API_URL?.replace(/\/graphql\/?$/, "") ||
-          "https://sp1ng.smpn1ngawi.sch.id/wp";
+          process.env.NEXT_PUBLIC_WORDPRESS_API_URL?.replace(
+            /\/graphql\/?$/,
+            "",
+          ) || "https://sp1ng.smpn1ngawi.sch.id/wp";
         const response = await fetch(
           `${wpUrl}/wp-json/wp/v2/agenda?_embed&per_page=100&orderby=date&order=desc`,
           { cache: "no-store" },
@@ -118,7 +134,10 @@ export default function AgendaPage() {
             };
           });
         setAgenda(mapped);
-        setCategories(["Semua", ...Array.from(new Set(mapped.map((item) => item.category)))]);
+        setCategories([
+          "Semua",
+          ...Array.from(new Set(mapped.map((item) => item.category))),
+        ]);
       } catch (error) {
         console.error("Gagal memuat agenda dari WordPress:", error);
         setAgenda([]);
@@ -149,9 +168,13 @@ export default function AgendaPage() {
         <div className="absolute inset-0 bg-[radial-gradient(#0097DF_1px,transparent_1px)] [background-size:24px_24px] opacity-20" />
         <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="flex items-center gap-2 text-sm text-[#0097DF] mb-4 font-medium">
-            <Link href="/" className="hover:underline">Beranda</Link>
+            <Link href="/" className="hover:underline">
+              Beranda
+            </Link>
             <ChevronRight className="h-4 w-4" />
-            <Link href="/informasi" className="hover:underline">Informasi</Link>
+            <Link href="/informasi" className="hover:underline">
+              Informasi
+            </Link>
             <ChevronRight className="h-4 w-4" />
             <span className="text-white">Agenda Kegiatan</span>
           </div>
@@ -161,10 +184,14 @@ export default function AgendaPage() {
               <CalendarIcon className="h-3.5 w-3.5" /> Kalender & Kegiatan
             </div>
             <h1 className="text-3xl font-extrabold tracking-tight sm:text-5xl text-white">
-              Agenda Resmi <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#FFE500] to-amber-300">SMPN 1 Ngawi</span>
+              Agenda Resmi{" "}
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#FFE500] to-amber-300">
+                SMPN 1 Ngawi
+              </span>
             </h1>
             <p className="mt-4 text-base sm:text-lg text-slate-200">
-              Jadwal lengkap kegiatan akademik, kesiswaan, peringatan hari besar, serta agenda resmi sekolah sepanjang tahun ajaran.
+              Jadwal lengkap kegiatan akademik, kesiswaan, peringatan hari
+              besar, serta agenda resmi sekolah sepanjang tahun ajaran.
             </p>
           </div>
         </div>
@@ -222,7 +249,9 @@ export default function AgendaPage() {
         {/* Category Chips */}
         <div className="flex items-center gap-2 overflow-x-auto py-4">
           <Filter className="h-4 w-4 text-slate-400 shrink-0" />
-          <span className="text-xs font-medium text-slate-500 mr-2 shrink-0">Kategori:</span>
+          <span className="text-xs font-medium text-slate-500 mr-2 shrink-0">
+            Kategori:
+          </span>
           {categories.map((cat) => (
             <button
               key={cat}
@@ -244,14 +273,22 @@ export default function AgendaPage() {
         {isLoading ? (
           <div className="text-center py-16 bg-white rounded-2xl border border-slate-100 p-8 shadow-sm">
             <CalendarIcon className="mx-auto h-12 w-12 text-slate-300 animate-pulse" />
-            <h3 className="mt-3 text-base font-semibold text-slate-800">Memuat agenda...</h3>
-            <p className="mt-1 text-sm text-slate-500">Mengambil jadwal terbaru dari WordPress.</p>
+            <h3 className="mt-3 text-base font-semibold text-slate-800">
+              Memuat agenda...
+            </h3>
+            <p className="mt-1 text-sm text-slate-500">
+              Mengambil jadwal terbaru dari Cyber Sp1ng.
+            </p>
           </div>
         ) : filteredAgenda.length === 0 ? (
           <div className="text-center py-16 bg-white rounded-2xl border border-slate-100 p-8 shadow-sm">
             <CalendarIcon className="mx-auto h-12 w-12 text-slate-300" />
-            <h3 className="mt-3 text-base font-semibold text-slate-800">Tidak ada agenda ditemukan</h3>
-            <p className="mt-1 text-sm text-slate-500">Coba sesuaikan kata kunci pencarian atau ganti filter status.</p>
+            <h3 className="mt-3 text-base font-semibold text-slate-800">
+              Tidak ada agenda ditemukan
+            </h3>
+            <p className="mt-1 text-sm text-slate-500">
+              Coba sesuaikan kata kunci pencarian atau ganti filter status.
+            </p>
           </div>
         ) : (
           <div className="space-y-4">
@@ -270,16 +307,13 @@ export default function AgendaPage() {
                   <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-5">
                     {/* Left: Date badge & Titles */}
                     <div className="flex items-start gap-4">
-                      {/* Date Badge */}
-                      <div className="shrink-0 text-center rounded-xl bg-gradient-to-b from-[#1E2B7A] to-[#111A4D] text-white p-3 min-w-[76px] shadow-md shadow-[#1E2B7A]/15">
-                        <span className="block text-xs font-medium text-slate-200 uppercase tracking-wider">
-                          {agenda.date.split(" ")[1]}
-                        </span>
-                        <span className="block text-2xl font-black text-[#FFE500] leading-none my-1">
+                      {/* Tanggal Agenda */}
+                      <div className="shrink-0 rounded-xl border border-[#FFE500]/30 bg-[#1E2B7A] px-2.5 py-1.5 text-center text-[#FFE500] shadow-xs">
+                        <span className="block text-base font-black leading-tight">
                           {agenda.date.split(" ")[0]}
                         </span>
-                        <span className="block text-[10px] text-slate-300">
-                          {agenda.date.split(" ")[2]}
+                        <span className="block text-[10px] font-extrabold uppercase tracking-wider text-white">
+                          {agenda.date.split(" ")[1]}
                         </span>
                       </div>
 
@@ -345,9 +379,12 @@ export default function AgendaPage() {
             <span className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-[#FFE500]">
               <Sparkles className="h-3.5 w-3.5" /> Sinkronisasi Jadwal
             </span>
-            <h2 className="text-xl sm:text-2xl font-bold mt-1">Perlu Konfirmasi Kegiatan Sekolah?</h2>
+            <h2 className="text-xl sm:text-2xl font-bold mt-1">
+              Perlu Konfirmasi Kegiatan Sekolah?
+            </h2>
             <p className="mt-2 text-sm text-slate-100 max-w-2xl">
-              Informasi undangan dinas, izin peminjaman aula/laboratorium, dan kemitraan kegiatan dapat dikomunikasikan dengan bagian Tata Usaha.
+              Informasi undangan dinas, izin peminjaman aula/laboratorium, dan
+              kemitraan kegiatan dapat dikomunikasikan dengan bagian Tata Usaha.
             </p>
           </div>
           <Link
