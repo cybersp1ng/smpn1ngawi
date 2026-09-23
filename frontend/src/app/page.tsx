@@ -1,5 +1,5 @@
-import React from 'react';
-import Link from 'next/link';
+import React from "react";
+import Link from "next/link";
 import {
   ArrowRight,
   BookOpen,
@@ -13,20 +13,21 @@ import {
   ChevronRight,
   GraduationCap,
   FileText,
-} from 'lucide-react';
-import SchoolLogo from '@/components/SchoolLogo';
+} from "lucide-react";
+import SchoolLogo from "@/components/SchoolLogo";
 
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";
 
 interface WpPost {
   id: number;
+  slug: string;
   date: string;
   title?: { rendered?: string };
   excerpt?: { rendered?: string };
   content?: { rendered?: string };
   _embedded?: {
-    'wp:term'?: Array<Array<{ name?: string }>>;
-    'wp:featuredmedia'?: Array<{ source_url?: string }>;
+    "wp:term"?: Array<Array<{ name?: string }>>;
+    "wp:featuredmedia"?: Array<{ source_url?: string }>;
   };
 }
 
@@ -53,13 +54,13 @@ interface WpAgenda {
 
 function decodeHtml(value: string): string {
   return value
-    .replace(/<[^>]*>/g, ' ')
-    .replace(/&amp;/g, '&')
+    .replace(/<[^>]*>/g, " ")
+    .replace(/&amp;/g, "&")
     .replace(/&quot;/g, '"')
     .replace(/&#039;/g, "'")
-    .replace(/&lt;/g, '<')
-    .replace(/&gt;/g, '>')
-    .replace(/\s+/g, ' ')
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/\s+/g, " ")
     .trim();
 }
 
@@ -67,10 +68,10 @@ function formatNewsDate(value: string): string {
   const date = new Date(value);
   return Number.isNaN(date.getTime())
     ? value
-    : new Intl.DateTimeFormat('id-ID', {
-        day: '2-digit',
-        month: 'long',
-        year: 'numeric',
+    : new Intl.DateTimeFormat("id-ID", {
+        day: "2-digit",
+        month: "long",
+        year: "numeric",
       }).format(date);
 }
 
@@ -78,10 +79,10 @@ function formatAnnouncementDate(value: string): string {
   const date = new Date(`${value}T00:00:00`);
   return Number.isNaN(date.getTime())
     ? value
-    : new Intl.DateTimeFormat('id-ID', {
-        day: '2-digit',
-        month: 'long',
-        year: 'numeric',
+    : new Intl.DateTimeFormat("id-ID", {
+        day: "2-digit",
+        month: "long",
+        year: "numeric",
       }).format(date);
 }
 
@@ -95,14 +96,14 @@ function parseAgendaDate(value: string): Date {
 function getAgendaDateParts(value: string): { day: string; month: string } {
   const date = parseAgendaDate(value);
   if (Number.isNaN(date.getTime())) {
-    return { day: value, month: '' };
+    return { day: value, month: "" };
   }
 
   return {
-    day: new Intl.DateTimeFormat('id-ID', { day: '2-digit' }).format(date),
-    month: new Intl.DateTimeFormat('id-ID', { month: 'short' })
+    day: new Intl.DateTimeFormat("id-ID", { day: "2-digit" }).format(date),
+    month: new Intl.DateTimeFormat("id-ID", { month: "short" })
       .format(date)
-      .replace('.', '')
+      .replace(".", "")
       .toUpperCase(),
   };
 }
@@ -110,27 +111,27 @@ function getAgendaDateParts(value: string): { day: string; month: string } {
 function getAgendaStatus(
   startDate: string,
   endDate?: string,
-): 'upcoming' | 'ongoing' | 'past' {
+): "upcoming" | "ongoing" | "past" {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
   const start = parseAgendaDate(startDate);
   const end = parseAgendaDate(endDate || startDate);
   end.setHours(23, 59, 59, 999);
 
-  if (today < start) return 'upcoming';
-  if (today <= end) return 'ongoing';
-  return 'past';
+  if (today < start) return "upcoming";
+  if (today <= end) return "ongoing";
+  return "past";
 }
 
 async function getHomepageContent() {
   const wpUrl =
-    process.env.NEXT_PUBLIC_WORDPRESS_API_URL?.replace(/\/graphql\/?$/, '') ||
-    'https://sp1ng.smpn1ngawi.sch.id/wp';
+    process.env.NEXT_PUBLIC_WORDPRESS_API_URL?.replace(/\/graphql\/?$/, "") ||
+    "https://sp1ng.smpn1ngawi.sch.id/wp";
 
   try {
     const response = await fetch(
       `${wpUrl}/wp-json/wp/v2/posts?_embed&per_page=3&orderby=date&order=desc`,
-      { cache: 'no-store' },
+      { cache: "no-store" },
     );
 
     if (!response.ok) {
@@ -139,36 +140,37 @@ async function getHomepageContent() {
 
     const posts: WpPost[] = await response.json();
     return posts.map((post) => {
-      const content = decodeHtml(post.content?.rendered || '');
+      const content = decodeHtml(post.content?.rendered || "");
       const categories =
-        post._embedded?.['wp:term']?.flatMap((terms) =>
-          terms.map((term) => term.name || '').filter(Boolean),
+        post._embedded?.["wp:term"]?.flatMap((terms) =>
+          terms.map((term) => term.name || "").filter(Boolean),
         ) || [];
 
       return {
         id: String(post.id),
-        title: decodeHtml(post.title?.rendered || 'Berita sekolah'),
+        slug: post.slug,
+        title: decodeHtml(post.title?.rendered || "Berita sekolah"),
         excerpt: decodeHtml(post.excerpt?.rendered || content).slice(0, 240),
         date: formatNewsDate(post.date),
-        category: categories[0] || 'Berita Sekolah',
-        image: post._embedded?.['wp:featuredmedia']?.[0]?.source_url,
+        category: categories[0] || "Berita Sekolah",
+        image: post._embedded?.["wp:featuredmedia"]?.[0]?.source_url,
       };
     });
   } catch (error) {
-    console.error('Gagal memuat berita terbaru dari WordPress:', error);
+    console.error("Gagal memuat berita terbaru dari WordPress:", error);
     return [];
   }
 }
 
 async function getHomepageAnnouncements() {
   const wpUrl =
-    process.env.NEXT_PUBLIC_WORDPRESS_API_URL?.replace(/\/graphql\/?$/, '') ||
-    'https://sp1ng.smpn1ngawi.sch.id/wp';
+    process.env.NEXT_PUBLIC_WORDPRESS_API_URL?.replace(/\/graphql\/?$/, "") ||
+    "https://sp1ng.smpn1ngawi.sch.id/wp";
 
   try {
     const response = await fetch(
       `${wpUrl}/wp-json/wp/v2/pengumuman?_embed&per_page=3&orderby=date&order=desc`,
-      { cache: 'no-store' },
+      { cache: "no-store" },
     );
 
     if (!response.ok) {
@@ -178,32 +180,30 @@ async function getHomepageAnnouncements() {
     const posts: WpPengumuman[] = await response.json();
     return posts.map((post) => ({
       id: String(post.id),
-      title: decodeHtml(post.title?.rendered || 'Pengumuman'),
-      date: formatAnnouncementDate(
-        post.acf?.tanggal_pengumuman || post.date,
-      ),
+      title: decodeHtml(post.title?.rendered || "Pengumuman"),
+      date: formatAnnouncementDate(post.acf?.tanggal_pengumuman || post.date),
       badge:
-        post.acf?.urgensi === 'Mendesak' ||
-        post.acf?.urgensi === 'Penting' ||
-        post.acf?.urgensi === 'PPDB'
+        post.acf?.urgensi === "Mendesak" ||
+        post.acf?.urgensi === "Penting" ||
+        post.acf?.urgensi === "PPDB"
           ? post.acf.urgensi
-          : 'Umum',
+          : "Umum",
     }));
   } catch (error) {
-    console.error('Gagal memuat pengumuman terbaru dari WordPress:', error);
+    console.error("Gagal memuat pengumuman terbaru dari WordPress:", error);
     return [];
   }
 }
 
 async function getHomepageAgendas() {
   const wpUrl =
-    process.env.NEXT_PUBLIC_WORDPRESS_API_URL?.replace(/\/graphql\/?$/, '') ||
-    'https://sp1ng.smpn1ngawi.sch.id/wp';
+    process.env.NEXT_PUBLIC_WORDPRESS_API_URL?.replace(/\/graphql\/?$/, "") ||
+    "https://sp1ng.smpn1ngawi.sch.id/wp";
 
   try {
     const response = await fetch(
       `${wpUrl}/wp-json/wp/v2/agenda?_embed&per_page=100&orderby=date&order=desc`,
-      { cache: 'no-store' },
+      { cache: "no-store" },
     );
 
     if (!response.ok) {
@@ -215,27 +215,26 @@ async function getHomepageAgendas() {
     return posts
       .filter((post) => post.acf?.tanggal_kegiatan)
       .map((post) => {
-        const date = post.acf?.tanggal_kegiatan || '';
+        const date = post.acf?.tanggal_kegiatan || "";
         const endDate = post.acf?.tanggal_selesai || undefined;
         return {
           id: String(post.id),
-          title: decodeHtml(post.title?.rendered || 'Agenda kegiatan'),
+          title: decodeHtml(post.title?.rendered || "Agenda kegiatan"),
           dateValue: parseAgendaDate(date),
           status: getAgendaStatus(date, endDate),
           ...getAgendaDateParts(date),
-          time: post.acf?.waktu || '-',
-          location: post.acf?.lokasi || '-',
+          time: post.acf?.waktu || "-",
+          location: post.acf?.lokasi || "-",
         };
       })
       .filter(
         (agenda) =>
-          !Number.isNaN(agenda.dateValue.getTime()) &&
-          agenda.status !== 'past',
+          !Number.isNaN(agenda.dateValue.getTime()) && agenda.status !== "past",
       )
       .sort((a, b) => a.dateValue.getTime() - b.dateValue.getTime())
       .slice(0, 3);
   } catch (error) {
-    console.error('Gagal memuat agenda terdekat dari WordPress:', error);
+    console.error("Gagal memuat agenda terdekat dari WordPress:", error);
     return [];
   }
 }
@@ -248,27 +247,27 @@ export default async function HomePage() {
   const highlights = [
     {
       icon: GraduationCap,
-      title: 'Kurikulum Merdeka',
-      desc: 'Pembelajaran interaktif berorientasi pada pengembangan nalar kritis dan minat bakat siswa.',
-      link: '/akademik#kurikulum',
+      title: "Kurikulum Merdeka",
+      desc: "Pembelajaran interaktif berorientasi pada pengembangan nalar kritis dan minat bakat siswa.",
+      link: "/akademik#kurikulum",
     },
     {
       icon: Award,
-      title: 'Tradisi Prestasi',
-      desc: 'Konsisten mencetak juara di kompetisi OSN, O2SN, FLS2N tingkat regional hingga nasional.',
-      link: '/akademik/prestasi',
+      title: "Tradisi Prestasi",
+      desc: "Konsisten mencetak juara di kompetisi OSN, O2SN, FLS2N tingkat regional hingga nasional.",
+      link: "/akademik/prestasi",
     },
     {
       icon: Users,
-      title: 'Ekstrakurikuler Aktif',
-      desc: 'Wadah pembinaan 20+ bidang ekskul mulai dari kepramukaan, olahraga, hingga teknologi informasi.',
-      link: '/akademik/ekstrakurikuler',
+      title: "Ekstrakurikuler Aktif",
+      desc: "Wadah pembinaan 20+ bidang ekskul mulai dari kepramukaan, olahraga, hingga teknologi informasi.",
+      link: "/akademik/ekstrakurikuler",
     },
     {
       icon: Sparkles,
-      title: 'Lingkungan Asri & Nyaman',
-      desc: 'Sekolah ramah anak dengan fasilitas laboratorium modern, perpustakaan digital, dan sarana olahraga.',
-      link: '/profil',
+      title: "Lingkungan Asri & Nyaman",
+      desc: "Sekolah ramah anak dengan fasilitas laboratorium modern, perpustakaan digital, dan sarana olahraga.",
+      link: "/profil",
     },
   ];
 
@@ -291,16 +290,17 @@ export default async function HomePage() {
               </div>
 
               <h1 className="text-3xl sm:text-5xl lg:text-6xl font-black tracking-tight leading-tight sm:leading-none">
-                Membentuk Generasi{' '}
+                Membentuk Generasi{" "}
                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#FFE500] via-yellow-200 to-[#0097DF]">
                   Berkarakter & Berprestasi
                 </span>
               </h1>
 
               <p className="text-slate-200 text-base sm:text-lg max-w-2xl mx-auto lg:mx-0 leading-relaxed font-normal">
-                Selamat datang di website resmi SMP Negeri 1 Ngawi. Lembaga pendidikan terdepan yang
-                mengembangkan potensi kognitif, keimanan, kemandirian literasi, dan prestasi siswa
-                di Kabupaten Ngawi.
+                Selamat datang di website resmi SMP Negeri 1 Ngawi. Lembaga
+                pendidikan terdepan yang mengembangkan potensi kognitif,
+                keimanan, kemandirian literasi, dan prestasi siswa di Kabupaten
+                Ngawi.
               </p>
 
               <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4 pt-2">
@@ -321,16 +321,28 @@ export default async function HomePage() {
               {/* Stat Counter */}
               <div className="grid grid-cols-3 gap-6 pt-6 border-t border-white/15 text-left">
                 <div>
-                  <span className="block text-2xl sm:text-3xl font-extrabold text-[#FFE500]">950+</span>
-                  <span className="block text-xs sm:text-sm text-slate-300">Siswa Aktif</span>
+                  <span className="block text-2xl sm:text-3xl font-extrabold text-[#FFE500]">
+                    950+
+                  </span>
+                  <span className="block text-xs sm:text-sm text-slate-300">
+                    Siswa Aktif
+                  </span>
                 </div>
                 <div>
-                  <span className="block text-2xl sm:text-3xl font-extrabold text-white">55+</span>
-                  <span className="block text-xs sm:text-sm text-slate-300">Guru & Staf</span>
+                  <span className="block text-2xl sm:text-3xl font-extrabold text-white">
+                    55+
+                  </span>
+                  <span className="block text-xs sm:text-sm text-slate-300">
+                    Guru & Staf
+                  </span>
                 </div>
                 <div>
-                  <span className="block text-2xl sm:text-3xl font-extrabold text-[#0097DF]">100+</span>
-                  <span className="block text-xs sm:text-sm text-slate-300">Prestasi Juara</span>
+                  <span className="block text-2xl sm:text-3xl font-extrabold text-[#0097DF]">
+                    100+
+                  </span>
+                  <span className="block text-xs sm:text-sm text-slate-300">
+                    Prestasi Juara
+                  </span>
                 </div>
               </div>
             </div>
@@ -346,7 +358,9 @@ export default async function HomePage() {
                       <h2 className="text-white font-extrabold text-base tracking-tight">
                         SMPN 1 NGAWI
                       </h2>
-                      <p className="text-xs text-[#0097DF] font-semibold">NPSN: 20508537</p>
+                      <p className="text-xs text-[#0097DF] font-semibold">
+                        NPSN: 20508537
+                      </p>
                     </div>
                   </div>
                   <span className="px-3 py-1 bg-[#FFE500]/20 text-[#FFE500] text-xs font-bold rounded-full border border-[#FFE500]/40">
@@ -361,7 +375,9 @@ export default async function HomePage() {
                   </div>
                   <div className="flex items-start gap-3 text-slate-200">
                     <CheckCircle2 className="w-5 h-5 text-[#0097DF] shrink-0 mt-0.5" />
-                    <span>Sekolah Ramah Anak & Berwawasan Adiwiyata Mandiri</span>
+                    <span>
+                      Sekolah Ramah Anak & Berwawasan Adiwiyata Mandiri
+                    </span>
                   </div>
                   <div className="flex items-start gap-3 text-slate-200">
                     <CheckCircle2 className="w-5 h-5 text-[#0097DF] shrink-0 mt-0.5" />
@@ -369,7 +385,9 @@ export default async function HomePage() {
                   </div>
                   <div className="flex items-start gap-3 text-slate-200">
                     <CheckCircle2 className="w-5 h-5 text-[#0097DF] shrink-0 mt-0.5" />
-                    <span>Akses Perpustakaan Cerdas & Pojok Literasi Siswa</span>
+                    <span>
+                      Akses Perpustakaan Cerdas & Pojok Literasi Siswa
+                    </span>
                   </div>
                 </div>
 
@@ -409,30 +427,36 @@ export default async function HomePage() {
                 </div>
               </div>
               <div className="mt-4">
-                <h3 className="font-bold text-slate-900 text-lg">Kepala SMPN 1 Ngawi</h3>
-                <p className="text-xs text-blue-600 font-medium">Pembina Tk. I / IV-b</p>
+                <h3 className="font-bold text-slate-900 text-lg">
+                  Kepala SMPN 1 Ngawi
+                </h3>
+                <p className="text-xs text-blue-600 font-medium">
+                  Pembina Tk. I / IV-b
+                </p>
               </div>
             </div>
 
             {/* Isi Sambutan */}
             <div className="lg:col-span-8 space-y-4">
               <div className="inline-flex items-center gap-2 text-[#1E2B7A] font-bold text-xs tracking-wider uppercase bg-blue-50/80 px-3.5 py-1.5 rounded-lg border-l-3 border-[#FFE500]">
-                Sambutan Pimpinan
+                Sambutan Kepala Sekolah
               </div>
               <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
-                Membangun Generasi Emas yang Cerdas, Santun, dan Bertanggung Jawab
+                Membangun Generasi Emas yang Cerdas, Santun, dan Bertanggung
+                Jawab
               </h2>
               <div className="space-y-3 text-slate-600 text-sm sm:text-base leading-relaxed">
                 <p>
-                  &ldquo;Puji syukur kita panjatkan ke hadirat Tuhan Yang Maha Esa. Website ini hadir
-                  sebagai jembatan komunikasi, transparansi informasi, dan media literasi digital
-                  antara keluarga besar SMP Negeri 1 Ngawi dengan seluruh lapisan masyarakat, siswa,
-                  dan para orang tua/wali murid.&rdquo;
+                  &ldquo;Puji syukur kita panjatkan ke hadirat Tuhan Yang Maha
+                  Esa. Website ini hadir sebagai jembatan komunikasi,
+                  transparansi informasi, dan media literasi digital antara
+                  keluarga besar SMP Negeri 1 Ngawi dengan seluruh lapisan
+                  masyarakat, siswa, dan para orang tua/wali murid.&rdquo;
                 </p>
                 <p>
-                  &ldquo;Kami terus berkomitmen mewujudkan iklim belajar yang inklusif, adaptif
-                  terhadap perkembangan teknologi, dan berakar kuat pada nilai-nilai kearifan lokal
-                  serta keimanan.&rdquo;
+                  &ldquo;Kami terus berkomitmen mewujudkan iklim belajar yang
+                  inklusif, adaptif terhadap perkembangan teknologi, dan berakar
+                  kuat pada nilai-nilai kearifan lokal serta keimanan.&rdquo;
                 </p>
               </div>
               <div className="pt-2">
@@ -440,7 +464,8 @@ export default async function HomePage() {
                   href="/profil"
                   className="inline-flex items-center gap-1.5 text-sm font-bold text-[#1E2B7A] hover:text-[#0097DF] transition group"
                 >
-                  Pelajari Visi & Misi Kami <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition text-[#0097DF]" />
+                  Pelajari Visi & Misi Kami{" "}
+                  <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition text-[#0097DF]" />
                 </Link>
               </div>
             </div>
@@ -458,8 +483,8 @@ export default async function HomePage() {
             Keunggulan & Karakter SMPN 1 Ngawi
           </h2>
           <p className="text-slate-600 text-sm sm:text-base mt-2">
-            Kami mendedikasikan seluruh sarana dan metode pengajaran terbaik untuk menumbuhkan
-            potensi unik setiap peserta didik.
+            Kami mendedikasikan seluruh sarana dan metode pengajaran terbaik
+            untuk menumbuhkan potensi unik setiap peserta didik.
           </p>
         </div>
 
@@ -478,7 +503,9 @@ export default async function HomePage() {
                   <h3 className="font-bold text-slate-900 text-lg group-hover:text-[#1E2B7A] transition">
                     {item.title}
                   </h3>
-                  <p className="text-sm text-slate-600 leading-relaxed">{item.desc}</p>
+                  <p className="text-sm text-slate-600 leading-relaxed">
+                    {item.desc}
+                  </p>
                 </div>
                 <div className="pt-6">
                   <Link
@@ -502,7 +529,8 @@ export default async function HomePage() {
             <div className="flex items-center justify-between border-b border-slate-200 pb-4">
               <div>
                 <h2 className="text-2xl font-bold text-slate-900 tracking-tight flex items-center gap-2">
-                  <BookOpen className="w-6 h-6 text-blue-600" /> Warta & Berita Terbaru
+                  <BookOpen className="w-6 h-6 text-blue-600" /> Warta & Berita
+                  Terbaru
                 </h2>
                 <p className="text-xs text-slate-500 mt-0.5">
                   Informasi seputar agenda dan aktivitas siswa terkini
@@ -523,49 +551,54 @@ export default async function HomePage() {
                 </div>
               ) : (
                 latestPosts.map((news) => (
-                <article
-                  key={news.id}
-                  className="bg-white rounded-2xl border border-slate-200/80 overflow-hidden shadow-sm hover:shadow-md transition flex flex-col justify-between"
-                >
-                  <div
-                    className="h-36 bg-gradient-to-tr from-slate-200 to-blue-100 flex items-center justify-center text-slate-400 bg-cover bg-center"
-                    style={
-                      news.image
-                        ? {
-                            backgroundImage: `linear-gradient(135deg, rgba(226,232,240,.75), rgba(219,234,254,.65)), url("${news.image}")`,
-                          }
-                        : undefined
-                    }
+                  <article
+                    key={news.id}
+                    className="bg-white rounded-2xl border border-slate-200/80 overflow-hidden shadow-sm hover:shadow-md transition flex flex-col justify-between"
                   >
-                    {!news.image && <FileText className="w-10 h-10 text-blue-300" />}
-                  </div>
-                  <div className="p-5 flex-1 flex flex-col justify-between space-y-3">
-                    <div className="space-y-2">
-                      <div className="flex items-center justify-between text-xs text-slate-500">
-                        <span className="px-2 py-0.5 rounded bg-blue-50 text-blue-700 font-medium">
-                          {news.category}
-                        </span>
-                        <span className="flex items-center gap-1">
-                          <Clock className="w-3 h-3" /> {news.date}
-                        </span>
+                    <div
+                      className="h-36 bg-gradient-to-tr from-slate-200 to-blue-100 flex items-center justify-center text-slate-400 bg-cover bg-center"
+                      style={
+                        news.image
+                          ? {
+                              backgroundImage: `linear-gradient(135deg, rgba(226,232,240,.75), rgba(219,234,254,.65)), url("${news.image}")`,
+                            }
+                          : undefined
+                      }
+                    >
+                      {!news.image && (
+                        <FileText className="w-10 h-10 text-blue-300" />
+                      )}
+                    </div>
+                    <div className="p-5 flex-1 flex flex-col justify-between space-y-3">
+                      <div className="space-y-2">
+                        <div className="flex items-center justify-between text-xs text-slate-500">
+                          <span className="px-2 py-0.5 rounded bg-blue-50 text-blue-700 font-medium">
+                            {news.category}
+                          </span>
+                          <span className="flex items-center gap-1">
+                            <Clock className="w-3 h-3" /> {news.date}
+                          </span>
+                        </div>
+                        <h3 className="font-bold text-slate-900 text-sm leading-snug line-clamp-2 hover:text-blue-700 transition">
+                          <Link href={`/informasi/berita/${news.slug}`}>
+                            {news.title}
+                          </Link>
+                        </h3>
+                        <p className="text-xs text-slate-600 line-clamp-3 leading-relaxed">
+                          {news.excerpt}
+                        </p>
                       </div>
-                      <h3 className="font-bold text-slate-900 text-sm leading-snug line-clamp-2 hover:text-blue-700 transition">
-                        <Link href="/informasi/berita">{news.title}</Link>
-                      </h3>
-                      <p className="text-xs text-slate-600 line-clamp-3 leading-relaxed">
-                        {news.excerpt}
-                      </p>
+                      <div className="pt-3 border-t border-slate-100">
+                        <Link
+                          href={`/informasi/berita/${news.slug}`}
+                          className="text-xs font-semibold text-blue-600 hover:text-blue-700 flex items-center gap-1"
+                        >
+                          Baca Selengkapnya{" "}
+                          <ChevronRight className="w-3.5 h-3.5" />
+                        </Link>
+                      </div>
                     </div>
-                    <div className="pt-3 border-t border-slate-100">
-                      <Link
-                        href="/informasi/berita"
-                        className="text-xs font-semibold text-blue-600 hover:text-blue-700 flex items-center gap-1"
-                      >
-                        Baca Selengkapnya <ChevronRight className="w-3.5 h-3.5" />
-                      </Link>
-                    </div>
-                  </div>
-                </article>
+                  </article>
                 ))
               )}
             </div>
@@ -592,25 +625,27 @@ export default async function HomePage() {
                   <p className="rounded-xl border border-slate-100 bg-slate-50 p-4 text-xs text-slate-500">
                     Belum ada pengumuman terbaru.
                   </p>
-                ) : announcements.map((item) => (
-                  <div
-                    key={item.id}
-                    className="p-3 rounded-xl bg-slate-50 hover:bg-blue-50/60 border border-slate-100 transition space-y-1.5"
-                  >
-                    <div className="flex items-center justify-between text-xs">
-                      <span className="font-semibold text-amber-600 bg-amber-50 px-2 py-0.5 rounded">
-                        {item.badge}
-                      </span>
-                      <span className="text-slate-400">{item.date}</span>
-                    </div>
-                    <Link
-                      href="/informasi/pengumuman"
-                      className="block text-xs sm:text-sm font-semibold text-slate-800 hover:text-blue-700 line-clamp-2 leading-snug"
+                ) : (
+                  announcements.map((item) => (
+                    <div
+                      key={item.id}
+                      className="p-3 rounded-xl bg-slate-50 hover:bg-blue-50/60 border border-slate-100 transition space-y-1.5"
                     >
-                      {item.title}
-                    </Link>
-                  </div>
-                ))}
+                      <div className="flex items-center justify-between text-xs">
+                        <span className="font-semibold text-amber-600 bg-amber-50 px-2 py-0.5 rounded">
+                          {item.badge}
+                        </span>
+                        <span className="text-slate-400">{item.date}</span>
+                      </div>
+                      <Link
+                        href="/informasi/pengumuman"
+                        className="block text-xs sm:text-sm font-semibold text-slate-800 hover:text-blue-700 line-clamp-2 leading-snug"
+                      >
+                        {item.title}
+                      </Link>
+                    </div>
+                  ))
+                )}
               </div>
             </div>
 
@@ -618,7 +653,8 @@ export default async function HomePage() {
             <div className="bg-white rounded-2xl border border-slate-200/80 p-6 shadow-sm space-y-5">
               <div className="flex items-center justify-between border-b border-slate-100 pb-3">
                 <h3 className="font-bold text-slate-900 text-base flex items-center gap-2">
-                  <Calendar className="w-5 h-5 text-indigo-600" /> Agenda Terdekat
+                  <Calendar className="w-5 h-5 text-indigo-600" /> Agenda
+                  Terdekat
                 </h3>
                 <Link
                   href="/informasi/agenda"
@@ -633,28 +669,34 @@ export default async function HomePage() {
                   <p className="rounded-xl border border-slate-100 bg-slate-50 p-4 text-xs text-slate-500">
                     Belum ada agenda terdekat.
                   </p>
-                ) : upcomingAgendas.map((agenda) => (
-                  <div
-                    key={agenda.id}
-                    className="flex items-start gap-3.5 p-3 rounded-xl bg-slate-50 border border-slate-100 hover:border-[#0097DF]/40 transition"
-                  >
-                    <div className="bg-[#1E2B7A] text-[#FFE500] border border-[#FFE500]/30 rounded-xl px-2.5 py-1.5 text-center shrink-0 shadow-xs">
-                      <span className="block text-base font-black leading-tight">
-                        {agenda.day}
-                      </span>
-                      <span className="block text-[10px] font-extrabold uppercase tracking-wider text-[#0097DF]">
-                        {agenda.month}
-                      </span>
+                ) : (
+                  upcomingAgendas.map((agenda) => (
+                    <div
+                      key={agenda.id}
+                      className="flex items-start gap-3.5 p-3 rounded-xl bg-slate-50 border border-slate-100 hover:border-[#0097DF]/40 transition"
+                    >
+                      <div className="bg-[#1E2B7A] text-[#FFE500] border border-[#FFE500]/30 rounded-xl px-2.5 py-1.5 text-center shrink-0 shadow-xs">
+                        <span className="block text-base font-black leading-tight">
+                          {agenda.day}
+                        </span>
+                        <span className="block text-[10px] font-extrabold uppercase tracking-wider text-[#0097DF]">
+                          {agenda.month}
+                        </span>
+                      </div>
+                      <div className="space-y-0.5">
+                        <h4 className="text-xs font-bold text-slate-900 leading-snug">
+                          {agenda.title}
+                        </h4>
+                        <p className="text-[11px] text-slate-500">
+                          {agenda.time}
+                        </p>
+                        <p className="text-[11px] text-[#0097DF] font-semibold">
+                          {agenda.location}
+                        </p>
+                      </div>
                     </div>
-                    <div className="space-y-0.5">
-                      <h4 className="text-xs font-bold text-slate-900 leading-snug">
-                        {agenda.title}
-                      </h4>
-                      <p className="text-[11px] text-slate-500">{agenda.time}</p>
-                      <p className="text-[11px] text-[#0097DF] font-semibold">{agenda.location}</p>
-                    </div>
-                  </div>
-                ))}
+                  ))
+                )}
               </div>
             </div>
           </div>
@@ -672,8 +714,9 @@ export default async function HomePage() {
               Ingin Mengetahui Lebih Banyak Tentang SMPN 1 Ngawi?
             </h2>
             <p className="text-slate-200 text-sm sm:text-base leading-relaxed">
-              Tim bimbingan dan administrasi kami siap melayani pertanyaan seputar kurikulum, jadwal
-              kegiatan, atau proses pendaftaran peserta didik baru.
+              Tim bimbingan dan administrasi kami siap melayani pertanyaan
+              seputar kurikulum, jadwal kegiatan, atau proses pendaftaran
+              peserta didik baru.
             </p>
             <div className="flex flex-wrap gap-4 pt-4">
               <Link

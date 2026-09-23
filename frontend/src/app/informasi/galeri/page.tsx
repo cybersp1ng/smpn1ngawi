@@ -110,7 +110,7 @@ export default function GaleriPage() {
               date: formatDate(post.date),
               image:
                 post._embedded?.["wp:featuredmedia"]?.[0]?.source_url || "",
-              caption: content || "Dokumentasi kegiatan SMPN 1 Ngawi.",
+              caption: content || "Dokumentasi SMPN 1 Ngawi.",
               mediaType,
               videoUrl: getYoutubeEmbedUrl(acf.youtube_url),
             };
@@ -159,16 +159,11 @@ export default function GaleriPage() {
               <Camera className="h-3.5 w-3.5" /> Dokumentasi Visual
             </div>
             <h1 className="text-3xl font-extrabold tracking-tight sm:text-5xl text-white">
-              Galeri Kegiatan{" "}
+              Galeri{" "}
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#FFE500] to-amber-300">
-                SMPN 1 Ngawi
+                Foto
               </span>
             </h1>
-            <p className="mt-4 text-base sm:text-lg text-slate-200">
-              Koleksi dokumentasi momen bersejarah, ragam kegiatan belajar
-              mengajar, prestasi kejuaraan, serta sarana fasilitas modern
-              sekolah.
-            </p>
           </div>
         </div>
       </section>

@@ -239,7 +239,7 @@ export default function Footer() {
             </a>{" "}
             &{" "}
             <a
-              href="https://github.com/haviedzmiftah"
+              href="https://hafidmiftah.my.id/"
               target="_blank"
               rel="noopener noreferrer"
               className="text-slate-300 hover:text-[#FFE500] transition"
