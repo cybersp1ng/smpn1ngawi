@@ -180,6 +180,14 @@ export default function Footer() {
                   Kegiatan Ekstrakurikuler
                 </Link>
               </li>
+              <li>
+                <Link
+                  href="/release-note"
+                  className="hover:text-[#FFE500] transition"
+                >
+                  Release Note
+                </Link>
+              </li>
             </ul>
           </div>
 
@@ -228,23 +236,14 @@ export default function Footer() {
       <div className="border-t border-slate-800/80 bg-[#0C1236] py-5">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-400 gap-3">
           <p>
-            © {currentYear} SMP Negeri 1 Ngawi. Dibuat oleh{" "}
-            <a
-              href="https://github.com/cybersp1ng"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-slate-300 hover:text-[#FFE500] transition"
-            >
-              cyber sp1ng
-            </a>{" "}
-            &{" "}
+            © {currentYear} SMPN 1 Ngawi. All rights reserved | Developed by{" "}
             <a
               href="https://hafidmiftah.my.id/"
               target="_blank"
               rel="noopener noreferrer"
               className="text-slate-300 hover:text-[#FFE500] transition"
             >
-              haviedz miftah
+              Havidz Miftah
             </a>
           </p>
         </div>

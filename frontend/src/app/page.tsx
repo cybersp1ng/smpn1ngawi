@@ -157,7 +157,7 @@ async function getHomepageContent() {
       };
     });
   } catch (error) {
-    console.error("Gagal memuat berita terbaru dari WordPress:", error);
+    console.error("Gagal memuat berita terbaru :", error);
     return [];
   }
 }
@@ -190,7 +190,7 @@ async function getHomepageAnnouncements() {
           : "Umum",
     }));
   } catch (error) {
-    console.error("Gagal memuat pengumuman terbaru dari WordPress:", error);
+    console.error("Gagal memuat pengumuman terbaru :", error);
     return [];
   }
 }
@@ -234,7 +234,7 @@ async function getHomepageAgendas() {
       .sort((a, b) => a.dateValue.getTime() - b.dateValue.getTime())
       .slice(0, 3);
   } catch (error) {
-    console.error("Gagal memuat agenda terdekat dari WordPress:", error);
+    console.error("Gagal memuat agenda.", error);
     return [];
   }
 }
@@ -260,13 +260,13 @@ export default async function HomePage() {
     {
       icon: Users,
       title: "Ekstrakurikuler Aktif",
-      desc: "Wadah pembinaan 20+ bidang ekskul mulai dari kepramukaan, olahraga, hingga teknologi informasi.",
+      desc: "Wadah pembinaan bidang ekskul akademik dan non akademik.",
       link: "/akademik/ekstrakurikuler",
     },
     {
       icon: Sparkles,
       title: "Lingkungan Asri & Nyaman",
-      desc: "Sekolah ramah anak dengan fasilitas laboratorium modern, perpustakaan digital, dan sarana olahraga.",
+      desc: "Sekolah ramah anak, lingkungan asri dan nyaman dengan fasilitas yang memadai.",
       link: "/profil",
     },
   ];
@@ -317,34 +317,6 @@ export default async function HomePage() {
                   Informasi Akademik
                 </Link>
               </div>
-
-              {/* Stat Counter */}
-              <div className="grid grid-cols-3 gap-6 pt-6 border-t border-white/15 text-left">
-                <div>
-                  <span className="block text-2xl sm:text-3xl font-extrabold text-[#FFE500]">
-                    950+
-                  </span>
-                  <span className="block text-xs sm:text-sm text-slate-300">
-                    Siswa Aktif
-                  </span>
-                </div>
-                <div>
-                  <span className="block text-2xl sm:text-3xl font-extrabold text-white">
-                    55+
-                  </span>
-                  <span className="block text-xs sm:text-sm text-slate-300">
-                    Guru & Staf
-                  </span>
-                </div>
-                <div>
-                  <span className="block text-2xl sm:text-3xl font-extrabold text-[#0097DF]">
-                    100+
-                  </span>
-                  <span className="block text-xs sm:text-sm text-slate-300">
-                    Prestasi Juara
-                  </span>
-                </div>
-              </div>
             </div>
 
             {/* Visual Card Hero dengan Lambang Sekolah */}
@@ -359,7 +331,7 @@ export default async function HomePage() {
                         SMPN 1 NGAWI
                       </h2>
                       <p className="text-xs text-[#0097DF] font-semibold">
-                        NPSN: 20508537
+                        NPSN: 20508544
                       </p>
                     </div>
                   </div>
@@ -532,9 +504,6 @@ export default async function HomePage() {
                   <BookOpen className="w-6 h-6 text-blue-600" /> Warta & Berita
                   Terbaru
                 </h2>
-                <p className="text-xs text-slate-500 mt-0.5">
-                  Informasi seputar agenda dan aktivitas siswa terkini
-                </p>
               </div>
               <Link
                 href="/informasi/berita"

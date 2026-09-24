@@ -15,7 +15,7 @@ const dancingScript = Dancing_Script({
 interface NavItem {
   label: string;
   href: string;
-  children?: { label: string; href: string; desc?: string }[];
+  children?: { label: string; href: string }[];
 }
 
 const NAV_ITEMS: NavItem[] = [
@@ -30,22 +30,18 @@ const NAV_ITEMS: NavItem[] = [
       {
         label: "Sejarah Singkat",
         href: "/profil#sejarah",
-        desc: "Perjalanan & kilas balik sekolah",
       },
       {
         label: "Visi & Misi",
         href: "/profil#visi-misi",
-        desc: "Arah dan komitmen pendidikan",
       },
       {
         label: "Struktur Organisasi",
         href: "/profil#struktur",
-        desc: "Bagan susunan pengelola sekolah",
       },
       {
         label: "Guru & Staf",
         href: "/profil/guru",
-        desc: "Tenaga pendidik & kependidikan",
       },
     ],
   },
@@ -56,27 +52,22 @@ const NAV_ITEMS: NavItem[] = [
       {
         label: "Kurikulum",
         href: "/akademik#kurikulum",
-        desc: "Penerapan Kurikulum Merdeka",
       },
       {
         label: "Jadwal Pelajaran",
         href: "/akademik#jadwal",
-        desc: "Jadwal KBM per jenjang kelas",
       },
       {
         label: "Kalender Akademik",
         href: "/akademik#kalender",
-        desc: "Agenda semester & hari libur",
       },
       {
         label: "Ekstrakurikuler",
         href: "/akademik/ekstrakurikuler",
-        desc: "Pengembangan minat & bakat siswa",
       },
       {
         label: "Prestasi Siswa",
         href: "/akademik/prestasi",
-        desc: "Capaian kejuaraan membanggakan",
       },
     ],
   },
@@ -87,27 +78,22 @@ const NAV_ITEMS: NavItem[] = [
       {
         label: "Pengumuman Resmi",
         href: "/informasi/pengumuman",
-        desc: "Surat edaran & info kedinasan",
       },
       {
         label: "Berita Sekolah",
         href: "/informasi/berita",
-        desc: "Kabar kegiatan & liputan terkini",
       },
       {
         label: "Agenda Kegiatan",
         href: "/informasi/agenda",
-        desc: "Jadwal acara mendatang",
       },
       {
         label: "Galeri Foto",
         href: "/informasi/galeri",
-        desc: "Dokumentasi kegiatan siswa",
       },
       {
         label: "Video Kegiatan",
         href: "/informasi/video",
-        desc: "Kanal dokumentasi YouTube resmi",
       },
     ],
   },
@@ -251,11 +237,6 @@ export default function Navbar() {
                               <span className="block text-sm font-semibold text-slate-800 group-hover/child:text-[#1E2B7A]">
                                 {child.label}
                               </span>
-                              {child.desc && (
-                                <span className="block text-xs text-slate-500 mt-0.5">
-                                  {child.desc}
-                                </span>
-                              )}
                             </Link>
                           ))}
                         </div>
