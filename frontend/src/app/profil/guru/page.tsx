@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import React, { useState, useEffect } from 'react';
-import Link from 'next/link';
-import Image from 'next/image';
+import React, { useState, useEffect } from "react";
+import Link from "next/link";
+import Image from "next/image";
 import {
   Search,
   Users,
@@ -10,8 +10,8 @@ import {
   Mail,
   ChevronRight,
   BookOpen,
-} from 'lucide-react';
-import { fetchGraphQL } from '@/lib/graphql';
+} from "lucide-react";
+import { fetchGraphQL } from "@/lib/graphql";
 
 interface GuruItem {
   id: string;
@@ -25,15 +25,15 @@ interface GuruItem {
 }
 
 const KATEGORI_OPTIONS = [
-  'Semua',
-  'Pimpinan',
-  'Matematika & IPA',
-  'Bahasa',
-  'Sosial & Agama',
-  'Olahraga & Seni',
-  'Teknologi & Vokasi',
-  'Layanan Siswa',
-  'Tenaga Kependidikan',
+  "Semua",
+  "Pimpinan",
+  "Matematika & IPA",
+  "Bahasa",
+  "Sosial & Agama",
+  "Olahraga & Seni",
+  "Teknologi & Vokasi",
+  "Layanan Siswa",
+  "Tenaga Kependidikan",
 ];
 
 interface WPGuruResponse {
@@ -61,19 +61,19 @@ interface WPGuruResponse {
 function decodeWpText(raw: string): string {
   return raw
     .replace(/&#(\d+);/g, (_, dec: string) => String.fromCharCode(Number(dec)))
-    .replace(/&amp;/g, '&')
+    .replace(/&amp;/g, "&")
     .replace(/&quot;/g, '"')
     .replace(/&#039;/g, "'")
-    .replace(/&lt;/g, '<')
-    .replace(/&gt;/g, '>')
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
     .trim();
 }
 
 export default function GuruPage() {
   const [daftarGuru, setDaftarGuru] = useState<GuruItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [selectedKategori, setSelectedKategori] = useState('Semua');
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedKategori, setSelectedKategori] = useState("Semua");
 
   useEffect(() => {
     async function loadGuruFromWordPress() {
@@ -108,11 +108,11 @@ export default function GuruPage() {
           const mapped: GuruItem[] = nodes.map((node, idx) => ({
             id: node.id || String(idx + 1),
             nama: decodeWpText(node.title),
-            nip: node.dataGuru?.nip || '-',
-            jabatan: decodeWpText(node.dataGuru?.jabatan || 'Tenaga Pendidik'),
-            mataPelajaran: decodeWpText(node.dataGuru?.mataPelajaran || '-'),
-            kategori: decodeWpText(node.dataGuru?.kategori || ''),
-            email: node.dataGuru?.email || '',
+            nip: node.dataGuru?.nip || "-",
+            jabatan: decodeWpText(node.dataGuru?.jabatan || "Tenaga Pendidik"),
+            mataPelajaran: decodeWpText(node.dataGuru?.mataPelajaran || "-"),
+            kategori: decodeWpText(node.dataGuru?.kategori || ""),
+            email: node.dataGuru?.email || "",
             fotoUrl: node.featuredImage?.node?.sourceUrl,
           }));
           setDaftarGuru(mapped);
@@ -134,8 +134,10 @@ export default function GuruPage() {
       try {
         // Deteksi basis URL WordPress dari env atau fallback ke server live
         const wpUrl =
-          process.env.NEXT_PUBLIC_WORDPRESS_API_URL?.replace(/\/graphql\/?$/, '') ||
-          'https://sp1ng.smpn1ngawi.sch.id/wp';
+          process.env.NEXT_PUBLIC_WORDPRESS_API_URL?.replace(
+            /\/graphql\/?$/,
+            "",
+          ) || "https://sp1ng.smpn1ngawi.sch.id/wp";
         const restEndpoint = `${wpUrl}/wp-json/wp/v2/guru?_embed&per_page=100`;
 
         const res = await fetch(restEndpoint);
@@ -154,22 +156,22 @@ export default function GuruPage() {
               email?: string;
             };
             _embedded?: {
-              'wp:featuredmedia'?: Array<{ source_url?: string }>;
+              "wp:featuredmedia"?: Array<{ source_url?: string }>;
             };
           }
 
           const mappedFromRest: GuruItem[] = posts.map((p: WpRestGuru) => {
             const fotoUrl =
-              p._embedded?.['wp:featuredmedia']?.[0]?.source_url || undefined;
+              p._embedded?.["wp:featuredmedia"]?.[0]?.source_url || undefined;
 
             return {
               id: String(p.id),
-              nama: decodeWpText(p.title?.rendered || 'Pendidik'),
-              nip: p.acf?.nip || '-',
-              jabatan: decodeWpText(p.acf?.jabatan || 'Tenaga Pendidik'),
-              mataPelajaran: decodeWpText(p.acf?.mata_pelajaran || '-'),
-              kategori: decodeWpText(p.acf?.kategori || ''),
-              email: p.acf?.email || '',
+              nama: decodeWpText(p.title?.rendered || "Pendidik"),
+              nip: p.acf?.nip || "-",
+              jabatan: decodeWpText(p.acf?.jabatan || "Tenaga Pendidik"),
+              mataPelajaran: decodeWpText(p.acf?.mata_pelajaran || "-"),
+              kategori: decodeWpText(p.acf?.kategori || ""),
+              email: p.acf?.email || "",
               fotoUrl,
             };
           });
@@ -193,11 +195,13 @@ export default function GuruPage() {
         guru.nip.includes(searchQuery);
 
       const matchesKategori =
-        selectedKategori === 'Semua' || guru.kategori === selectedKategori;
+        selectedKategori === "Semua" || guru.kategori === selectedKategori;
 
       return matchesSearch && matchesKategori;
     })
-    .sort((a, b) => a.nama.localeCompare(b.nama, 'id-ID', { sensitivity: 'base' }));
+    .sort((a, b) =>
+      a.nama.localeCompare(b.nama, "id-ID", { sensitivity: "base" }),
+    );
 
   return (
     <div className="space-y-12 sm:space-y-16 pb-20">
@@ -221,14 +225,14 @@ export default function GuruPage() {
           </nav>
 
           <h1 className="text-3xl sm:text-5xl font-black tracking-tight leading-tight">
-            Direktori Guru &{' '}
+            Direktori Guru &{" "}
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#FFE500] via-yellow-200 to-[#0097DF]">
               Tenaga Kependidikan
             </span>
           </h1>
           <p className="text-slate-200 text-sm sm:text-base max-w-2xl mx-auto mt-3 leading-relaxed">
-            Mengenal lebih dekat para pendidik berdedikasi tinggi dan tenaga administrasi profesional
-            SMP Negeri 1 Ngawi.
+            Mengenal lebih dekat para pendidik berdedikasi tinggi dan tenaga
+            administrasi profesional SMP Negeri 1 Ngawi.
           </p>
         </div>
       </section>
@@ -254,7 +258,11 @@ export default function GuruPage() {
               {/* Counter Hasil */}
               <div className="md:col-span-4 flex items-center justify-end text-xs font-semibold text-slate-500 gap-1.5">
                 <Users className="w-4 h-4 text-[#1E2B7A]" />
-                Menampilkan <span className="text-[#1E2B7A] font-bold">{filteredGurus.length}</span> dari {daftarGuru.length} tenaga pendidik
+                Menampilkan{" "}
+                <span className="text-[#1E2B7A] font-bold">
+                  {filteredGurus.length}
+                </span>{" "}
+                dari {daftarGuru.length} tenaga pendidik
               </div>
             </div>
 
@@ -266,8 +274,8 @@ export default function GuruPage() {
                   onClick={() => setSelectedKategori(kat)}
                   className={`px-4 py-2 rounded-xl text-xs font-bold transition ${
                     selectedKategori === kat
-                      ? 'bg-[#1E2B7A] text-[#FFE500] shadow-xs'
-                      : 'bg-slate-50 text-slate-600 hover:bg-slate-100 hover:text-[#1E2B7A]'
+                      ? "bg-[#1E2B7A] text-[#FFE500] shadow-xs"
+                      : "bg-slate-50 text-slate-600 hover:bg-slate-100 hover:text-[#1E2B7A]"
                   }`}
                 >
                   {kat}
@@ -334,7 +342,9 @@ export default function GuruPage() {
                         <h3 className="font-extrabold text-slate-900 text-base group-hover:text-[#1E2B7A] transition leading-snug">
                           {guru.nama}
                         </h3>
-                        <p className="text-xs font-bold text-[#0097DF] mt-1">{guru.jabatan}</p>
+                        <p className="text-xs font-bold text-[#0097DF] mt-1">
+                          {guru.jabatan}
+                        </p>
                       </div>
 
                       <div className="space-y-2 text-xs text-slate-600 pt-2 border-t border-slate-100">
@@ -342,14 +352,18 @@ export default function GuruPage() {
                         <div className="flex items-start gap-1.5">
                           <BookOpen className="w-3.5 h-3.5 text-[#1E2B7A] shrink-0 mt-0.5" />
                           <div>
-                            <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wide block">Mata Pelajaran</span>
                             <span className="font-semibold text-slate-700">
-                              {guru.mataPelajaran && guru.mataPelajaran !== '-' ? guru.mataPelajaran : <span className="text-slate-400 italic">—</span>}
+                              {guru.mataPelajaran &&
+                              guru.mataPelajaran !== "-" ? (
+                                guru.mataPelajaran
+                              ) : (
+                                <span className="text-slate-400 italic">—</span>
+                              )}
                             </span>
                           </div>
                         </div>
                         {/* NIP */}
-                        {guru.nip && guru.nip !== '-' && (
+                        {guru.nip && guru.nip !== "-" && (
                           <div className="text-[11px] text-slate-400 font-mono pt-0.5">
                             NIP: {guru.nip}
                           </div>
@@ -380,14 +394,17 @@ export default function GuruPage() {
           ) : (
             <div className="bg-white rounded-3xl p-12 text-center border border-slate-200 shadow-sm space-y-3">
               <Users className="w-12 h-12 text-slate-300 mx-auto" />
-              <h3 className="font-bold text-slate-900 text-lg">Tidak ada data guru ditemukan</h3>
+              <h3 className="font-bold text-slate-900 text-lg">
+                Tidak ada data guru ditemukan
+              </h3>
               <p className="text-sm text-slate-500 max-w-md mx-auto">
-                Silakan coba kata kunci lain atau ubah pilihan kategori pencarian di atas.
+                Silakan coba kata kunci lain atau ubah pilihan kategori
+                pencarian di atas.
               </p>
               <button
                 onClick={() => {
-                  setSearchQuery('');
-                  setSelectedKategori('Semua');
+                  setSearchQuery("");
+                  setSelectedKategori("Semua");
                 }}
                 className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#1E2B7A] text-[#FFE500] text-xs font-bold mt-2"
               >
