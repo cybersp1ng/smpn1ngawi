@@ -502,6 +502,76 @@
     "graphql_field_name": "dataProfil"
   },
   {
+    "key": "group_beranda_sambutan_fields",
+    "title": "Data Sambutan Kepala Sekolah",
+    "fields": [
+      {
+        "key": "field_beranda_foto_kepala_sekolah",
+        "label": "Foto Kepala Sekolah",
+        "name": "foto_kepala_sekolah",
+        "type": "image",
+        "instructions": "Upload foto resmi kepala sekolah yang akan ditampilkan di section sambutan halaman depan.",
+        "return_format": "array",
+        "preview_size": "medium",
+        "library": "all",
+        "required": 0,
+        "show_in_graphql": 1
+      },
+      {
+        "key": "field_beranda_nama_kepala_sekolah",
+        "label": "Nama Kepala Sekolah",
+        "name": "nama_kepala_sekolah",
+        "type": "text",
+        "instructions": "Contoh: Drs. H. Sutrisno, M.Pd.",
+        "required": 1,
+        "show_in_graphql": 1
+      },
+      {
+        "key": "field_beranda_jabatan_kepala_sekolah",
+        "label": "Jabatan / Gelar Kepala Sekolah",
+        "name": "jabatan_kepala_sekolah",
+        "type": "text",
+        "instructions": "Contoh: Pembina Tk. I / IV-b",
+        "required": 1,
+        "show_in_graphql": 1
+      },
+      {
+        "key": "field_beranda_judul_sambutan",
+        "label": "Judul Sambutan",
+        "name": "judul_sambutan",
+        "type": "text",
+        "instructions": "Judul yang muncul di atas isi sambutan pada halaman depan.",
+        "required": 0,
+        "show_in_graphql": 1
+      },
+      {
+        "key": "field_beranda_sambutan_kepala_sekolah",
+        "label": "Teks Sambutan Kepala Sekolah",
+        "name": "sambutan_kepala_sekolah",
+        "type": "wysiwyg",
+        "instructions": "Tulis isi sambutan kepala sekolah. Gunakan paragraf pendek agar tampil rapi di website.",
+        "tabs": "all",
+        "toolbar": "full",
+        "media_upload": 1,
+        "delay": 0,
+        "required": 1,
+        "show_in_graphql": 1
+      }
+    ],
+    "location": [
+      [
+        {
+          "param": "post_type",
+          "operator": "==",
+          "value": "sambutan"
+        }
+      ]
+    ],
+    "show_in_rest": 1,
+    "show_in_graphql": 1,
+    "graphql_field_name": "dataSambutan"
+  },
+  {
     "key": "group_struktur_organisasi_item_fields",
     "title": "Data Pengurus Struktur Organisasi",
     "fields": [
