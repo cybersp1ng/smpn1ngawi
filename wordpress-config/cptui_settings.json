@@ -1,4 +1,60 @@
 {
+  "artikel": {
+    "name": "artikel",
+    "label": "Artikel Sekolah",
+    "singular_label": "Artikel",
+    "description": "Artikel edukatif dan opini pendidikan SMPN 1 Ngawi, terpisah dari berita sekolah",
+    "public": "true",
+    "publicly_queryable": "true",
+    "show_ui": "true",
+    "show_in_nav_menus": "false",
+    "delete_with_user": "false",
+    "show_in_rest": "true",
+    "rest_base": "artikel",
+    "rest_controller_class": "",
+    "rest_namespace": "",
+    "has_archive": "false",
+    "has_archive_string": "",
+    "exclude_from_search": "false",
+    "capability_type": "post",
+    "hierarchical": "false",
+    "can_export": "true",
+    "rewrite": "true",
+    "rewrite_slug": "artikel",
+    "rewrite_withfront": "true",
+    "query_var": "true",
+    "query_var_slug": "",
+    "menu_position": "13",
+    "show_in_menu": "true",
+    "show_in_menu_string": "",
+    "menu_icon": "dashicons-edit",
+    "supports": [
+      "title",
+      "editor",
+      "excerpt",
+      "thumbnail",
+      "author",
+      "revisions"
+    ],
+    "taxonomies": ["category", "post_tag"],
+    "labels": {
+      "menu_name": "Artikel",
+      "all_items": "Semua Artikel",
+      "add_new": "Tambah Artikel",
+      "add_new_item": "Tambah Artikel Baru",
+      "edit_item": "Edit Artikel",
+      "new_item": "Artikel Baru",
+      "view_item": "Lihat Artikel",
+      "view_items": "Lihat Semua Artikel",
+      "search_items": "Cari Artikel",
+      "not_found": "Tidak ada artikel",
+      "not_found_in_trash": "Tidak ada artikel di tempat sampah"
+    },
+    "custom_supports": "",
+    "show_in_graphql": "true",
+    "graphql_single_name": "artikelSekolah",
+    "graphql_plural_name": "daftarArtikelSekolah"
+  },
   "guru": {
     "name": "guru",
     "label": "Guru & Staf",
@@ -419,4 +475,3 @@
     "graphql_plural_name": "daftarSambutan"
   }
 }
-

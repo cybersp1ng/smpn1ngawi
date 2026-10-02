@@ -95,6 +95,10 @@ const NAV_ITEMS: NavItem[] = [
         label: "Video Kegiatan",
         href: "/informasi/video",
       },
+      {
+        label: "Artikel",
+        href: "/informasi/artikel",
+      },
     ],
   },
   {

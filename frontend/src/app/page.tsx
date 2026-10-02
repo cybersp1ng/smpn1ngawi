@@ -1,4 +1,3 @@
-import React from "react";
 import Image from "next/image";
 import Link from "next/link";
 import {
@@ -55,7 +54,6 @@ interface WpAgenda {
 
 interface WpSambutan {
   title?: { rendered?: string };
-  featured_media?: number;
   acf?: Record<string, unknown>;
   _embedded?: {
     "wp:featuredmedia"?: Array<{ source_url?: string }>;
@@ -72,6 +70,15 @@ function decodeHtml(value: string): string {
     .replace(/&gt;/g, ">")
     .replace(/\s+/g, " ")
     .trim();
+}
+
+function getFirstContentImage(content: string): string | undefined {
+  const imageTag = content.match(/<img\b[^>]*>/i)?.[0];
+  const imageSource = imageTag?.match(
+    /\b(?:src|data-src)\s*=\s*(["'])(.*?)\1/i,
+  )?.[2];
+
+  return imageSource?.replace(/&amp;/g, "&");
 }
 
 function formatNewsDate(value: string): string {
@@ -163,11 +170,54 @@ async function getHomepageContent() {
         excerpt: decodeHtml(post.excerpt?.rendered || content).slice(0, 240),
         date: formatNewsDate(post.date),
         category: categories[0] || "Berita Sekolah",
-        image: post._embedded?.["wp:featuredmedia"]?.[0]?.source_url,
+        image:
+          post._embedded?.["wp:featuredmedia"]?.[0]?.source_url ||
+          getFirstContentImage(post.content?.rendered || ""),
       };
     });
   } catch (error) {
     console.error("Gagal memuat berita terbaru :", error);
+    return [];
+  }
+}
+
+async function getHomepageArticles() {
+  const wpUrl =
+    process.env.NEXT_PUBLIC_WORDPRESS_API_URL?.replace(/\/graphql\/?$/, "") ||
+    "https://sp1ng.smpn1ngawi.sch.id/wp";
+
+  try {
+    const response = await fetch(
+      `${wpUrl}/wp-json/wp/v2/artikel?_embed&per_page=3&orderby=date&order=desc`,
+      { cache: "no-store" },
+    );
+
+    if (!response.ok) {
+      throw new Error(`WordPress API: ${response.status}`);
+    }
+
+    const articles: WpPost[] = await response.json();
+    return articles.map((article) => {
+      const content = decodeHtml(article.content?.rendered || "");
+      const categories =
+        article._embedded?.["wp:term"]?.flatMap((terms) =>
+          terms.map((term) => term.name || "").filter(Boolean),
+        ) || [];
+
+      return {
+        id: String(article.id),
+        slug: article.slug,
+        title: decodeHtml(article.title?.rendered || ""),
+        excerpt: decodeHtml(article.excerpt?.rendered || content).slice(0, 240),
+        date: formatNewsDate(article.date),
+        category: categories[0],
+        image:
+          article._embedded?.["wp:featuredmedia"]?.[0]?.source_url ||
+          getFirstContentImage(article.content?.rendered || ""),
+      };
+    });
+  } catch (error) {
+    console.error("Gagal memuat artikel terbaru:", error);
     return [];
   }
 }
@@ -179,7 +229,7 @@ async function getHomepageAnnouncements() {
 
   try {
     const response = await fetch(
-      `${wpUrl}/wp-json/wp/v2/pengumuman?_embed&per_page=3&orderby=date&order=desc`,
+      `${wpUrl}/wp-json/wp/v2/pengumuman?per_page=3&orderby=date&order=desc`,
       { cache: "no-store" },
     );
 
@@ -212,7 +262,7 @@ async function getHomepageAgendas() {
 
   try {
     const response = await fetch(
-      `${wpUrl}/wp-json/wp/v2/agenda?_embed&per_page=100&orderby=date&order=desc`,
+      `${wpUrl}/wp-json/wp/v2/agenda?per_page=100&orderby=date&order=desc`,
       { cache: "no-store" },
     );
 
@@ -464,10 +514,19 @@ async function getHeadmasterWelcome(): Promise<HeadmasterWelcome> {
 }
 
 export default async function HomePage() {
-  const latestPosts = await getHomepageContent();
-  const announcements = await getHomepageAnnouncements();
-  const upcomingAgendas = await getHomepageAgendas();
-  const headmasterWelcome = await getHeadmasterWelcome();
+  const [
+    latestPosts,
+    latestArticles,
+    announcements,
+    upcomingAgendas,
+    headmasterWelcome,
+  ] = await Promise.all([
+    getHomepageContent(),
+    getHomepageArticles(),
+    getHomepageAnnouncements(),
+    getHomepageAgendas(),
+    getHeadmasterWelcome(),
+  ]);
 
   const highlights = [
     {
@@ -896,7 +955,87 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* 5. CALL TO ACTION (PPDB & KONTAK) */}
+      {/* 5. ARTIKEL TERBARU */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="space-y-6">
+          <div className="flex items-center justify-between border-b border-slate-200 pb-4">
+            <h2 className="text-2xl font-bold text-slate-900 tracking-tight flex items-center gap-2">
+              <BookOpen className="w-6 h-6 text-blue-600" /> Artikel Terbaru
+            </h2>
+            <Link
+              href="/informasi/artikel"
+              className="text-xs sm:text-sm font-semibold text-blue-600 hover:text-blue-700 flex items-center gap-1"
+            >
+              Semua Artikel <ArrowRight className="w-3.5 h-3.5" />
+            </Link>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {latestArticles.length === 0 ? (
+              <div className="sm:col-span-2 lg:col-span-3 rounded-2xl border border-slate-200 bg-white p-8 text-center text-sm text-slate-500">
+                Belum ada artikel terbaru.
+              </div>
+            ) : (
+              latestArticles.map((article) => (
+                <article
+                  key={article.id}
+                  className="bg-white rounded-2xl border border-slate-200/80 overflow-hidden shadow-sm hover:shadow-md transition flex flex-col justify-between"
+                >
+                  <div
+                    className="h-36 bg-gradient-to-tr from-slate-200 to-blue-100 flex items-center justify-center text-slate-400 bg-cover bg-center"
+                    style={
+                      article.image
+                        ? {
+                            backgroundImage: `linear-gradient(135deg, rgba(226,232,240,.75), rgba(219,234,254,.65)), url("${article.image}")`,
+                          }
+                        : undefined
+                    }
+                  >
+                    {!article.image && (
+                      <FileText className="w-10 h-10 text-blue-300" />
+                    )}
+                  </div>
+                  <div className="p-5 flex-1 flex flex-col justify-between space-y-3">
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between text-xs text-slate-500">
+                        {article.category && (
+                          <span className="px-2 py-0.5 rounded bg-blue-50 text-blue-700 font-medium">
+                            {article.category}
+                          </span>
+                        )}
+                        <span className="flex items-center gap-1">
+                          <Clock className="w-3 h-3" /> {article.date}
+                        </span>
+                      </div>
+                      <h3 className="font-bold text-slate-900 text-sm leading-snug line-clamp-2 hover:text-blue-700 transition">
+                        <Link href={`/informasi/artikel/${article.slug}`}>
+                          {article.title}
+                        </Link>
+                      </h3>
+                      {article.excerpt && (
+                        <p className="text-xs text-slate-600 line-clamp-3 leading-relaxed">
+                          {article.excerpt}
+                        </p>
+                      )}
+                    </div>
+                    <div className="pt-3 border-t border-slate-100">
+                      <Link
+                        href={`/informasi/artikel/${article.slug}`}
+                        className="text-xs font-semibold text-blue-600 hover:text-blue-700 flex items-center gap-1"
+                      >
+                        Baca Selengkapnya{" "}
+                        <ChevronRight className="w-3.5 h-3.5" />
+                      </Link>
+                    </div>
+                  </div>
+                </article>
+              ))
+            )}
+          </div>
+        </div>
+      </section>
+
+      {/* 6. CALL TO ACTION (PPDB & KONTAK) */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-[#111A4D] via-[#1E2B7A] to-[#0077B6] text-white p-8 sm:p-14 shadow-2xl border border-[#0097DF]/30">
           <div className="relative z-10 max-w-2xl space-y-4">
