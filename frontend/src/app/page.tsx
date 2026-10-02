@@ -1,4 +1,5 @@
 import React from "react";
+import Image from "next/image";
 import Link from "next/link";
 import {
   ArrowRight,
@@ -49,6 +50,15 @@ interface WpAgenda {
     tanggal_selesai?: string;
     waktu?: string;
     lokasi?: string;
+  };
+}
+
+interface WpSambutan {
+  title?: { rendered?: string };
+  featured_media?: number;
+  acf?: Record<string, unknown>;
+  _embedded?: {
+    "wp:featuredmedia"?: Array<{ source_url?: string }>;
   };
 }
 
@@ -239,10 +249,225 @@ async function getHomepageAgendas() {
   }
 }
 
+interface HeadmasterWelcome {
+  imageUrl: string;
+  name: string;
+  title: string;
+  heading: string;
+  paragraphs: string[];
+}
+
+const defaultHeadmasterWelcome: HeadmasterWelcome = {
+  imageUrl:
+    "https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&w=900&q=80",
+  name: "Kepala SMPN 1 Ngawi",
+  title: "Pembina Tk. I / IV-b",
+  heading:
+    "Membangun Generasi Emas yang Cerdas, Santun, dan Bertanggung Jawab",
+  paragraphs: [
+    "Puji syukur kita panjatkan ke hadirat Tuhan Yang Maha Esa. Website ini hadir sebagai jembatan komunikasi, transparansi informasi, dan media literasi digital antara keluarga besar SMP Negeri 1 Ngawi dengan seluruh lapisan masyarakat, siswa, dan para orang tua/wali murid.",
+    "Kami terus berkomitmen mewujudkan iklim belajar yang inklusif, adaptif terhadap perkembangan teknologi, dan berakar kuat pada nilai-nilai kearifan lokal serta keimanan.",
+  ],
+};
+
+function sanitizeText(value: unknown): string {
+  if (typeof value === "string") {
+    return decodeHtml(value)
+      .replace(/&nbsp;/g, " ")
+      .replace(/\u00a0/g, " ")
+      .replace(/\s+/g, " ")
+      .trim();
+  }
+
+  if (Array.isArray(value)) {
+    return value.map((item) => sanitizeText(item)).filter(Boolean).join(" ");
+  }
+
+  if (value && typeof value === "object") {
+    const record = value as Record<string, unknown>;
+    const fallback =
+      record.value ??
+      record.url ??
+      record.source_url ??
+      record.sourceUrl ??
+      record.rendered ??
+      record.title ??
+      record.name ??
+      record.text ??
+      record.label;
+    return sanitizeText(fallback);
+  }
+
+  return typeof value === "number" ? String(value) : "";
+}
+
+function splitParagraphs(value: unknown): string[] {
+  const rawValue =
+    typeof value === "string"
+      ? value
+      : value && typeof value === "object"
+        ? sanitizeText(value)
+        : "";
+  const text = rawValue
+    .replace(/<br\s*\/?>/gi, "\n")
+    .replace(/<\/(?:p|div|li|blockquote)>/gi, "\n\n")
+    .replace(/<[^>]*>/g, "")
+    .replace(/&nbsp;/gi, " ")
+    .replace(/\u00a0/g, " ")
+    .replace(/&amp;/g, "&")
+    .replace(/&quot;/g, '"')
+    .replace(/&#0*39;/g, "'")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/\r\n?/g, "\n")
+    .split("\n")
+    .map((line) => line.replace(/\s+/g, " ").trim())
+    .join("\n")
+    .trim();
+  if (!text) {
+    return [];
+  }
+
+  return text
+    .split(/\n\s*\n/)
+    .map((paragraph) =>
+      paragraph.replace(/^(["“”'\(\[]+)|(["“”'\)\]]+)$/g, "").trim(),
+    )
+    .filter(Boolean);
+}
+
+async function resolveMediaUrl(
+  wpUrl: string,
+  value: unknown,
+): Promise<string | undefined> {
+  const direct = sanitizeText(value);
+  if (direct && /^(https?:)?\/\//.test(direct)) {
+    return direct.startsWith("http") ? direct : `https:${direct}`;
+  }
+
+  if (typeof value === "number" && value > 0) {
+    try {
+      const mediaResponse = await fetch(`${wpUrl}/wp-json/wp/v2/media/${value}`, {
+        cache: "no-store",
+      });
+
+      if (!mediaResponse.ok) {
+        return undefined;
+      }
+
+      const media = await mediaResponse.json();
+      return media?.source_url || media?.guid?.rendered || undefined;
+    } catch {
+      return undefined;
+    }
+  }
+
+  if (value && typeof value === "object") {
+    const record = value as Record<string, unknown>;
+    const directUrl = sanitizeText(
+      record.url ?? record.source_url ?? record.sourceUrl ?? record.guid,
+    );
+
+    if (directUrl && /^(https?:)?\/\//.test(directUrl)) {
+      return directUrl.startsWith("http") ? directUrl : `https:${directUrl}`;
+    }
+
+    const sizes = record.sizes as Record<string, { url?: string }> | undefined;
+    if (sizes) {
+      const selected =
+        sizes.large?.url ||
+        sizes.medium_large?.url ||
+        sizes.medium?.url ||
+        sizes.thumbnail?.url ||
+        sizes.full?.url;
+      if (selected) {
+        return selected;
+      }
+    }
+  }
+
+  return undefined;
+}
+
+async function getHeadmasterWelcome(): Promise<HeadmasterWelcome> {
+  const wpUrl =
+    process.env.NEXT_PUBLIC_WORDPRESS_API_URL?.replace(/\/graphql\/?$/, "") ||
+    "https://sp1ng.smpn1ngawi.sch.id/wp";
+
+  try {
+    const response = await fetch(
+      `${wpUrl}/wp-json/wp/v2/sambutan?_embed&per_page=1&status=publish&orderby=date&order=desc`,
+      { cache: "no-store" },
+    );
+
+    if (!response.ok) {
+      throw new Error(`WordPress API: ${response.status}`);
+    }
+
+    const posts: WpSambutan[] = await response.json();
+    const post = posts[0];
+    if (!post) {
+      return defaultHeadmasterWelcome;
+    }
+
+    const acf = post.acf || {};
+    const imageUrl =
+      (await resolveMediaUrl(
+        wpUrl,
+        acf.foto_kepala_sekolah ??
+          acf.gambar_kepala_sekolah ??
+          acf.foto_sambutan ??
+          acf.kepala_sekolah_foto ??
+          acf.foto ??
+          acf.gambar,
+      )) ||
+      post._embedded?.["wp:featuredmedia"]?.[0]?.source_url ||
+      defaultHeadmasterWelcome.imageUrl;
+
+    const paragraphs = splitParagraphs(
+      acf.sambutan_kepala_sekolah ??
+        acf.teks_sambutan ??
+        acf.isi_sambutan ??
+        acf.sambutan,
+    );
+
+    return {
+      imageUrl,
+      name:
+        sanitizeText(
+          acf.nama_kepala_sekolah ??
+            acf.kepala_sekolah_nama ??
+            acf.nama ??
+            post.title?.rendered,
+        ) || defaultHeadmasterWelcome.name,
+      title:
+        sanitizeText(
+          acf.jabatan_kepala_sekolah ??
+            acf.kepala_sekolah_jabatan ??
+            acf.jabatan,
+        ) || defaultHeadmasterWelcome.title,
+      heading:
+        sanitizeText(
+          acf.judul_sambutan ??
+            acf.heading_sambutan ??
+            acf.sambutan_judul ??
+            acf.judul,
+        ) || defaultHeadmasterWelcome.heading,
+      paragraphs:
+        paragraphs.length > 0 ? paragraphs : defaultHeadmasterWelcome.paragraphs,
+    };
+  } catch (error) {
+    console.error("Gagal memuat sambutan kepala sekolah dari CMS:", error);
+  }
+
+  return defaultHeadmasterWelcome;
+}
+
 export default async function HomePage() {
   const latestPosts = await getHomepageContent();
   const announcements = await getHomepageAnnouncements();
   const upcomingAgendas = await getHomepageAgendas();
+  const headmasterWelcome = await getHeadmasterWelcome();
 
   const highlights = [
     {
@@ -384,52 +609,51 @@ export default async function HomePage() {
       {/* 2. SAMBUTAN KEPALA SEKOLAH */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="bg-white rounded-3xl border border-slate-200/80 shadow-sm p-8 sm:p-12">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
-            {/* Foto / Ilustrasi Kepala Sekolah */}
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
             <div className="lg:col-span-4 text-center">
-              <div className="relative mx-auto w-48 h-56 sm:w-56 sm:h-64 rounded-2xl bg-gradient-to-t from-blue-900 to-slate-800 flex items-center justify-center text-slate-400 shadow-md overflow-hidden border-4 border-slate-50">
-                <div className="text-center p-4">
-                  <GraduationCap className="w-16 h-16 text-blue-400/80 mx-auto mb-2" />
-                  <span className="block text-xs font-semibold text-slate-300 uppercase tracking-wider">
-                    Foto Resmi
-                  </span>
-                  <span className="block text-sm font-bold text-white mt-1">
-                    Kepala Sekolah
-                  </span>
-                </div>
+              <div className="relative mx-auto w-48 h-56 sm:w-56 sm:h-64 rounded-2xl bg-gradient-to-t from-blue-900 to-slate-800 shadow-md overflow-hidden border-4 border-slate-50">
+                {headmasterWelcome.imageUrl ? (
+                  <Image
+                    src={headmasterWelcome.imageUrl}
+                    alt={headmasterWelcome.name}
+                    fill
+                    priority
+                    sizes="(max-width: 1024px) 100vw, 25vw"
+                    className="object-cover"
+                  />
+                ) : (
+                  <div className="text-center p-4">
+                    <GraduationCap className="w-16 h-16 text-blue-400/80 mx-auto mb-2" />
+                    <span className="block text-xs font-semibold text-slate-300 uppercase tracking-wider">
+                      Foto Resmi
+                    </span>
+                    <span className="block text-sm font-bold text-white mt-1">
+                      Kepala Sekolah
+                    </span>
+                  </div>
+                )}
               </div>
               <div className="mt-4">
                 <h3 className="font-bold text-slate-900 text-lg">
-                  Kepala SMPN 1 Ngawi
+                  {headmasterWelcome.name}
                 </h3>
                 <p className="text-xs text-blue-600 font-medium">
-                  Pembina Tk. I / IV-b
+                  {headmasterWelcome.title}
                 </p>
               </div>
             </div>
 
-            {/* Isi Sambutan */}
             <div className="lg:col-span-8 space-y-4">
               <div className="inline-flex items-center gap-2 text-[#1E2B7A] font-bold text-xs tracking-wider uppercase bg-blue-50/80 px-3.5 py-1.5 rounded-lg border-l-3 border-[#FFE500]">
                 Sambutan Kepala Sekolah
               </div>
               <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
-                Membangun Generasi Emas yang Cerdas, Santun, dan Bertanggung
-                Jawab
+                {headmasterWelcome.heading}
               </h2>
               <div className="space-y-3 text-slate-600 text-sm sm:text-base leading-relaxed">
-                <p>
-                  &ldquo;Puji syukur kita panjatkan ke hadirat Tuhan Yang Maha
-                  Esa. Website ini hadir sebagai jembatan komunikasi,
-                  transparansi informasi, dan media literasi digital antara
-                  keluarga besar SMP Negeri 1 Ngawi dengan seluruh lapisan
-                  masyarakat, siswa, dan para orang tua/wali murid.&rdquo;
-                </p>
-                <p>
-                  &ldquo;Kami terus berkomitmen mewujudkan iklim belajar yang
-                  inklusif, adaptif terhadap perkembangan teknologi, dan berakar
-                  kuat pada nilai-nilai kearifan lokal serta keimanan.&rdquo;
-                </p>
+                {headmasterWelcome.paragraphs.map((paragraph) => (
+                  <p key={paragraph}>{paragraph}</p>
+                ))}
               </div>
               <div className="pt-2">
                 <Link
