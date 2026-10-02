@@ -8,7 +8,6 @@ import {
   Video,
   ChevronRight,
   ArrowRight,
-  Sparkles,
 } from 'lucide-react';
 
 export const metadata = {
@@ -28,12 +27,20 @@ export default function InformasiOverviewPage() {
       badgeColor: 'bg-amber-100 text-amber-800',
     },
     {
+      title: 'Artikel',
+      desc: 'Tulisan edukatif, refleksi pembelajaran, dan insight sekolah untuk memperkaya wawasan siswa dan orang tua.',
+      icon: BookOpen,
+      href: '/informasi/artikel',
+      badge: 'Konten Edukatif',
+      badgeColor: 'bg-blue-100 text-blue-800',
+    },
+    {
       title: 'Warta & Berita Sekolah',
-      desc: 'Kabar liputan kegiatan pembelajaran, workshop pendidik, kejuaraan siswa, dan artikel edukatif.',
+      desc: 'Kabar liputan kegiatan pembelajaran, workshop pendidik, kejuaraan siswa, dan informasi sekolah terkini.',
       icon: BookOpen,
       href: '/informasi/berita',
       badge: 'Liputan Terkini',
-      badgeColor: 'bg-blue-100 text-blue-800',
+      badgeColor: 'bg-sky-100 text-sky-800',
     },
     {
       title: 'Agenda Kegiatan',

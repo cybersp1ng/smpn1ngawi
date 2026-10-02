@@ -17,6 +17,7 @@ interface BeritaItem {
   slug: string;
   judul: string;
   kategori: string;
+  jenis: 'Artikel' | 'Berita Sekolah';
   tanggal: string;
   penulis: string;
   ringkasan: string;
@@ -49,6 +50,15 @@ function decodeHtml(value: string): string {
     .replace(/&gt;/g, '>')
     .replace(/\s+/g, ' ')
     .trim();
+}
+
+function getFirstContentImage(content: string): string | undefined {
+  const imageTag = content.match(/<img\b[^>]*>/i)?.[0];
+  const imageSource = imageTag?.match(
+    /\b(?:src|data-src)\s*=\s*(["'])(.*?)\1/i,
+  )?.[2];
+
+  return imageSource?.replace(/&amp;/g, '&');
 }
 
 function formatDate(value: string): string {
@@ -92,21 +102,25 @@ export default function BeritaPage() {
           const categories = post._embedded?.['wp:term']?.flatMap((terms) =>
             terms.map((term) => term.name || '').filter(Boolean),
           ) || [];
+
           return {
             id: String(post.id),
             slug: post.slug,
             judul: decodeHtml(post.title?.rendered || 'Berita sekolah'),
             kategori: categories[0] || 'Berita Sekolah',
+            jenis: 'Berita Sekolah' as const,
             tanggal: formatDate(post.date),
             penulis: post._embedded?.author?.[0]?.name || 'SMPN 1 Ngawi',
             ringkasan: decodeHtml(post.excerpt?.rendered || content).slice(0, 240),
             isiLengkap: content,
             bacaMenit: readingTime(content),
-            gambar: post._embedded?.['wp:featuredmedia']?.[0]?.source_url,
+            gambar:
+              post._embedded?.['wp:featuredmedia']?.[0]?.source_url ||
+              getFirstContentImage(post.content?.rendered || ''),
           };
         });
         setDaftarBerita(mapped);
-        setKategoriBerita(['Semua', ...Array.from(new Set(mapped.map((item) => item.kategori)))]);
+        setKategoriBerita(['Semua', ...Array.from(new Set(mapped.map((item) => item.jenis)))]);
       } catch (error) {
         console.error('Gagal memuat berita dari WordPress:', error);
         setDaftarBerita([]);
@@ -124,7 +138,7 @@ export default function BeritaPage() {
       item.ringkasan.toLowerCase().includes(searchQuery.toLowerCase());
 
     const matchesKat =
-      selectedKategori === 'Semua' || item.kategori === selectedKategori;
+      selectedKategori === 'Semua' || item.jenis === selectedKategori;
 
     return matchesSearch && matchesKat;
   });
@@ -157,7 +171,8 @@ export default function BeritaPage() {
           </h1>
           <p className="text-slate-200 text-sm sm:text-base max-w-2xl mx-auto mt-3 leading-relaxed">
             Liputan resmi seputar kegiatan pembelajaran, prestasi siswa, inovasi pendidik, dan
-            perkembangan terkini di SMP Negeri 1 Ngawi.
+            perkembangan terkini di SMP Negeri 1 Ngawi. Konten dipisahkan untuk artikel edukatif
+            dan berita sekolah yang bersifat aktual.
           </p>
         </div>
       </section>
@@ -181,13 +196,13 @@ export default function BeritaPage() {
 
               <div className="md:col-span-4 flex items-center justify-end text-xs font-semibold text-slate-500 gap-1.5">
                 <BookOpen className="w-4 h-4 text-[#0097DF]" />
-                Menampilkan <span className="text-[#1E2B7A] font-bold">{filteredBerita.length}</span> artikel berita
+                Menampilkan <span className="text-[#1E2B7A] font-bold">{filteredBerita.length}</span> konten
               </div>
             </div>
 
             {/* Filter Kategori Chips */}
             <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-slate-100">
-              <span className="text-xs font-bold text-slate-400 mr-2">Topik:</span>
+              <span className="text-xs font-bold text-slate-400 mr-2">Jenis:</span>
               {kategoriBerita.map((kat) => (
                 <button
                   key={kat}
@@ -225,7 +240,7 @@ export default function BeritaPage() {
                     style={item.gambar ? { backgroundImage: `linear-gradient(135deg, rgba(17,26,77,.85), rgba(30,43,122,.6)), url("${item.gambar}")` } : undefined}
                   >
                     <span className="self-start px-3 py-1 rounded-full text-[11px] font-bold bg-[#FFE500] text-[#111A4D] shadow-xs">
-                      {item.kategori}
+                      {item.jenis}
                     </span>
                     <span className="text-white/80 text-xs flex items-center gap-1.5">
                       <Clock className="w-3.5 h-3.5 text-[#FFE500]" /> {item.bacaMenit}

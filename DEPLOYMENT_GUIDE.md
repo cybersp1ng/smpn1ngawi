@@ -62,6 +62,9 @@ Setiap kali ada commit atau perubahan yang di-push ke branch `main`, Vercel akan
    - `wordpress-config/cptui_settings.json` (via menu *CPT UI* &rarr; *Tools* &rarr; *Import/Export Post Types*)
    - `wordpress-config/acf_fields.json` (via menu *Custom Fields* &rarr; *Tools* &rarr; *Import Field Groups*)
    - Setelah import, pastikan field group **Data Galeri & Video** berstatus **Active** dan opsi **Show in REST API** aktif. Field `Tipe Media` wajib bernilai **Foto** atau **Video** agar item tampil pada menu yang sesuai.
+   - Konfigurasi CPT UI juga menambahkan tipe konten **Artikel Sekolah** sebagai menu utama tersendiri di sidebar WordPress, sejajar dengan **Posts**, **Pengumuman**, dan **Agenda**. Konten artikel tersimpan terpisah dari berita pada menu **Posts** dan tersedia melalui REST API di `/wp-json/wp/v2/artikel`.
+   - Untuk menerapkan perubahan CPT UI, impor ulang konfigurasi tersebut melalui CPT UI. Jika permalink atau endpoint belum berfungsi, buka *Settings* &rarr; *Permalinks* dan klik **Save Changes** tanpa mengubah pengaturan permalink.
+4. Untuk membuat berita, gunakan menu **Posts** seperti biasa. Untuk membuat tulisan edukatif/opini, pilih menu utama **Artikel** &rarr; **Tambah Artikel**. Artikel mendukung judul, isi, ringkasan, gambar utama, penulis, kategori, dan tag; setelah diterbitkan, artikel tampil di halaman Artikel website.
 
 ---
 
