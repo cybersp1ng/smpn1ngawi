@@ -1,6 +1,8 @@
 import Link from 'next/link';
 import { ArrowLeft, Calendar, ChevronRight, Clock, User } from 'lucide-react';
 import { notFound } from 'next/navigation';
+import type { Metadata } from 'next';
+import ShareButtons from '@/components/ShareButtons';
 
 interface WpPost {
   date: string;
@@ -60,6 +62,43 @@ async function getArticle(slug: string): Promise<WpPost | null> {
   return posts[0] || null;
 }
 
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}): Promise<Metadata> {
+  const { slug } = await params;
+  const post = await getArticle(slug);
+  if (!post) notFound();
+
+  const title = decodeHtml(post.title?.rendered || 'Berita sekolah');
+  const description = decodeHtml(
+    post.excerpt?.rendered || 'Baca berita terbaru dari SMP Negeri 1 Ngawi.',
+  );
+  const image = post._embedded?.['wp:featuredmedia']?.[0]?.source_url;
+  const url = `/informasi/berita/${encodeURIComponent(post.slug)}`;
+
+  return {
+    title,
+    description,
+    alternates: { canonical: url },
+    openGraph: {
+      title,
+      description,
+      url,
+      type: 'article',
+      publishedTime: post.date,
+      images: image ? [{ url: image, alt: title }] : [],
+    },
+    twitter: {
+      card: image ? 'summary_large_image' : 'summary',
+      title,
+      description,
+      images: image ? [image] : [],
+    },
+  };
+}
+
 export default async function BeritaDetailPage({
   params,
 }: {
@@ -113,9 +152,10 @@ export default async function BeritaDetailPage({
         {image && (
           <img src={image} alt="" className="w-full max-h-[28rem] object-cover rounded-3xl shadow-sm mb-8" />
         )}
-        <div className="rounded-3xl border border-slate-200 bg-white p-6 sm:p-10 shadow-sm text-slate-700 text-sm sm:text-base leading-relaxed [&_p]:mb-5 [&_p:last-child]:mb-0 [&_h2]:mt-8 [&_h2]:mb-4 [&_h2]:text-2xl [&_h2]:font-bold [&_h2]:leading-tight [&_h3]:mt-6 [&_h3]:mb-3 [&_h3]:text-xl [&_h3]:font-bold [&_ul]:my-5 [&_ul]:list-disc [&_ul]:space-y-2 [&_ul]:pl-6 [&_ol]:my-5 [&_ol]:list-decimal [&_ol]:space-y-2 [&_ol]:pl-6 [&_a]:font-semibold [&_a]:text-[#1E2B7A] [&_a]:underline [&_blockquote]:my-6 [&_blockquote]:border-l-4 [&_blockquote]:border-[#0097DF] [&_blockquote]:pl-4 [&_blockquote]:italic [&_img]:my-6 [&_img]:h-auto [&_img]:max-w-full [&_img]:rounded-2xl">
+        <div className="article-content rounded-3xl border border-slate-200 bg-white p-6 sm:p-10 shadow-sm text-slate-700 text-sm sm:text-base leading-relaxed [&_p]:mb-5 [&_p:last-child]:mb-0 [&_h2]:mt-8 [&_h2]:mb-4 [&_h2]:text-2xl [&_h2]:font-bold [&_h2]:leading-tight [&_h3]:mt-6 [&_h3]:mb-3 [&_h3]:text-xl [&_h3]:font-bold [&_ul]:my-5 [&_ul]:list-disc [&_ul]:space-y-2 [&_ul]:pl-6 [&_ol]:my-5 [&_ol]:list-decimal [&_ol]:space-y-2 [&_ol]:pl-6 [&_a]:font-semibold [&_a]:text-[#1E2B7A] [&_a]:underline [&_blockquote]:my-6 [&_blockquote]:border-l-4 [&_blockquote]:border-[#0097DF] [&_blockquote]:pl-4 [&_blockquote]:italic [&_img]:my-6 [&_img]:h-auto [&_img]:max-w-full [&_img]:rounded-2xl">
           <div dangerouslySetInnerHTML={{ __html: contentHtml }} />
         </div>
+        <ShareButtons title={decodeHtml(post.title?.rendered || 'Berita sekolah')} />
         <Link href="/informasi/berita" className="inline-flex items-center gap-2 mt-8 text-sm font-bold text-[#1E2B7A] hover:text-[#0097DF] transition">
           <ArrowLeft className="w-4 h-4" /> Kembali ke daftar berita
         </Link>

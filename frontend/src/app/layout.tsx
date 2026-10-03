@@ -11,6 +11,7 @@ const plusJakartaSans = Plus_Jakarta_Sans({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL('https://smpn1ngawi.sch.id'),
   title: {
     default: 'SMP Negeri 1 Ngawi | Juara dan Berbudaya',
     template: '%s | SMP Negeri 1 Ngawi',
