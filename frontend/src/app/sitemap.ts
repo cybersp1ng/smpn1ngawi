@@ -1,7 +1,7 @@
 import { MetadataRoute } from 'next';
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl = 'https://smpn1ngawi.sch.id';
+  const baseUrl = 'https://www.smpn1ngawi.sch.id';
 
   return [
     {

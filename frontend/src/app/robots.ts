@@ -7,6 +7,6 @@ export default function robots(): MetadataRoute.Robots {
       allow: '/',
       disallow: ['/api/', '/_next/'],
     },
-    sitemap: 'https://smpn1ngawi.sch.id/sitemap.xml',
+    sitemap: 'https://www.smpn1ngawi.sch.id/sitemap.xml',
   };
 }
