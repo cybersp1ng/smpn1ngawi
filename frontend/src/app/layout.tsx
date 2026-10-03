@@ -18,7 +18,7 @@ const allura = Allura({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://smpn1ngawi.sch.id'),
+  metadataBase: new URL('https://www.smpn1ngawi.sch.id'),
   title: {
     default: 'SMP Negeri 1 Ngawi | Juara dan Berbudaya',
     template: '%s | SMP Negeri 1 Ngawi',
@@ -42,7 +42,7 @@ export const metadata: Metadata = {
     title: 'SMP Negeri 1 Ngawi | Juara dan Berbudaya',
     description:
       'Website resmi SMP Negeri 1 Ngawi. Menyajikan informasi profil, akademik, berita, agenda, dan prestasi siswa.',
-    url: 'https://smpn1ngawi.sch.id',
+    url: 'https://www.smpn1ngawi.sch.id',
     siteName: 'SMP Negeri 1 Ngawi',
     locale: 'id_ID',
     type: 'website',
