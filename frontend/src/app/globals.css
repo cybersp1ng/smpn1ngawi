@@ -28,6 +28,10 @@ body {
   overflow-x: hidden;
 }
 
+.font-allura {
+  font-family: var(--font-allura), cursive;
+}
+
 /* Custom Utilities untuk Aksentuasi Warna Logo */
 .bg-brand-navy {
   background-color: #1E2B7A;

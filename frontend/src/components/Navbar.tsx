@@ -1,16 +1,10 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
-import { Dancing_Script } from "next/font/google";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Menu, X, ChevronDown } from "lucide-react";
 import SchoolLogo from "@/components/SchoolLogo";
-
-const dancingScript = Dancing_Script({
-  subsets: ["latin"],
-  display: "swap",
-});
 
 interface NavItem {
   label: string;
@@ -177,9 +171,7 @@ export default function Navbar() {
                 SMP NEGERI 1 NGAWI
               </span>
 
-              <span
-                className={`block text-sm text-[#1E2B7A] ${dancingScript.className}`}
-              >
+              <span className="font-allura block text-sm text-[#1E2B7A]">
                 Juara dan Berbudaya
               </span>
             </div>

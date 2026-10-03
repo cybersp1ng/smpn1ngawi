@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { Plus_Jakarta_Sans } from 'next/font/google';
+import { Allura, Plus_Jakarta_Sans } from 'next/font/google';
 import './globals.css';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
@@ -7,6 +7,13 @@ import Footer from '@/components/Footer';
 const plusJakartaSans = Plus_Jakarta_Sans({
   subsets: ['latin'],
   variable: '--font-sans',
+  display: 'swap',
+});
+
+const allura = Allura({
+  subsets: ['latin'],
+  weight: '400',
+  variable: '--font-allura',
   display: 'swap',
 });
 
@@ -48,7 +55,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="id" className={`${plusJakartaSans.variable} font-sans scroll-smooth`}>
+    <html
+      lang="id"
+      className={`${plusJakartaSans.variable} ${allura.variable} font-sans scroll-smooth`}
+    >
       <body className="min-h-screen flex flex-col bg-slate-50 text-slate-900 antialiased selection:bg-blue-600 selection:text-white">
         <Navbar />
         <main className="flex-1">{children}</main>

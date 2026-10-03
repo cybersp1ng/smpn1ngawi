@@ -1,13 +1,7 @@
 import React from "react";
-import { Dancing_Script } from "next/font/google";
 import Link from "next/link";
 import { MapPin, Phone, Mail, ExternalLink, Clock } from "lucide-react";
 import SchoolLogo from "@/components/SchoolLogo";
-
-const dancingScript = Dancing_Script({
-  subsets: ["latin"],
-  display: "swap",
-});
 
 export default function Footer() {
   const currentYear = new Date().getFullYear();
@@ -25,9 +19,7 @@ export default function Footer() {
                 <span className="block font-extrabold text-white text-base tracking-tight">
                   SMP NEGERI 1 NGAWI
                 </span>
-                <span
-                  className={`block text-sm text-[#FFE500] ${dancingScript.className}`}
-                >
+                <span className="font-allura block text-sm text-[#FFE500]">
                   Juara dan Berbudaya
                 </span>
               </div>
