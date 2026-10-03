@@ -3,6 +3,7 @@ import { ArrowLeft, Calendar, ChevronRight, Clock, User } from 'lucide-react';
 import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
 import ShareButtons from '@/components/ShareButtons';
+import { getArticlePreviewImage } from '@/lib/article-image';
 
 interface WpPost {
   date: string;
@@ -75,7 +76,10 @@ export async function generateMetadata({
   const description = decodeHtml(
     post.excerpt?.rendered || 'Baca berita terbaru dari SMP Negeri 1 Ngawi.',
   );
-  const image = post._embedded?.['wp:featuredmedia']?.[0]?.source_url;
+  const image = getArticlePreviewImage(
+    post.content?.rendered || '',
+    post._embedded?.['wp:featuredmedia']?.[0]?.source_url,
+  );
   const url = `/informasi/berita/${encodeURIComponent(post.slug)}`;
 
   return {
