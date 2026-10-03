@@ -2,11 +2,14 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { ArrowLeft, Calendar, ChevronRight, User } from 'lucide-react';
 import { notFound } from 'next/navigation';
+import type { Metadata } from 'next';
+import ShareButtons from '@/components/ShareButtons';
 
 interface WpArtikel {
   date: string;
   slug: string;
   title?: { rendered?: string };
+  excerpt?: { rendered?: string };
   content?: { rendered?: string };
   _embedded?: {
     author?: Array<{ name?: string }>;
@@ -53,6 +56,43 @@ async function getArtikel(slug: string): Promise<WpArtikel | null> {
 
   const articles: WpArtikel[] = await response.json();
   return articles[0] || null;
+}
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}): Promise<Metadata> {
+  const { slug } = await params;
+  const article = await getArtikel(slug);
+  if (!article) notFound();
+
+  const title = decodeHtml(article.title?.rendered || 'Artikel');
+  const description = decodeHtml(
+    article.excerpt?.rendered || 'Baca artikel terbaru dari SMP Negeri 1 Ngawi.',
+  );
+  const image = article._embedded?.['wp:featuredmedia']?.[0]?.source_url;
+  const url = `/informasi/artikel/${encodeURIComponent(article.slug)}`;
+
+  return {
+    title,
+    description,
+    alternates: { canonical: url },
+    openGraph: {
+      title,
+      description,
+      url,
+      type: 'article',
+      publishedTime: article.date,
+      images: image ? [{ url: image, alt: title }] : [],
+    },
+    twitter: {
+      card: image ? 'summary_large_image' : 'summary',
+      title,
+      description,
+      images: image ? [image] : [],
+    },
+  };
 }
 
 export default async function ArtikelDetailPage({
@@ -111,9 +151,10 @@ export default async function ArtikelDetailPage({
             className="w-full max-h-[28rem] object-cover rounded-3xl shadow-sm mb-8"
           />
         )}
-        <div className="rounded-3xl border border-slate-200 bg-white p-6 sm:p-10 shadow-sm text-slate-700 text-sm sm:text-base leading-relaxed [&_p]:mb-5 [&_p:last-child]:mb-0 [&_h2]:mt-8 [&_h2]:mb-4 [&_h2]:text-2xl [&_h2]:font-bold [&_h2]:leading-tight [&_h3]:mt-6 [&_h3]:mb-3 [&_h3]:text-xl [&_h3]:font-bold [&_ul]:my-5 [&_ul]:list-disc [&_ul]:space-y-2 [&_ul]:pl-6 [&_ol]:my-5 [&_ol]:list-decimal [&_ol]:space-y-2 [&_ol]:pl-6 [&_a]:font-semibold [&_a]:text-[#1E2B7A] [&_a]:underline [&_blockquote]:my-6 [&_blockquote]:border-l-4 [&_blockquote]:border-[#0097DF] [&_blockquote]:pl-4 [&_blockquote]:italic [&_img]:my-6 [&_img]:h-auto [&_img]:max-w-full [&_img]:rounded-2xl">
+        <div className="article-content rounded-3xl border border-slate-200 bg-white p-6 sm:p-10 shadow-sm text-slate-700 text-sm sm:text-base leading-relaxed [&_p]:mb-5 [&_p:last-child]:mb-0 [&_h2]:mt-8 [&_h2]:mb-4 [&_h2]:text-2xl [&_h2]:font-bold [&_h2]:leading-tight [&_h3]:mt-6 [&_h3]:mb-3 [&_h3]:text-xl [&_h3]:font-bold [&_ul]:my-5 [&_ul]:list-disc [&_ul]:space-y-2 [&_ul]:pl-6 [&_ol]:my-5 [&_ol]:list-decimal [&_ol]:space-y-2 [&_ol]:pl-6 [&_a]:font-semibold [&_a]:text-[#1E2B7A] [&_a]:underline [&_blockquote]:my-6 [&_blockquote]:border-l-4 [&_blockquote]:border-[#0097DF] [&_blockquote]:pl-4 [&_blockquote]:italic [&_img]:my-6 [&_img]:h-auto [&_img]:max-w-full [&_img]:rounded-2xl">
           <div dangerouslySetInnerHTML={{ __html: contentHtml }} />
         </div>
+        <ShareButtons title={decodeHtml(article.title?.rendered || 'Artikel')} />
         <Link
           href="/informasi/artikel"
           className="inline-flex items-center gap-2 mt-8 text-sm font-bold text-[#1E2B7A] hover:text-[#0097DF] transition"
