@@ -23,7 +23,6 @@ export const metadata = {
 interface StrukturOrganisasiItem {
   role: string;
   name: string;
-  nip: string;
   category: string;
   fotoUrl?: string;
 }
@@ -75,7 +74,6 @@ interface WPProfilResponse {
       sejarahKonten?: string;
       visi?: string;
       misi?: string;
-      strukturOrganisasi?: string;
     };
   };
   daftarStrukturOrganisasi?: {
@@ -88,7 +86,6 @@ interface WPProfilResponse {
       };
       dataStruktur?: {
         role?: string;
-        nip?: string;
         category?: string;
         urutan?: number;
       };
@@ -101,7 +98,9 @@ async function fetchStrukturFromRest(): Promise<StrukturOrganisasiItem[]> {
     const wpUrl =
       process.env.NEXT_PUBLIC_WORDPRESS_API_URL?.replace(/\/graphql\/?$/, "") ||
       "https://sp1ng.smpn1ngawi.sch.id/wp";
-    const restEndpoint = `${wpUrl}/wp-json/wp/v2/struktur_organisasi?_embed&per_page=100`;
+    const restEndpoint =
+      `${wpUrl}/wp-json/wp/v2/struktur_organisasi?_embed&per_page=100` +
+      "&_fields=id,title,featured_media,acf.role,acf.category,acf.urutan,acf.foto,_embedded";
 
     const res = await fetch(restEndpoint, { next: { revalidate: 0 } });
     if (!res.ok) return [];
@@ -114,7 +113,6 @@ async function fetchStrukturFromRest(): Promise<StrukturOrganisasiItem[]> {
         featured_media?: number;
         acf?: {
           role?: string;
-          nip?: string;
           category?: string;
           urutan?: number;
           foto?: string | number | { url?: string; source_url?: string };
@@ -160,8 +158,8 @@ async function fetchStrukturFromRest(): Promise<StrukturOrganisasiItem[]> {
         );
       }
 
-      const items: Array<StrukturOrganisasiItem & { order: number }> =
-        posts.map((p: WpRestStruktur) => {
+      const items: Array<StrukturOrganisasiItem & { order: number }> = posts.map(
+        (p: WpRestStruktur) => {
           const rawName = p.title?.rendered || "";
           const cleanName = rawName
             .replace(/&#(\d+);/g, (_, dec) => String.fromCharCode(dec))
@@ -189,19 +187,18 @@ async function fetchStrukturFromRest(): Promise<StrukturOrganisasiItem[]> {
           return {
             role: p.acf?.role || cleanName,
             name: cleanName,
-            nip: p.acf?.nip || "-",
             category: p.acf?.category || "Manajemen",
             fotoUrl,
             order: Number(p.acf?.urutan || 99),
           };
-        });
+        },
+      );
 
       // Urutkan berdasarkan kolom urutan
       items.sort((a, b) => a.order - b.order);
-      return items.map(({ role, name, nip, category, fotoUrl }) => ({
+      return items.map(({ role, name, category, fotoUrl }) => ({
         role,
         name,
-        nip,
         category,
         fotoUrl,
       }));
@@ -227,7 +224,6 @@ async function getProfilSekolah(): Promise<ProfilSekolahData> {
           sejarahKonten
           visi
           misi
-          strukturOrganisasi
         }
       }
       daftarStrukturOrganisasi(first: 100) {
@@ -240,7 +236,6 @@ async function getProfilSekolah(): Promise<ProfilSekolahData> {
           }
           dataStruktur {
             role
-            nip
             category
             urutan
           }
@@ -271,38 +266,9 @@ async function getProfilSekolah(): Promise<ProfilSekolahData> {
       parsedStruktur = sorted.map((node) => ({
         role: node.dataStruktur?.role || node.title,
         name: node.title,
-        nip: node.dataStruktur?.nip || "-",
         category: node.dataStruktur?.category || "Manajemen",
         fotoUrl: node.featuredImage?.node?.sourceUrl,
       }));
-    }
-    // 2. Atau jika diisi via teks textarea di Halaman Page "Profil"
-    else if (
-      acf?.strukturOrganisasi &&
-      acf.strukturOrganisasi.trim().length > 0
-    ) {
-      const rows = acf.strukturOrganisasi
-        .split("\n")
-        .map((r) => r.trim())
-        .filter((r) => r.length > 0);
-
-      const items: StrukturOrganisasiItem[] = [];
-      for (const row of rows) {
-        const parts = row.split("|").map((p) => p.trim());
-        if (parts.length >= 2) {
-          items.push({
-            role: parts[0] || "Pengurus",
-            name: parts[1] || "",
-            nip: parts[2] || "-",
-            category: parts[3] || "Manajemen",
-            fotoUrl: parts[4] || undefined,
-          });
-        }
-      }
-
-      if (items.length > 0) {
-        parsedStruktur = items;
-      }
     }
 
     if (!acf) {
@@ -577,11 +543,6 @@ export default async function ProfilPage() {
                         {item.name}
                       </p>
                     </div>
-                    {item.nip && item.nip !== "-" && (
-                      <p className="text-[11px] text-slate-400 font-mono pt-1 border-t border-slate-100">
-                        NIP: {item.nip}
-                      </p>
-                    )}
                   </div>
                 </div>
 

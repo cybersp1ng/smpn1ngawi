@@ -4,15 +4,6 @@
     "title": "Data Guru & Staf",
     "fields": [
       {
-        "key": "field_guru_nip",
-        "label": "NIP",
-        "name": "nip",
-        "type": "text",
-        "instructions": "Masukkan NIP (kosongkan jika belum ada / non-PNS)",
-        "required": 0,
-        "show_in_graphql": 1
-      },
-      {
         "key": "field_guru_jabatan",
         "label": "Jabatan",
         "name": "jabatan",
@@ -470,16 +461,6 @@
         "rows": 6,
         "required": 0,
         "show_in_graphql": 1
-      },
-      {
-        "key": "field_profil_struktur_organisasi",
-        "label": "Daftar Struktur Organisasi",
-        "name": "struktur_organisasi",
-        "type": "textarea",
-        "instructions": "Format per baris: Jabatan | Nama Lengkap | NIP | Kategori (Contoh: Kepala Sekolah | Drs. H. Sudarsono, M.Pd. | 19680512 199412 1 002 | Pimpinan Utama)",
-        "rows": 10,
-        "required": 0,
-        "show_in_graphql": 1
       }
     ],
     "location": [
@@ -582,15 +563,6 @@
         "type": "text",
         "instructions": "Contoh: Kepala Sekolah, Wakasek Bidang Kurikulum, Komite Sekolah",
         "required": 1,
-        "show_in_graphql": 1
-      },
-      {
-        "key": "field_so_nip",
-        "label": "NIP",
-        "name": "nip",
-        "type": "text",
-        "instructions": "Masukkan NIP (kosongkan atau isi tanda - jika tidak ada)",
-        "required": 0,
         "show_in_graphql": 1
       },
       {

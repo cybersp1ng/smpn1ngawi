@@ -16,7 +16,6 @@ import { fetchGraphQL } from "@/lib/graphql";
 interface GuruItem {
   id: string;
   nama: string;
-  nip: string;
   jabatan: string;
   mataPelajaran: string;
   kategori: string;
@@ -47,7 +46,6 @@ interface WPGuruResponse {
         };
       };
       dataGuru?: {
-        nip?: string;
         jabatan?: string;
         mataPelajaran?: string;
         kategori?: string;
@@ -90,7 +88,6 @@ export default function GuruPage() {
                 }
               }
               dataGuru {
-                nip
                 jabatan
                 mataPelajaran
                 kategori
@@ -108,7 +105,6 @@ export default function GuruPage() {
           const mapped: GuruItem[] = nodes.map((node, idx) => ({
             id: node.id || String(idx + 1),
             nama: decodeWpText(node.title),
-            nip: node.dataGuru?.nip || "-",
             jabatan: decodeWpText(node.dataGuru?.jabatan || "Tenaga Pendidik"),
             mataPelajaran: decodeWpText(node.dataGuru?.mataPelajaran || "-"),
             kategori: decodeWpText(node.dataGuru?.kategori || ""),
@@ -138,7 +134,9 @@ export default function GuruPage() {
             /\/graphql\/?$/,
             "",
           ) || "https://sp1ng.smpn1ngawi.sch.id/wp";
-        const restEndpoint = `${wpUrl}/wp-json/wp/v2/guru?_embed&per_page=100`;
+        const restEndpoint =
+          `${wpUrl}/wp-json/wp/v2/guru?_embed&per_page=100` +
+          "&_fields=id,title,acf.jabatan,acf.mata_pelajaran,acf.kategori,acf.email,_embedded";
 
         const res = await fetch(restEndpoint);
         if (!res.ok) return;
@@ -149,7 +147,6 @@ export default function GuruPage() {
             id: number;
             title: { rendered: string };
             acf?: {
-              nip?: string;
               jabatan?: string;
               mata_pelajaran?: string;
               kategori?: string;
@@ -167,7 +164,6 @@ export default function GuruPage() {
             return {
               id: String(p.id),
               nama: decodeWpText(p.title?.rendered || "Pendidik"),
-              nip: p.acf?.nip || "-",
               jabatan: decodeWpText(p.acf?.jabatan || "Tenaga Pendidik"),
               mataPelajaran: decodeWpText(p.acf?.mata_pelajaran || "-"),
               kategori: decodeWpText(p.acf?.kategori || ""),
@@ -191,8 +187,7 @@ export default function GuruPage() {
       const matchesSearch =
         guru.nama.toLowerCase().includes(searchQuery.toLowerCase()) ||
         guru.mataPelajaran.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        guru.jabatan.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        guru.nip.includes(searchQuery);
+        guru.jabatan.toLowerCase().includes(searchQuery.toLowerCase());
 
       const matchesKategori =
         selectedKategori === "Semua" || guru.kategori === selectedKategori;
@@ -248,7 +243,7 @@ export default function GuruPage() {
                 <Search className="w-5 h-5 text-slate-400 absolute left-4 top-1/2 -translate-y-1/2" />
                 <input
                   type="text"
-                  placeholder="Cari berdasarkan nama guru, mata pelajaran, jabatan, atau NIP..."
+                  placeholder="Cari berdasarkan nama guru, mata pelajaran, atau jabatan..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="w-full pl-12 pr-4 py-3.5 rounded-2xl bg-slate-50 border border-slate-200 focus:outline-none focus:ring-2 focus:ring-[#1E2B7A] focus:bg-white text-sm transition"
@@ -362,12 +357,6 @@ export default function GuruPage() {
                             </span>
                           </div>
                         </div>
-                        {/* NIP */}
-                        {guru.nip && guru.nip !== "-" && (
-                          <div className="text-[11px] text-slate-400 font-mono pt-0.5">
-                            NIP: {guru.nip}
-                          </div>
-                        )}
                       </div>
                     </div>
                   </div>

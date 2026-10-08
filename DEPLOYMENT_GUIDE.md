@@ -82,18 +82,8 @@ Setiap kali ada commit atau perubahan yang di-push ke branch `main`, Vercel akan
    - **Visi & Misi**:
      - *Visi Sekolah*: Teks visi utama sekolah.
      - *Misi Sekolah*: Tuliskan butir misi sekolah, **satu butir per baris baru**.
-   - **Struktur Organisasi**:
-     - Tuliskan susunan bagan kepengurusan sekolah dengan format baris:
-       ```
-       Jabatan | Nama Lengkap | NIP | Kategori
-       ```
-       *Contoh:*
-       ```
-       Kepala Sekolah | Drs. H. Sudarsono, M.Pd. | 19680512 199412 1 002 | Pimpinan Utama
-       Komite Sekolah | Ir. H. Bambang Wahyudi | - | Mitra & Pengawas
-       Wakasek Bidang Kurikulum | Sri Wahyuni, S.Pd., M.Si. | 19750314 199903 2 003 | Manajemen
-       ```
-4. Klik **Publish (Terbitkan)** / **Update (Perbarui)**. Website Next.js akan memperbarui tampilan halaman `/profil` secara otomatis.
+4. Kelola bagan organisasi melalui menu **Struktur Organisasi** di WordPress. Isi jabatan, kategori, urutan tampil, dan foto pengurus.
+5. Klik **Publish (Terbitkan)** / **Update (Perbarui)**. Website Next.js akan memperbarui tampilan halaman `/profil` secara otomatis.
 
 ### B. Mengupdate Direktori Guru & Tenaga Kependidikan
 1. Buka menu **Guru & Staf** pada bilah menu samping dashboard WordPress.
@@ -101,7 +91,6 @@ Setiap kali ada commit atau perubahan yang di-push ke branch `main`, Vercel akan
    - **Judul**: Masukkan nama lengkap guru beserta gelar (misal: `Drs. H. Sudarsono, M.Pd.`).
    - **Featured Image (Gambar Utama)**: Unggah foto formal guru/staf untuk dijadikan foto kartu avatar.
    - **Panel Data Guru & Staf**:
-     - *NIP*: Nomor Induk Pegawai (atau beri tanda `-` jika non-PNS).
      - *Jabatan*: Misal `Kepala Sekolah`, `Wakasek Kurikulum`, atau `Guru Mata Pelajaran`.
      - *Mata Pelajaran*: Misal `Matematika`, `Bahasa Indonesia`, `Bimbingan Konseling`.
      - *Email*: Alamat email resmi guru (misal: `guru@smpn1ngawi.sch.id`).
