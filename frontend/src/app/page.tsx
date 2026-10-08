@@ -7,14 +7,12 @@ import {
   Calendar,
   Bell,
   Users,
-  CheckCircle2,
   Sparkles,
   Clock,
   ChevronRight,
   GraduationCap,
   FileText,
 } from "lucide-react";
-import SchoolLogo from "@/components/SchoolLogo";
 
 export const dynamic = "force-dynamic";
 
@@ -312,8 +310,7 @@ const defaultHeadmasterWelcome: HeadmasterWelcome = {
     "https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&w=900&q=80",
   name: "Kepala SMPN 1 Ngawi",
   title: "Pembina Tk. I / IV-b",
-  heading:
-    "Membangun Generasi Emas yang Cerdas, Santun, dan Bertanggung Jawab",
+  heading: "Membangun Generasi Emas yang Cerdas, Santun, dan Bertanggung Jawab",
   paragraphs: [
     "Puji syukur kita panjatkan ke hadirat Tuhan Yang Maha Esa. Website ini hadir sebagai jembatan komunikasi, transparansi informasi, dan media literasi digital antara keluarga besar SMP Negeri 1 Ngawi dengan seluruh lapisan masyarakat, siswa, dan para orang tua/wali murid.",
     "Kami terus berkomitmen mewujudkan iklim belajar yang inklusif, adaptif terhadap perkembangan teknologi, dan berakar kuat pada nilai-nilai kearifan lokal serta keimanan.",
@@ -330,7 +327,10 @@ function sanitizeText(value: unknown): string {
   }
 
   if (Array.isArray(value)) {
-    return value.map((item) => sanitizeText(item)).filter(Boolean).join(" ");
+    return value
+      .map((item) => sanitizeText(item))
+      .filter(Boolean)
+      .join(" ");
   }
 
   if (value && typeof value === "object") {
@@ -397,9 +397,12 @@ async function resolveMediaUrl(
 
   if (typeof value === "number" && value > 0) {
     try {
-      const mediaResponse = await fetch(`${wpUrl}/wp-json/wp/v2/media/${value}`, {
-        cache: "no-store",
-      });
+      const mediaResponse = await fetch(
+        `${wpUrl}/wp-json/wp/v2/media/${value}`,
+        {
+          cache: "no-store",
+        },
+      );
 
       if (!mediaResponse.ok) {
         return undefined;
@@ -504,7 +507,9 @@ async function getHeadmasterWelcome(): Promise<HeadmasterWelcome> {
             acf.judul,
         ) || defaultHeadmasterWelcome.heading,
       paragraphs:
-        paragraphs.length > 0 ? paragraphs : defaultHeadmasterWelcome.paragraphs,
+        paragraphs.length > 0
+          ? paragraphs
+          : defaultHeadmasterWelcome.paragraphs,
     };
   } catch (error) {
     console.error("Gagal memuat sambutan kepala sekolah dari CMS:", error);
@@ -558,9 +563,16 @@ export default async function HomePage() {
   return (
     <div className="space-y-16 sm:space-y-24 pb-16">
       {/* 1. HERO SECTION */}
-      <section className="relative overflow-hidden bg-gradient-to-b from-[#111A4D] via-[#1E2B7A] to-[#0C1236] text-white pt-12 pb-24 lg:pt-20 lg:pb-32">
+      <section className="relative flex min-h-[calc(100svh-5rem)] items-center overflow-hidden bg-[#0C1236] text-white pt-12 pb-24 lg:pt-20 lg:pb-32">
+        <div
+          className="absolute inset-0 bg-cover bg-center"
+          style={{
+            backgroundImage: "url('/school-building.webp')",
+            backgroundPosition: "center 58%",
+          }}
+        />
+        <div className="absolute inset-0 bg-gradient-to-b from-[#111A4D]/75 via-[#1E2B7A]/80 to-[#0C1236]/95" />
         {/* Background Accent Gradients */}
-        <div className="absolute inset-0 opacity-15 bg-[radial-gradient(#0097DF_1px,transparent_1px)] [background-size:20px_20px] pointer-events-none" />
         <div className="absolute -top-40 -right-40 w-96 h-96 bg-[#0097DF]/25 rounded-full blur-3xl pointer-events-none" />
         <div className="absolute top-1/2 -left-40 w-96 h-96 bg-[#FFE500]/15 rounded-full blur-3xl pointer-events-none" />
 
@@ -600,65 +612,6 @@ export default async function HomePage() {
                 >
                   Informasi Akademik
                 </Link>
-              </div>
-            </div>
-
-            {/* Visual Card Hero dengan Lambang Sekolah */}
-            <div className="lg:col-span-5">
-              <div className="relative mx-auto max-w-md bg-gradient-to-br from-[#16215D]/95 to-[#0D143D]/95 border border-[#0097DF]/40 p-6 sm:p-8 rounded-3xl shadow-2xl backdrop-blur-xl space-y-6">
-                {/* Header Card dengan Logo */}
-                <div className="flex items-center justify-between border-b border-white/10 pb-5">
-                  <div className="flex items-center gap-3.5">
-                    <SchoolLogo size={46} />
-                    <div>
-                      <h2 className="text-white font-extrabold text-base tracking-tight">
-                        SMPN 1 NGAWI
-                      </h2>
-                      <p className="text-xs text-[#0097DF] font-semibold">
-                        NPSN: 20508544
-                      </p>
-                    </div>
-                  </div>
-                  <span className="px-3 py-1 bg-[#FFE500]/20 text-[#FFE500] text-xs font-bold rounded-full border border-[#FFE500]/40">
-                    Akreditasi A
-                  </span>
-                </div>
-
-                <div className="space-y-3.5 text-sm">
-                  <div className="flex items-start gap-3 text-slate-200">
-                    <CheckCircle2 className="w-5 h-5 text-[#0097DF] shrink-0 mt-0.5" />
-                    <span>Penerapan Kurikulum Merdeka Terintegrasi</span>
-                  </div>
-                  <div className="flex items-start gap-3 text-slate-200">
-                    <CheckCircle2 className="w-5 h-5 text-[#0097DF] shrink-0 mt-0.5" />
-                    <span>
-                      Sekolah Ramah Anak & Berwawasan Adiwiyata Mandiri
-                    </span>
-                  </div>
-                  <div className="flex items-start gap-3 text-slate-200">
-                    <CheckCircle2 className="w-5 h-5 text-[#0097DF] shrink-0 mt-0.5" />
-                    <span>Laboratorium Digital, Sains & Ruang Multimedia</span>
-                  </div>
-                  <div className="flex items-start gap-3 text-slate-200">
-                    <CheckCircle2 className="w-5 h-5 text-[#0097DF] shrink-0 mt-0.5" />
-                    <span>
-                      Akses Perpustakaan Cerdas & Pojok Literasi Siswa
-                    </span>
-                  </div>
-                </div>
-
-                <div className="pt-2">
-                  <Link
-                    href="/informasi/pengumuman"
-                    className="w-full flex items-center justify-between p-3.5 rounded-2xl bg-[#0097DF]/20 hover:bg-[#0097DF]/30 border border-[#0097DF]/40 text-[#0097DF] hover:text-white transition text-xs font-bold group"
-                  >
-                    <span className="flex items-center gap-2">
-                      <Bell className="w-4 h-4 text-[#FFE500]" />
-                      Lihat Pengumuman Terbaru
-                    </span>
-                    <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition text-[#FFE500]" />
-                  </Link>
-                </div>
               </div>
             </div>
           </div>
