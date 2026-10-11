@@ -298,24 +298,12 @@ async function getHomepageAgendas() {
 }
 
 interface HeadmasterWelcome {
-  imageUrl: string;
-  name: string;
-  title: string;
-  heading: string;
+  imageUrl?: string;
+  name?: string;
+  title?: string;
+  heading?: string;
   paragraphs: string[];
 }
-
-const defaultHeadmasterWelcome: HeadmasterWelcome = {
-  imageUrl:
-    "https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&w=900&q=80",
-  name: "Kepala SMPN 1 Ngawi",
-  title: "Pembina Tk. I / IV-b",
-  heading: "Membangun Generasi Emas yang Cerdas, Santun, dan Bertanggung Jawab",
-  paragraphs: [
-    "Puji syukur kita panjatkan ke hadirat Tuhan Yang Maha Esa. Website ini hadir sebagai jembatan komunikasi, transparansi informasi, dan media literasi digital antara keluarga besar SMP Negeri 1 Ngawi dengan seluruh lapisan masyarakat, siswa, dan para orang tua/wali murid.",
-    "Kami terus berkomitmen mewujudkan iklim belajar yang inklusif, adaptif terhadap perkembangan teknologi, dan berakar kuat pada nilai-nilai kearifan lokal serta keimanan.",
-  ],
-};
 
 function sanitizeText(value: unknown): string {
   if (typeof value === "string") {
@@ -442,7 +430,7 @@ async function resolveMediaUrl(
   return undefined;
 }
 
-async function getHeadmasterWelcome(): Promise<HeadmasterWelcome> {
+async function getHeadmasterWelcome(): Promise<HeadmasterWelcome | null> {
   const wpUrl =
     process.env.NEXT_PUBLIC_WORDPRESS_API_URL?.replace(/\/graphql\/?$/, "") ||
     "https://sp1ng.smpn1ngawi.sch.id/wp";
@@ -460,7 +448,7 @@ async function getHeadmasterWelcome(): Promise<HeadmasterWelcome> {
     const posts: WpSambutan[] = await response.json();
     const post = posts[0];
     if (!post) {
-      return defaultHeadmasterWelcome;
+      return null;
     }
 
     const acf = post.acf || {};
@@ -474,8 +462,7 @@ async function getHeadmasterWelcome(): Promise<HeadmasterWelcome> {
           acf.foto ??
           acf.gambar,
       )) ||
-      post._embedded?.["wp:featuredmedia"]?.[0]?.source_url ||
-      defaultHeadmasterWelcome.imageUrl;
+      post._embedded?.["wp:featuredmedia"]?.[0]?.source_url;
 
     const paragraphs = splitParagraphs(
       acf.sambutan_kepala_sekolah ??
@@ -484,38 +471,36 @@ async function getHeadmasterWelcome(): Promise<HeadmasterWelcome> {
         acf.sambutan,
     );
 
-    return {
+    const welcome: HeadmasterWelcome = {
       imageUrl,
-      name:
-        sanitizeText(
-          acf.nama_kepala_sekolah ??
-            acf.kepala_sekolah_nama ??
-            acf.nama ??
-            post.title?.rendered,
-        ) || defaultHeadmasterWelcome.name,
-      title:
-        sanitizeText(
-          acf.jabatan_kepala_sekolah ??
-            acf.kepala_sekolah_jabatan ??
-            acf.jabatan,
-        ) || defaultHeadmasterWelcome.title,
-      heading:
-        sanitizeText(
-          acf.judul_sambutan ??
-            acf.heading_sambutan ??
-            acf.sambutan_judul ??
-            acf.judul,
-        ) || defaultHeadmasterWelcome.heading,
-      paragraphs:
-        paragraphs.length > 0
-          ? paragraphs
-          : defaultHeadmasterWelcome.paragraphs,
+      name: sanitizeText(
+        acf.nama_kepala_sekolah ??
+          acf.kepala_sekolah_nama ??
+          acf.nama ??
+          post.title?.rendered,
+      ),
+      title: sanitizeText(
+        acf.jabatan_kepala_sekolah ??
+          acf.kepala_sekolah_jabatan ??
+          acf.jabatan,
+      ),
+      heading: sanitizeText(
+        acf.judul_sambutan ??
+          acf.heading_sambutan ??
+          acf.sambutan_judul ??
+          acf.judul,
+      ),
+      paragraphs,
     };
+
+    return welcome.heading || welcome.paragraphs.length > 0
+      ? welcome
+      : null;
   } catch (error) {
     console.error("Gagal memuat sambutan kepala sekolah dari CMS:", error);
   }
 
-  return defaultHeadmasterWelcome;
+  return null;
 }
 
 export default async function HomePage() {
@@ -619,67 +604,78 @@ export default async function HomePage() {
       </section>
 
       {/* 2. SAMBUTAN KEPALA SEKOLAH */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="bg-white rounded-3xl border border-slate-200/80 shadow-sm p-8 sm:p-12">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-            <div className="lg:col-span-4 text-center">
-              <div className="relative mx-auto w-48 h-56 sm:w-56 sm:h-64 rounded-2xl bg-gradient-to-t from-blue-900 to-slate-800 shadow-md overflow-hidden border-4 border-slate-50">
-                {headmasterWelcome.imageUrl ? (
-                  <Image
-                    src={headmasterWelcome.imageUrl}
-                    alt={headmasterWelcome.name}
-                    fill
-                    priority
-                    sizes="(max-width: 1024px) 100vw, 25vw"
-                    className="object-cover"
-                  />
-                ) : (
-                  <div className="text-center p-4">
-                    <GraduationCap className="w-16 h-16 text-blue-400/80 mx-auto mb-2" />
-                    <span className="block text-xs font-semibold text-slate-300 uppercase tracking-wider">
-                      Foto Resmi
-                    </span>
-                    <span className="block text-sm font-bold text-white mt-1">
-                      Kepala Sekolah
-                    </span>
-                  </div>
-                )}
-              </div>
-              <div className="mt-4">
-                <h3 className="font-bold text-slate-900 text-lg">
-                  {headmasterWelcome.name}
-                </h3>
-                <p className="text-xs text-blue-600 font-medium">
-                  {headmasterWelcome.title}
-                </p>
-              </div>
-            </div>
+      {headmasterWelcome && (
+        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="bg-white rounded-3xl border border-slate-200/80 shadow-sm p-8 sm:p-12">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+              {(headmasterWelcome.imageUrl ||
+                headmasterWelcome.name ||
+                headmasterWelcome.title) && (
+                <div className="lg:col-span-4 text-center">
+                  {headmasterWelcome.imageUrl && (
+                    <div className="relative mx-auto w-48 h-56 sm:w-56 sm:h-64 rounded-2xl bg-slate-100 shadow-md overflow-hidden">
+                      <Image
+                        src={headmasterWelcome.imageUrl}
+                        alt={headmasterWelcome.name || ""}
+                        fill
+                        sizes="(max-width: 1024px) 100vw, 25vw"
+                        className="h-full w-full object-cover"
+                      />
+                    </div>
+                  )}
+                  {(headmasterWelcome.name || headmasterWelcome.title) && (
+                    <div className="mt-4">
+                      {headmasterWelcome.name && (
+                        <h3 className="font-bold text-slate-900 text-lg">
+                          {headmasterWelcome.name}
+                        </h3>
+                      )}
+                      {headmasterWelcome.title && (
+                        <p className="text-xs text-blue-600 font-medium">
+                          {headmasterWelcome.title}
+                        </p>
+                      )}
+                    </div>
+                  )}
+                </div>
+              )}
 
-            <div className="lg:col-span-8 space-y-4">
-              <div className="inline-flex items-center gap-2 text-[#1E2B7A] font-bold text-xs tracking-wider uppercase bg-blue-50/80 px-3.5 py-1.5 rounded-lg border-l-3 border-[#FFE500]">
-                Sambutan Kepala Sekolah
-              </div>
-              <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
-                {headmasterWelcome.heading}
-              </h2>
-              <div className="space-y-3 text-slate-600 text-sm sm:text-base leading-relaxed">
-                {headmasterWelcome.paragraphs.map((paragraph) => (
-                  <p key={paragraph}>{paragraph}</p>
-                ))}
-              </div>
-              <div className="pt-2">
-                <Link
-                  href="/profil"
-                  className="inline-flex items-center gap-1.5 text-sm font-bold text-[#1E2B7A] hover:text-[#0097DF] transition group"
-                >
-                  Pelajari Visi & Misi Kami{" "}
-                  <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition text-[#0097DF]" />
-                </Link>
+              <div
+                className={`space-y-4 ${
+                  headmasterWelcome.imageUrl ||
+                  headmasterWelcome.name ||
+                  headmasterWelcome.title
+                    ? "lg:col-span-8"
+                    : "lg:col-span-12"
+                }`}
+              >
+                <div className="inline-flex items-center gap-2 text-[#1E2B7A] font-bold text-xs tracking-wider uppercase bg-blue-50/80 px-3.5 py-1.5 rounded-lg border-l-3 border-[#FFE500]">
+                  Sambutan Kepala Sekolah
+                </div>
+                {headmasterWelcome.heading && (
+                  <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+                    {headmasterWelcome.heading}
+                  </h2>
+                )}
+                <div className="space-y-3 text-slate-600 text-sm sm:text-base leading-relaxed">
+                  {headmasterWelcome.paragraphs.map((paragraph) => (
+                    <p key={paragraph}>{paragraph}</p>
+                  ))}
+                </div>
+                <div className="pt-2">
+                  <Link
+                    href="/profil"
+                    className="inline-flex items-center gap-1.5 text-sm font-bold text-[#1E2B7A] hover:text-[#0097DF] transition group"
+                  >
+                    Pelajari Visi & Misi Kami{" "}
+                    <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition text-[#0097DF]" />
+                  </Link>
+                </div>
               </div>
             </div>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
 
       {/* 3. KEUNGGULAN SEKOLAH (HIGHLIGHTS) */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
